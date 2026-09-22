@@ -1,6 +1,6 @@
 # ADR-0004 — Trascrizione locale con fallback server esplicito
 
-**Data:** 22/09/2026 · **Stato:** accettato con verifica pendente nella slice 3
+**Data:** 22/09/2026 · **Stato:** sostituito da ADR-0006
 
 ## Contesto
 

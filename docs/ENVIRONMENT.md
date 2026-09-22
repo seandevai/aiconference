@@ -23,8 +23,9 @@ attive**. Se una tabella non ha RLS, quella chiave la espone a Internet.
 | `SUPABASE_SERVICE_ROLE_KEY` | scritture su ledger e job di purga. Bypassa RLS |
 | `LIVEKIT_API_KEY` | firma dei token di stanza |
 | `LIVEKIT_API_SECRET` | firma dei token di stanza |
-| `ANTHROPIC_API_KEY` | agente e riassunti |
-| `OPENAI_API_KEY` | trascrizione di fallback, generazione immagini |
+| `DEEPGRAM_API_KEY` | emissione dei token STT a vita breve. Mai esposta al client (ADR-0006) |
+| `ANTHROPIC_API_KEY` | agente, riassunti, classificazione intento |
+| `OPENAI_API_KEY` | generazione immagini |
 | `FAL_KEY` | generazione immagini alternativa |
 | `R2_ACCOUNT_ID` | Cloudflare R2 |
 | `R2_ACCESS_KEY_ID` | Cloudflare R2 |
@@ -32,8 +33,8 @@ attive**. Se una tabella non ha RLS, quella chiave la espone a Internet.
 | `R2_BUCKET` | nome del bucket asset |
 | `KV_REST_API_URL` | store effimero |
 | `KV_REST_API_TOKEN` | store effimero |
-| `STRIPE_SECRET_KEY` | billing, slice 7 |
-| `STRIPE_WEBHOOK_SECRET` | verifica firma webhook, slice 7 |
+| `STRIPE_SECRET_KEY` | billing, post-MVP |
+| `STRIPE_WEBHOOK_SECRET` | verifica firma webhook, post-MVP |
 | `CRON_SECRET` | autentica il job di purga |
 
 `SUPABASE_SERVICE_ROLE_KEY` bypassa ogni policy RLS. Va usata solo nelle route

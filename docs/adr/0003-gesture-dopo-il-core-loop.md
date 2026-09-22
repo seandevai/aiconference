@@ -1,6 +1,6 @@
 # ADR-0003 — Le gesture arrivano dopo il core loop
 
-**Data:** 22/09/2026 · **Stato:** accettato
+**Data:** 22/09/2026 · **Stato:** sostituito da ADR-0005
 
 ## Contesto
 

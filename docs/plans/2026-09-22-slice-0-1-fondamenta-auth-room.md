@@ -51,7 +51,7 @@ apps/web/                             applicazione Next.js
   src/app/(app)/dashboard/page.tsx
   src/app/(app)/rooms/actions.ts      server action creazione stanza
   src/app/room/[code]/page.tsx        ingresso da link
-  src/app/room/[code]/room-shell.tsx  layout 75/25
+  src/app/room/[code]/room-shell.tsx  layout 35/65
   src/lib/rooms/join-code.ts          generazione codice
 supabase/migrations/
   0001_profiles_workspaces.sql
@@ -908,7 +908,7 @@ git commit -m "feat(web): creazione stanza con server action e dashboard workspa
 - Crea: `apps/web/src/app/room/[code]/page.tsx`, `room-shell.tsx`
 
 **Consuma:** `isValidJoinCode()` dal task 1.3, client server dal task 1.1.
-**Produce:** la shell 75/25 in cui la slice 2 innesterà il video e la slice 3 il canvas.
+**Produce:** la shell 35/65 in cui la slice 2 innesterà il video e la slice 3 il canvas.
 
 - [ ] **Passo 1: pagina di ingresso con controllo server-side**
 
@@ -926,7 +926,7 @@ Il controllo di autorizzazione sta qui, sul server. Il codice di invito da solo 
 è un permesso: la slice 2 aggiungerà l'emissione del token realtime solo dopo questi
 stessi controlli.
 
-- [ ] **Passo 2: shell 75/25**
+- [ ] **Passo 2: shell 35/65**
 
 `room-shell.tsx`, client component:
 
@@ -974,7 +974,7 @@ inventato e una stanza chiusa.
 
 ```bash
 git add -A
-git commit -m "feat(web): ingresso stanza da link con controlli server-side e shell 75/25"
+git commit -m "feat(web): ingresso stanza da link con controlli server-side e shell 35/65"
 ```
 
 ---

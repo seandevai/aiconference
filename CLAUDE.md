@@ -4,9 +4,12 @@ Istruzioni per chi lavora su questo repository, agenti inclusi.
 
 ## Cosa stiamo costruendo
 
-Una stanza di lavoro video-first dove un agente AI ascolta la conversazione e genera
-asset nel pannello laterale, e dove a fine riunione tutto esce come un unico file
-scaricabile mentre i dati della sessione vengono distrutti.
+Una videochiamata dove un canvas AI genera materiale visivo mentre si parla, e lo
+si esplora con le mani. A fine riunione il lavoro esce come un unico PDF mentre i
+dati della sessione vengono distrutti.
+
+Tre pilastri, in ordine: canvas generativo dentro la call, controllo gestuale,
+ephemerality.
 
 Leggere prima di toccare codice:
 
@@ -28,6 +31,8 @@ Leggere prima di toccare codice:
 4. **Ogni funzione che costa soldi passa da `AIService`** e scrive sul ledger, con
    controllo quota prima della chiamata al provider.
 5. **Ogni cambiamento significativo ha un test**, e i test si scrivono prima.
+6. **Ogni gesto ha il suo click equivalente.** Le gesture sono più veloci, mai
+   l'unico modo. Vedi ADR-0005.
 
 ## Confini del codice
 
@@ -36,6 +41,9 @@ Leggere prima di toccare codice:
 | LiveKit solo in `packages/realtime` | cambiare vendor deve costare un file |
 | Provider AI solo in `packages/ai` | un unico punto per quota, costi, log |
 | `packages/ui` non legge dati | componenti riusabili e testabili |
+| STT solo in `packages/stt`, chiamato dal client | l'audio non tocca i nostri server |
+| `packages/gesture` non conosce schede né stanze | riceve un `<video>`, emette comandi, si testa senza webcam |
+| `packages/canvas` non sa da dove arriva un comando | mouse, gesto e agente passano dalla stessa funzione |
 | Presence e cursori mai su Postgres | il database non regge quel traffico e non serve |
 | Nuova tabella, policy RLS nella stessa migrazione | altrimenti resta aperta |
 
@@ -69,7 +77,14 @@ Non toccare segreti, billing o policy di sicurezza senza dichiararlo nel piano.
 ## Stato attuale
 
 Slice 0 in corso: fondamenta del repository. Nessun codice applicativo ancora
-scritto. Il prossimo passo è il piano in `docs/plans/`.
+scritto.
+
+Spec riscritta il 22/09 dopo brainstorming (versione 2). Cambiamenti rispetto alla
+v1: le gesture entrano nell'MVP (ADR-0005), la trascrizione passa a vendor esterno
+chiamato dal client (ADR-0006), il canvas diventa una lista di schede (ADR-0007),
+layout 35/65 invece di 75/25. MVP = slice 0-7, stimato 8-11 settimane full-time.
+
+Il prossimo passo è il piano in `docs/plans/`.
 
 ## Lingua
 

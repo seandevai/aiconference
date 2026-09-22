@@ -24,8 +24,10 @@ registrazione.
 | id | uuid PK | |
 | name | text | |
 | owner_id | uuid FK profiles | |
-| plan | text | `free`, `creator`, `pro`, `team` |
+| plan | text | `free`, `solo`, `studio` |
 | credits_balance | integer | crediti AI residui |
+| hours_included | integer | ore di stanza incluse nel piano, per periodo |
+| logo_url | text | nullable, stampato sul PDF. Vuoto sul piano free → watermark |
 | created_at, updated_at | timestamptz | |
 
 ### workspace_members
@@ -71,9 +73,9 @@ Il ledger dei costi. Nessun testo.
 |---|---|---|
 | id | uuid PK | |
 | workspace_id, room_id, user_id | uuid FK | |
-| provider | text | `anthropic`, `openai`, `fal` |
+| provider | text | `anthropic`, `openai`, `fal`, `deepgram` |
 | model | text | |
-| operation | text | `summarize`, `image`, `classify_intent` |
+| operation | text | `summarize`, `image`, `classify_intent`, `transcribe` |
 | input_tokens, output_tokens | integer | nullable |
 | latency_ms | integer | |
 | success | boolean | |
@@ -123,11 +125,15 @@ consenso esplicito e cancellazione self-service.
 Chiavi KV con TTL pari alla durata della sessione più un margine.
 
 ```
-room:{id}:state              stato canvas serializzato, lista ordinata di asset
+room:{id}:cards              lista ordinata di schede (ADR-0007), incluse le bozze
 room:{id}:presence           partecipanti connessi, TTL breve con refresh
-room:{id}:transcript_window  ultime N frasi, finestra scorrevole per l'agente
+room:{id}:transcript_window  ultime N frasi per speaker, TTL 5 minuti
 room:{id}:assets             riferimenti agli oggetti R2 generati nella sessione
 ```
+
+Il testo trascritto vive **solo** in `transcript_window`, con TTL di 5 minuti e
+nessuna scrittura su disco. Le bozze dentro `cards` hanno un `expiresAt` proprio e
+spariscono anche prima della fine della sessione.
 
 ## Policy RLS
 
