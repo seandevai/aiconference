@@ -84,7 +84,30 @@ v1: le gesture entrano nell'MVP (ADR-0005), la trascrizione passa a vendor ester
 chiamato dal client (ADR-0006), il canvas diventa una lista di schede (ADR-0007),
 layout 35/65 invece di 75/25. MVP = slice 0-7, stimato 8-11 settimane full-time.
 
-Il prossimo passo è il piano in `docs/plans/`.
+### Ripresa — dove eravamo (22/09/2026, fine sessione)
+
+Brainstorming chiuso, spec v2 committata. Nessun codice applicativo scritto.
+
+Il passo successivo, in ordine:
+
+1. **Sean rilegge la spec v2** e conferma o corregge. Tre punti segnalati:
+   l'economia di §6 (0,80-1,25 $/ora, più alto del PRD), l'ordine delle slice di §8
+   (audio prima del video, ledger nella slice 3), il rischio di §11.2 (il gate vero
+   del progetto è la qualità del PDF, si scopre alla slice 4).
+2. **Riscrivere il piano** in `docs/plans/` con la skill `writing-plans`. Quello
+   esistente copre slice 0-1 e riflette la v1: va rifatto sulla v2.
+3. **Poi** partire con la slice 0 (`/slice 0`).
+
+Decisioni già prese e non da riaprire senza un ADR nuovo: layout 35/65, canvas a
+schede, gesture nell'MVP, STT vendor chiamato dal client con VAD, target consulenti
+e agenzie, niente whiteboard, niente sottotitoli live, un solo artefatto in uscita
+(il PDF).
+
+Da decidere presto: quale vendor STT (Deepgram o AssemblyAI) su qualità italiano e
+prezzo reale.
+
+I mockup del canvas stanno in `.superpowers/brainstorm/` (ignorato da git, resta
+su disco).
 
 ## Lingua
 
