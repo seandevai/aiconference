@@ -1,0 +1,47 @@
+# dipendenze
+node_modules/
+.pnp
+.pnp.js
+
+# build
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+
+# ambiente — i segreti non entrano mai in git
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# test e coverage
+coverage/
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+
+# piattaforme
+.vercel/
+.turbo/
+.supabase/
+
+# editor e sistema
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# log
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# artefatti locali degli agenti
+.claude/settings.local.json
+scratch/
+*.stackdump

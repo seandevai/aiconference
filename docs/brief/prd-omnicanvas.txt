@@ -1,0 +1,126 @@
+OmniCanvas AI - Product Requirement Document
+
+ PRODUCT REQUIREMENT DOCUMENT (PRD)
+
+OmniCanvas AI
+
+ Concept: The Ephemeral Gesture-Driven Meeting OS
+
+1. Visione del Prodotto ed Idea Core
+
+OmniCanvas AI è una piattaforma di videoconferenza di nuova generazione che trasforma i meeting da flussi
+video passivi a spazi di lavoro operativi e generativi in tempo reale. Il software abbandona la classica
+interfaccia simmetrica a griglia per introdurre un layout asimmetrico: 3/4 dello schermo dedicati ai flussi video
+stabili dei partecipanti, e 1/4 dello schermo come AI Canvas interattivo. Un agente AI multimodale partecipa
+alla stanza: ascolta la conversazione, comprende le richieste contestuali e genera istantaneamente nel Canvas
+immagini, documenti di marketing o schemi.
+
+L'interazione con il Canvas avviene tramite Gesture visive (Spatial Gestures) catturate da una comune
+webcam, senza bisogno di hardware o visori esterni. La piattaforma adotta una filosofia Zero-Data Retention
+(Ephemerality): nessun documento viene caricato in modo persistente sui server; tutto risiede nella cache
+temporanea live per essere infine impacchettato e scaricato dai partecipanti come un Final Bundle (un unico
+archivio PDF/ZIP con riassunto ed asset creati). A sessione chiusa, la stanza si autodistrugge sui server.
+
+2. Estratto Strategico: Budget, Tasse e Legal (Italia)
+
+2.1 Struttura Fiscale per la Fase di Lancio
+
+   · Regime Scelto: Partita IVA in Regime Forfettario Start-up (Aliquota 5%).
+   · Codice ATECO Primario: 62.01.00 (Produzione di software non assistito) o 63.11.20.
+   · Coefficiente di Redditività: 67% (il 33% del fatturato viene escluso dalle tasse in modo forfettario come
+
+      spesa presunta dallo Stato).
+   · Contributi Previdenziali: Iscrizione alla Gestione Commercianti INPS con richiesta di riduzione del 35%
+
+      sul minimale.
+   · Pressione Fiscale Effettiva Attesa: ~13,4% sul fatturato lordo complessivo.
+   · Evoluzione Futura: Al superamento della soglia degli 85.000/anno, transizione automatica verso una
+
+      S.r.l. Startup Innovativa per l'attrazione di capitali VC (Venture Capital).
+
+2.2 Architettura Legale e GDPR Compliant
+
+   · Trattamento Dati 'In-Memory': Le informative legali specificano che i flussi audio/video e le coordinate
+      spaziali delle mani vengono elaborati in-memory o sul dispositivo dell'utente.
+
+CONFIDENZIALE - SOLO PER USO INTERNO DI SVILUPPO   Pagina 1 di 3
+OmniCanvas AI - Product Requirement Document
+
+· Sub-responsabili (AI Vendor): L'infrastruttura utilizza esclusivamente le API Enterprise dei LLM
+   (OpenAI/Anthropic). I contratti DPA (Data Processing Agreement) garantiscono che nessun dato vocale o
+   testuale venga registrato o usato per addestramento.
+
+· Autodistruzione dei Dati: I server di backend distruggono irrevocabilmente i log di sessione entro 10
+   minuti dal clic su 'Termina Riunione'. Il link di download del Final Bundle scade dopo 7 giorni.
+
+3. Modello Economico e Costi delle API
+
+Il modello adotta un SaaS ibrido basato su abbonamento mensile con crediti orari per proteggere i margini dai
+costi a consumo delle API.
+
+Servizio / Componente         Costo Stimato per 1 Ora (4 Pax) Dettagli Infrastruttura
+Flusso Video WebRTC
+Trascrizione & AI Agent Live  ~0,12 $             LiveKit Cloud (240 min totali)
+Generazione Asset Visivi
+Compilazione Final Bundle     ~0,45 $             Whisper + Claude API
+TOTALE COSTO VIVO
+                              ~0,30 $             5 immagini via Flux/DALL-E 3
+
+                              ~0,05 $             Rendering PDF e Script Chiusura
+
+                              ~0,92 $ / ora       Coperto interamente dai piani a pagamento
+
+CONFIDENZIALE - SOLO PER USO INTERNO DI SVILUPPO                                       Pagina 2 di 3
+OmniCanvas AI - Product Requirement Document
+
+ 4. Specifiche e Lista delle Funzionalità Minime (MVP Scope)
+
+ Istruzioni tecniche destinate ad ambienti di sviluppo AI (es. Claude Code) per la generazione del codice.
+
+ 4.1 Modulo Interfaccia Utente (UI/UX)
+
+    · Asymmetric Split Screen: Creazione di un layout responsivo a due colonne. Colonna Sinistra (Larghezza
+       75%): Griglia video per i flussi dei partecipanti. Colonna Destra (Larghezza 25%): Pannello denominato 'AI
+       Canvas'.
+
+    · AI Canvas Behavior: Deve comportarsi come una lavagna flessibile in grado di visualizzare moduli di testo
+       (schede di marketing, riassunti) e contenitori di immagini generate.
+
+ 4.2 Modulo Streaming Video (WebRTC Infrastructure)
+
+    · Infrastruttura LiveKit: Configurazione di una connessione WebRTC client-side che si collega a stanze
+       temporanee tramite token dinamici.
+
+    · DataChannels Sincronizzati: Configurazione di canali dati WebRTC a bassa latenza per inviare stringhe
+       di stato e messaggi broadcast tra tutti i client connessi, senza passare da database persistenti.
+
+ 4.3 Modulo Visione Artificiale (Local Gesture Engine)
+
+    · Integrazione Google MediaPipe: Inclusione del pacchetto npm @mediapipe/tasks-vision.
+    · Local Processing: Il browser dell'utente deve analizzare il feed della webcam locale per tracciare i punti di
+
+       riferimento della mano (Hand Landmarks). Nessun flusso video grezzo deve essere inviato al server.
+    · Dizionario Gesti MVP: SWIPE_LEFT/RIGHT per scorrere varianti asset su asse X; PINCH calcolando la
+
+       distanza minima tra indice e pollice per attivare la selezione o lo zoom di una scheda.
+
+ 4.4 Modulo Intelligenza Artificiale (Agentic & Ephemeral Pipeline)
+
+    · Live Text Subtitles: L'audio viene catturato, convertito in testo localmente via Web Speech API e inviato
+       all'LLM per la traduzione testuale immediata a schermo, riducendo i costi rispetto alla clonazione vocale.
+
+    · Contextual Trigger: L'agente AI analizza le trascrizioni della stanza. Al rilevamento di frasi chiave (es:
+       'Genera un'immagine di...'), intercetta il testo e lancia una chiamata API verso i modelli di generazione.
+
+ 4.5 Modulo Chiusura (The Final Bundle)
+
+    · Trigger di Chiusura: All'evento di disconnessione dell'host o al clic sul pulsante 'Termina Riunione', il
+       backend compila automaticamente un documento PDF standardizzato con il riassunto esecutivo, bozze
+       dei testi ed asset creati.
+
+    · Viral Acquisition Hook: Prima di scaricare il file finale, la pagina mostra un modulo email: 'Inserisci la tua
+       email per ricevere il pacchetto completo del meeting'. I dati dell'ospite alimentano la mailing list, mentre i
+       dati del meeting vengono cancellati dalla RAM entro 10 minuti.
+
+CONFIDENZIALE - SOLO PER USO INTERNO DI SVILUPPO  Pagina 3 di 3
+
