@@ -7,7 +7,7 @@ Avvia il lavoro sulla slice $1 di OmniCanvas AI.
 
 Nell'ordine, senza saltare passi:
 
-1. Leggi `docs/specs/2026-09-22-omnicanvas-mvp-design.md`, sezione 8, e riporta la
+1. Leggi `docs/specs/2026-09-23-omnicanvas-mvp-design.md`, sezione 8, e riporta la
    Definition of Done della slice $1.
 2. Leggi tutti gli ADR in `docs/adr/` e segnala quelli che vincolano questa slice.
 3. Leggi `docs/WORKFLOW.md` e `CLAUDE.md`.

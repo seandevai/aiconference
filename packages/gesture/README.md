@@ -1,2 +1,2 @@
 MediaPipe, classificatore gesti, debouncing. Tutto client-side, i landmark non lasciano il browser.
-Vedi ADR-0003. Slice 6, post-MVP.
+Riceve un <video>, emette comandi. Dizionario in ADR-0010. Sviluppo in parallelo dal giorno 1, integrazione nella slice 5.

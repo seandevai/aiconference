@@ -27,7 +27,7 @@ Ognuna con il motivo dello scarto.
 ```
 
 3. Se l'ADR cambia qualcosa di già scritto nella spec, aggiorna la tabella dei
-   conflitti nella sezione 1 di `docs/specs/2026-09-22-omnicanvas-mvp-design.md`.
+   conflitti nella sezione 1 di `docs/specs/2026-09-23-omnicanvas-mvp-design.md`.
 4. Se rende obsoleto un ADR precedente, marca quello vecchio come sostituito.
 
 Un ADR serve solo per decisioni contestate o costose da invertire. Le scelte ovvie

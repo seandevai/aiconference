@@ -1,2 +1,2 @@
-Modello e riduttori dello stato AI Canvas: lista ordinata di asset, last-write-wins sullordinamento.
-Vedi ADR-0002. Arriva nella slice 3.
+Modello e riduttori puri del palco: finestre, slot, vassoio, negoziazione.
+Un solo scrittore alla volta, nessun CRDT. Vedi ADR-0009. Arriva nella slice 3.

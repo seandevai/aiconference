@@ -1,8 +1,9 @@
 # OmniCanvas AI
 
-Stanza di lavoro video-first dove un agente AI ascolta la conversazione e genera
-asset nel pannello laterale in tempo reale. A fine riunione tutto esce come un unico
-file scaricabile e i dati della sessione vengono distrutti.
+Videochiamata fra business e clienti con un agente AI attivato a comando, che
+produce grafici, testi e immagini su un palco di finestre comandato con le mani.
+Sottotitoli tradotti, e a fine riunione un pacchetto cifrato nel browser con un link
+che scade.
 
 **Stato:** slice 0, fondamenta. Nessun codice applicativo ancora scritto.
 
@@ -10,16 +11,18 @@ file scaricabile e i dati della sessione vengono distrutti.
 
 Next.js App Router e TypeScript strict per l'app, LiveKit dietro un'astrazione per
 audio e video, Supabase Postgres con RLS per i metadati, KV con TTL per lo stato
-della stanza viva, Cloudflare R2 per gli asset temporanei, Stripe per il billing.
+della stanza viva, Cloudflare R2 per i pacchetti cifrati, MediaPipe nel browser per
+le gesture.
 
 Il vincolo che governa tutto: **in Postgres finiscono solo metadati**. Audio, video,
-trascrizioni, prompt e output non toccano mai il disco. Vedi `docs/adr/0001`.
+trascrizioni, prompt e output non toccano mai il disco in chiaro. Vedi `docs/adr/0001`
+e `docs/adr/0008`.
 
 ## Documentazione
 
 | File | Contenuto |
 |---|---|
-| `docs/specs/2026-09-22-omnicanvas-mvp-design.md` | cosa si costruisce e perché |
+| `docs/specs/2026-09-23-omnicanvas-mvp-design.md` | cosa si costruisce e perché |
 | `docs/ARCHITECTURE.md` | struttura, confini, flussi |
 | `docs/DATA-MODEL.md` | tabelle, RLS, stato effimero |
 | `docs/ENVIRONMENT.md` | contratto delle variabili d'ambiente |
@@ -51,11 +54,12 @@ npm run test:e2e   # smoke del percorso principale
 |---|---|---|
 | 0 | Fondamenta | in corso |
 | 1 | Auth e stanza | da fare |
-| 2 | Video | da fare |
-| 3 | AI Canvas | da fare |
-| 4 | Usage e quota | da fare |
-| 5 | Final Bundle | da fare |
-| 6 | Gesture | post-MVP |
-| 7 | Billing | post-MVP |
+| 2 | Call | da fare |
+| 3 | Palco | da fare |
+| 4 | Agente | da fare |
+| 5 | Gesture | da fare |
+| 6 | Sottotitoli | da fare |
+| 7 | Negoziazione | da fare |
+| 8 | Pacchetto | da fare |
 
-MVP uguale slice 0-5.
+Prima demo = slice 0-5. MVP = slice 0-8. Dettagli in `docs/specs/2026-09-23-omnicanvas-mvp-design.md` §8.

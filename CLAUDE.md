@@ -95,9 +95,11 @@ Prima demo = slice 0-5 (6-8 settimane), MVP = slice 0-8 (8-12 settimane).
 
 Spec v3 approvata; `ARCHITECTURE.md`, `DATA-MODEL.md` e `BACKLOG.md` allineati.
 
-1. **Riscrivere il piano** in `docs/plans/` con `writing-plans`: quello esistente è
-   obsoleto.
-2. **Poi** la slice 0 (`/slice 0`).
+Piano delle slice 0-1 pronto: `docs/plans/2026-09-23-slice-0-1-fondamenta-auth-stanza.md`.
+
+1. **Slice 0** con `/slice 0`. Prerequisiti: Docker Desktop per Supabase locale;
+   account Supabase Cloud e Vercel per il task 0.5.
+2. I piani delle slice 2-5 si scrivono all'inizio di ciascuna.
 
 Decisioni prese e non da riaprire senza un ADR nuovo: palco a slot magnetici, solo
 l'host scrive sul palco e attiva l'agente, negoziazione aperta dall'host con tetto e
