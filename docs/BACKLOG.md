@@ -14,8 +14,8 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 - [x] Workflow CI con typecheck, lint, test
 - [x] Spec v2 dopo il brainstorming del 22/09
 - [x] Spec v3 dopo il brainstorming del 23/09, architettura e modello dati allineati
-- [ ] `npm install` e workspace funzionante
-- [ ] Scaffolding Next.js in `apps/web` con TypeScript strict
+- [x] `npm install` e workspace funzionante
+- [x] Scaffolding Next.js in `apps/web` con TypeScript strict
 - [ ] Progetto Supabase creato, credenziali in `.env.local`
 - [ ] Migrazione 0001: profiles, workspaces, workspace_members, con RLS
 - [ ] Test che prova l'accesso RLS da utente non autorizzato
@@ -128,3 +128,6 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 - [ ] Scegliere il provider di immagini su costo e latenza
 - [ ] Firmare i DPA con vendor STT e LLM, zero retention per iscritto
 - [ ] Misurare i costi reali e decidere l'economia
+- [ ] `apps/web/src/app/layout.tsx` ha ancora il boilerplate di `create-next-app`
+      (`lang="en"`, titolo/metadata in inglese): fuori scope del task 0.2, da
+      sistemare quando si scrive il layout reale (slice 0/1)
