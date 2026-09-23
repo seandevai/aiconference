@@ -147,4 +147,3 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 - [ ] Codice stanza case-sensitive: normalizzare maiuscolo/trim quando si digita a
       mano
 - [ ] Tipi `packages/db` scritti a mano: rigenerare
-- [ ] CI: `supabase/setup-cli` a `latest` mentre il CLI locale è 2.117.0

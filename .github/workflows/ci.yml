@@ -33,6 +33,23 @@ jobs:
       - name: Unit tests
         run: npm run test:unit
 
+      - name: Build app
+        run: npm run build --workspace=apps/web
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
+          SUPABASE_SERVICE_ROLE_KEY: dummy
+          GUEST_SESSION_SECRET: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+
+      - name: Nessun segreto nel bundle client
+        run: |
+          if grep -rEl "SERVICE_ROLE|GUEST_SESSION_SECRET|sk-ant|LIVEKIT_API_SECRET" apps/web/.next/static/; then
+            echo "::error::Segreto trovato nel bundle client"
+            exit 1
+          fi
+          echo "pulito"
+
   db:
     name: RLS e integrazione su Supabase locale
     runs-on: ubuntu-latest
@@ -49,7 +66,7 @@ jobs:
 
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 2.117.0
 
       - name: Start Supabase
         run: supabase start
