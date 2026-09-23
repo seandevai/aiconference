@@ -12,7 +12,9 @@ describe('RLS on profiles, workspaces, workspace_members', () => {
 
   it('signup creates profile, free workspace with zero credits, owner membership', async () => {
     const client = await signedInClient(alice);
-    const { data: workspaces } = await client.from('workspaces').select('id, plan, credits_balance');
+    const { data: workspaces } = await client
+      .from('workspaces')
+      .select('id, plan, credits_balance');
     expect(workspaces).toHaveLength(1);
     expect(workspaces?.[0]?.plan).toBe('free');
     expect(workspaces?.[0]?.credits_balance).toBe(0);
