@@ -110,6 +110,117 @@ export type Database = {
           },
         ];
       };
+      rooms: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          created_by: string;
+          title: string;
+          join_code: string;
+          status: string;
+          guest_credit_cap: number | null;
+          started_at: string | null;
+          ended_at: string | null;
+          purged_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          workspace_id: string;
+          created_by: string;
+          title: string;
+          join_code: string;
+          status?: string;
+          guest_credit_cap?: number | null;
+          started_at?: string | null;
+          ended_at?: string | null;
+          purged_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          workspace_id?: string;
+          created_by?: string;
+          title?: string;
+          join_code?: string;
+          status?: string;
+          guest_credit_cap?: number | null;
+          started_at?: string | null;
+          ended_at?: string | null;
+          purged_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'rooms_workspace_id_fkey';
+            columns: ['workspace_id'];
+            isOneToOne: false;
+            referencedRelation: 'workspaces';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'rooms_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      room_participants: {
+        Row: {
+          id: string;
+          room_id: string;
+          user_id: string | null;
+          role: string;
+          display_name: string;
+          language: string;
+          joined_at: string;
+          left_at: string | null;
+          duration_seconds: number | null;
+        };
+        Insert: {
+          id?: string;
+          room_id: string;
+          user_id?: string | null;
+          role: string;
+          display_name: string;
+          language: string;
+          joined_at?: string;
+          left_at?: string | null;
+          duration_seconds?: number | null;
+        };
+        Update: {
+          id?: string;
+          room_id?: string;
+          user_id?: string | null;
+          role?: string;
+          display_name?: string;
+          language?: string;
+          joined_at?: string;
+          left_at?: string | null;
+          duration_seconds?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'room_participants_room_id_fkey';
+            columns: ['room_id'];
+            isOneToOne: false;
+            referencedRelation: 'rooms';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'room_participants_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
