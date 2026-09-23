@@ -138,9 +138,6 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 - [ ] Scegliere il provider di immagini su costo e latenza
 - [ ] Firmare i DPA con vendor STT e LLM, zero retention per iscritto
 - [ ] Misurare i costi reali e decidere l'economia
-- [ ] `apps/web/src/app/layout.tsx` ha ancora il boilerplate di `create-next-app`
-      (`lang="en"`, titolo/metadata in inglese): fuori scope del task 0.2, da
-      sistemare quando si scrive il layout reale (slice 0/1)
 - [ ] Indice unico host senza filtro `left_at`: l'host non rientra dopo l'uscita
       (slice 2)
 - [ ] Ospite anonimo che reinvia il form crea righe aperte orfane; action pubblica
