@@ -18,6 +18,9 @@ describe('safeNextPath', () => {
     ['/\n/evil.example'],
     ['/\r/evil.example'],
     ['/ok\\evil'],
+    ['/.//evil.example'],
+    ['/..//evil.example'],
+    ['/a/../..//evil'],
   ])('falls back to /dashboard for %s', (value) => {
     expect(safeNextPath(value)).toBe('/dashboard');
   });
