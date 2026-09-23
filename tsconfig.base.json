@@ -21,11 +21,8 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "declaration": true,
-    "declarationMap": true,
     "sourceMap": true,
-    "composite": true,
-    "incremental": true
+    "noEmit": true
   },
   "exclude": ["node_modules", "dist", ".next"]
 }
