@@ -4,9 +4,6 @@ Documento vivo. Va aggiornato nello stesso commit che cambia la struttura, non d
 
 Riferimento di prodotto: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 
-> **Da allineare alla v3** (palco a finestre, `packages/bundle`, pacchetto cifrato,
-> sottotitoli). Fino ad allora, in caso di conflitto vale la spec.
-
 ## 1. Forma del repository
 
 Monorepo con npm workspaces. Un'applicazione, package separati per i domini che
@@ -16,10 +13,11 @@ hanno confini veri.
 apps/web                 Next.js App Router, l'unica superficie utente
 packages/ui              design system, componenti senza logica di dominio
 packages/realtime        astrazione LiveKit, unico punto che conosce il vendor
-packages/stt             cattura microfono, VAD, streaming al vendor STT
-packages/ai              AIService, adapter provider, accounting dei costi
-packages/canvas          modello e riduttori delle schede
+packages/stt             microfono, VAD, parola chiave locale, streaming al vendor STT
+packages/ai              AIService, adapter provider, quota, accounting dei costi
+packages/canvas          palco, finestre, vassoio, negoziazione: modello e riduttori
 packages/gesture         MediaPipe, classificatore gesti, debouncing
+packages/bundle          raccolta contenuti, ZIP, cifratura, upload del pacchetto
 packages/db              schema, client tipizzato, tipi generati
 supabase/migrations      migrazioni SQL e policy RLS
 docs                     spec, piani, ADR, modello dati, contratto env
@@ -29,9 +27,13 @@ Regola di dipendenza: `apps/web` può importare da qualsiasi package. I package 
 importano da `apps/web`. `packages/ui` non importa da `packages/db` né da
 `packages/ai`: i componenti ricevono dati, non li vanno a prendere.
 
-`packages/gesture` non conosce né schede né stanze: riceve un elemento `<video>` ed
-emette comandi. Si testa con landmark registrati, senza webcam. Per questo si
-sviluppa in parallelo dalla prima settimana anche se si integra per ultimo.
+`packages/gesture` non conosce né finestre né stanze: riceve un elemento `<video>`
+ed emette comandi. Si testa con landmark registrati, senza webcam. Per questo si
+sviluppa in parallelo dal giorno 1 anche se si integra alla slice 5.
+
+**Il cuore sta nei package, non nelle pagine.** Una futura app nativa (Tauri o
+React Native) deve poter riusare `canvas`, `gesture`, `stt`, `bundle` e riscrivere
+solo la UI. Logica di dominio dentro un componente di `apps/web` è un difetto.
 
 ## 2. I quattro piani di stato
 
@@ -40,158 +42,225 @@ la disciplina principale del progetto.
 
 | Piano | Dove vive | Durata | Esempi |
 |---|---|---|---|
-| Persistente | Postgres | per sempre | utenti, workspace, record stanza, ledger |
-| Sessione | KV con TTL | durata della stanza | schede del canvas, finestra di testo |
-| Effimero | DataChannel | millisecondi | presence, scheda aperta, stato mute |
-| Locale | memoria browser | frame | audio, video grezzo, hand landmark |
+| Persistente | Postgres | per sempre | utenti, workspace, record stanza, ledger, record pacchetto |
+| Sessione | KV con TTL | durata della stanza | snapshot del palco, finestra di testo |
+| Effimero | DataChannel | millisecondi | comandi del palco, presence, sottotitoli |
+| Locale | memoria browser | frame | audio, video, landmark, byte delle immagini, chiave del pacchetto |
 
-Presence, cursori e hand landmark **non generano mai una scrittura su Postgres**.
-Se una feature sembra richiederlo, la feature è progettata male.
+Presence, cursori e landmark **non generano mai una scrittura su Postgres**. Se una
+feature sembra richiederlo, la feature è progettata male.
 
-## 3. Il canvas: una lista ordinata di schede
+## 3. Il palco
 
-```ts
-type Card = {
-  id: string                  // monotono, ordinabile
-  kind: 'concept' | 'diagram' | 'document' | 'image'
-  status: 'draft' | 'kept'
-  variants: Variant[]         // lo swipe scorre queste
-  activeVariant: number
-  size: 'large' | 'small'
-  order: number
-  authorId: string
-  expiresAt?: number          // solo le bozze
-}
-```
-
-Niente CRDT: last-write-wins sull'ordinamento più id monotono (ADR-0007). Le bozze
-scadono da sole e non entrano nel PDF.
-
-`packages/canvas` espone riduttori puri che ricevono comandi. **Non sa da dove
-arrivino.** Mouse, gesto o agente attraversano la stessa funzione: è questo a rendere
-«ogni gesto ha il suo click» una proprietà del codice invece che una promessa.
-
-## 4. Flusso audio → testo → agente
+Modello completo nella spec §4.4 e in ADR-0009. In breve:
 
 ```
-browser (ogni partecipante)
-  ├─ mic locale → VAD → packages/stt → vendor STT
-  │                     (token a vita breve emesso dal nostro server)
-  └─ righe { speakerId, ts, text } → route server
-       ↓
-  finestra scorrevole in KV, TTL 5 minuti, mai su disco
-       ↓
-  ├─ canale VELOCE   ogni 2-3 frasi, modello piccolo, una domanda sola:
-  │                  «è stato chiesto un asset?» → bozza o proposta
-  └─ canale LENTO    ogni ~90 secondi: aggiorna documento e decisioni
+Stage
+ ├─ windows[]      fino a 4: slot 'main' + 'side-1..3', ognuna con contents[]
+ ├─ focusedId      finestra in primo piano
+ ├─ tray[]         prodotto dall'agente e non piazzato, o archiviato
+ ├─ negotiation    null, oppure { contentId, snapshot, guestId, editsLeft, hostPays }
+ └─ version        monotono
 ```
 
-Ogni partecipante trascrive **solo la propria traccia**: l'attribuzione per voce
-esce gratis. L'audio non raggiunge mai una nostra macchina (ADR-0006).
+`packages/canvas` espone **riduttori puri** `(stage, command) → stage`. Non sa da
+dove arrivi il comando: mouse, gesto o agente attraversano la stessa funzione. È
+questo a rendere «ogni gesto ha il suo click» una proprietà del codice.
 
-Il VAD non è un'ottimizzazione: senza, i minuti fatturati triplicano.
+### 3.1 Sincronizzazione: un solo scrittore
 
-## 5. Flusso di una richiesta AI
+```
+scrittore (host, o chi ha il turno in negoziazione)
+  comando → riduttore locale → version+1 → sendData('stage', { version, command })
+                                         → snapshot in KV ogni N secondi
+ospiti
+  onData('stage') → stesso riduttore → stesso stato
+  version fuori sequenza → chiedono lo snapshot e ripartono da lì
+```
+
+Niente CRDT, niente merge. Chi non è scrittore non invia comandi di palco: li
+propone, e lo scrittore decide. Il server valida chi è scrittore quando emette il
+token (host) e quando apre il turno di negoziazione.
+
+### 3.2 Contenuti pesanti
+
+Grafici, testi e tabelle sono dati piccoli e viaggiano nel comando. Le immagini no:
+viaggiano come byte stream LiveKit dal browser dell'host agli ospiti e restano in
+memoria. Lo snapshot in KV contiene solo il riferimento; chi entra tardi chiede i
+byte al browser dell'host. **Le immagini non passano mai dal nostro storage** fino
+al pacchetto cifrato.
+
+## 4. Flusso dell'agente
+
+```
+browser host
+  parola chiave (modello ONNX locale) | gesto AGENT_ACTIVATE | bottone ✨
+    → token STT a vita breve (route server, solo host)
+    → packages/stt apre lo stream verso il vendor
+    → testo della richiesta, fine segnata dal VAD
+    → route server → AIService.execute({ operation: 'agent_generate', ... })
+    → contenuto → comando TRAY_ADD → DataChannel a tutti
+```
+
+Finché la parola chiave non scatta, **nessun audio lascia il browser**. Il modello
+della parola chiave gira in locale.
+
+**Modalità companion.** Lo stream STT resta aperto; le righe vanno nella finestra di
+testo in KV (TTL 5 minuti). Ogni ~90 secondi `AIService` valuta la finestra e può
+proporre contenuti al vassoio. L'interfaccia mostra che il contatore corre.
+
+## 5. Flusso dei sottotitoli
+
+```
+browser di chi parla
+  mic → VAD → vendor STT → { speakerId, ts, text, lang }
+    → route server → AIService.execute({ operation: 'translate', targets })
+    → risposta a chi parla → sendData('subtitles') → ognuno mostra la sua lingua
+```
+
+- `targets` = lingue presenti nella stanza meno quella di chi parla. Vuoto → nessuna
+  chiamata.
+- Una traduzione per lingua, non per ascoltatore.
+- In modalità sottotitoli la riga va anche nella finestra di testo in KV, così il
+  PDF riassuntivo può usarla.
+
+Ogni partecipante trascrive **solo la propria traccia**. L'audio non raggiunge mai
+una nostra macchina (ADR-0006). Il VAD non è un'ottimizzazione: senza, i minuti
+fatturati triplicano.
+
+## 6. Flusso di una richiesta AI
 
 Ogni chiamata a un modello passa per la stessa catena, senza scorciatoie.
 
 ```
 client
   → route server (auth verificata, mai chiamata diretta al provider dal browser)
-  → AIService.execute({ workspaceId, roomId, operation, input })
-      1. controllo quota: crediti residui del workspace
-      2. rate limit per utente e per workspace
-      3. adapter del provider scelto
-      4. misura latenza ed esito
-      5. scrittura riga su ai_requests (metadati, mai contenuto)
-      6. scalo crediti su credit_ledger
+  → AIService.execute({ roomId, participantId, operation, input })
+      1. risoluzione del pagante: host, ospite registrato, o host per conto
+         dell'ospite con «offro io» entro il tetto
+      2. controllo quota sul workspace pagante
+      3. rate limit per partecipante e per workspace
+      4. adapter del provider scelto
+      5. misura latenza ed esito
+      6. riga su ai_requests (metadati, mai contenuto)
+      7. scalo crediti su credit_ledger
   → risposta al client
 ```
 
-Se il passo 1 fallisce, non si chiama il provider. La quota è un cancello, non un
-avviso. Nessun codice fuori da `packages/ai` conosce chiavi API o nomi di modello.
+Se i passi 1-2 falliscono, il provider non viene chiamato. La quota è un cancello,
+non un avviso. Nessun codice fuori da `packages/ai` conosce chiavi API o nomi di
+modello.
 
-**Soglia di costo.** Sotto soglia l'asset nasce da solo, in bozza. Sopra, richiede
-conferma esplicita dell'utente prima della chiamata.
+Il **tetto di modifiche** della negoziazione e il **tetto di «offro io»** sono
+applicati qui, lato server. Il client li mostra, non li fa rispettare.
 
-## 6. Confine del realtime
+**Soglia di costo.** Grafici, testi, tabelle, traduzioni partono subito. Immagini e
+PDF chiedono conferma esplicita prima della chiamata.
+
+## 7. Confine del realtime
 
 `packages/realtime` espone un'interfaccia che non nomina LiveKit:
 
 - `connectToRoom(token)` restituisce una sessione
 - `publishLocalTracks(options)` — audio e video separabili
 - `onParticipantJoined`, `onParticipantLeft`, `onConnectionStateChange`
-- `sendData(channel, payload)` e `onData(channel, handler)`
+- `sendData(channel, payload)` e `onData(channel, handler)` — messaggi piccoli
+- `sendBytes(topic, bytes, to?)` e `onBytes(topic, handler)` — immagini
 
 Il codice dell'applicazione parla solo a questa interfaccia. Il giorno in cui
-LiveKit diventa caro o inadatto, si riscrive un file invece di trenta.
+LiveKit diventa caro o inadatto, si riscrive un file invece di trenta. Si parte dal
+free tier di LiveKit Cloud; il self-hosting è l'uscita.
 
-Audio e video si pubblicano separatamente: la slice 2 accende solo l'audio, la
-slice 5 aggiunge il video sopra la stessa sessione.
-
-## 7. Gesture: percorso interamente locale
+## 8. Gesture: percorso interamente locale
 
 ```
-webcam → MediaPipe (browser) → landmark → classificatore → debounce/cooldown → comando canvas
+webcam → MediaPipe (browser) → landmark → classificatore → debounce/cooldown → comando palco
 ```
 
-Nessun frame e nessun landmark lascia il dispositivo.
+Nessun frame e nessun landmark lascia il dispositivo. Dizionario in ADR-0010,
+caricato come configurazione.
 
-- **`OPEN_PALM` è l'interruttore.** Senza attivazione esplicita, ogni movimento
-  involontario mentre si parla sposta le schede.
-- **`SWIPE_LEFT` / `SWIPE_RIGHT`** scorrono le varianti della scheda aperta.
-- **`PINCH`** aperto o chiuso cambia `size` fra `large` e `small`.
+- **Palmo aperto è l'interruttore.** Senza attivazione esplicita, ogni movimento
+  involontario mentre si parla muove il palco.
 - **Frequenza adattiva.** Se il frame rate cala sotto soglia, MediaPipe riduce il
-  passo prima che degradi il video. Il video vince sempre sulle gesture.
+  passo prima che degradi il video. Il video vince sempre.
+- **Degrado ordinato.** Primo a cadere: il gesto a due mani (tracking doppio). Poi
+  la frequenza. Mai una funzione: ogni comando resta a click.
 
-I token di accesso alla stanza — LiveKit e STT — sono generati **solo lato server**,
-dopo aver verificato che l'utente abbia diritto a entrare. Durano quanto la
-sessione, non di più.
+Solo l'host usa le gesture nell'MVP.
 
-## 8. Ciclo di vita della stanza
+## 9. Il pacchetto
+
+```
+host termina
+  → packages/bundle raccoglie contenuti dal palco e dal vassoio (byte dalla RAM)
+  → se PDF attivo e in quota: AIService.execute({ operation: 'summarize_pdf' })
+      input: finestra di testo in KV (se c'è) + elenco richieste e contenuti
+  → ZIP se più di un file
+  → chiave AES-GCM casuale (Web Crypto), cifratura nel browser
+  → route server: crea riga in bundles, restituisce URL di upload firmato
+  → upload del blob cifrato su R2 (lifecycle 7 giorni)
+  → link …/p/<id>#<chiave> → sendData('bundle') a tutti
+```
+
+Il server vede: dimensione, stanza, scadenza. Non vede mai la chiave né il
+contenuto. La pagina `/p/<id>` scarica il blob e decifra nel browser; non carica
+script di terze parti, per non esporre il frammento (ADR-0008).
+
+## 10. Ciclo di vita della stanza
 
 ```
 CREATA        riga in rooms, nessuno stato in KV
 ATTIVA        primo join: stato in KV con TTL, token emessi
-IN CHIUSURA   host termina: schede tenute → composizione PDF
-CHIUSA        rooms.ended_at valorizzato, KV cancellato
-PURGATA       entro 10 minuti: asset temporanei rimossi, resta il PDF in R2
-SCADUTA       dopo 7 giorni: PDF rimosso da R2, resta solo la riga in rooms
+IN CHIUSURA   host termina: il suo browser compone, cifra e carica il pacchetto
+CHIUSA        rooms.ended_at valorizzato, KV cancellato, token revocati
+PURGATA       entro 10 minuti: nessuno stato di sessione sui server
+SCADUTA       dopo 7 giorni: blob rimosso dal lifecycle di R2, resta la riga in bundles
 ```
 
-Il passaggio da CHIUSA a PURGATA deve avvenire anche se l'host chiude il browser
-senza premere nulla. Serve un job programmato che purga le stanze senza presence da
-più di N minuti. Una promessa di cancellazione che dipende da un click dell'utente
-non è una promessa.
+Il passaggio a PURGATA avviene **anche se l'host chiude il browser senza premere
+nulla**: un job purga le stanze senza presence da più di N minuti. In quel caso il
+pacchetto non esiste, perché i contenuti vivevano solo nei browser. L'interfaccia lo
+dice prima, non dopo.
 
-## 9. Autorizzazione
+## 11. Autorizzazione
 
 Tre livelli, tutti server-side:
 
 1. **RLS su Postgres**, deny by default. Ogni policy parte dall'utente autenticato.
-2. **Controlli nelle route server** prima di ogni effetto: chi chiede è membro del
-   workspace, la stanza è sua, la quota è disponibile.
+2. **Controlli nelle route server** prima di ogni effetto: chi chiede è nella
+   stanza, ha il ruolo giusto, il pagante ha quota.
 3. **Token a vita breve** — LiveKit e STT — emessi solo dopo i due controlli sopra.
 
-Il frontend nasconde i bottoni che non servono. Non è quello a proteggere nulla.
+Riservati all'host, verificati server-side: token STT per l'agente, apertura e
+chiusura della negoziazione, «offro io», creazione del pacchetto. L'ospite ottiene
+un token STT solo per i sottotitoli, se accesi.
 
-Un token STT rubato è audio di terzi trascritto a nostre spese: vita breve e
-revoca alla chiusura della stanza non sono opzionali.
+L'ospite senza account entra con un token di stanza legato al `join_code` e a un
+`room_participants.id`. Non ha sessione Supabase e non legge Postgres.
 
-## 10. Errori
+Il frontend nasconde i bottoni che non servono. Non è quello a proteggere nulla. Un
+token STT rubato è audio di terzi trascritto a nostre spese: vita breve e revoca
+alla chiusura non sono opzionali.
+
+## 12. Errori
 
 Ogni errore mostrato all'utente dice cosa è successo e cosa può fare. Nessun
-"Something went wrong". Quattro categorie con trattamento diverso:
+"Something went wrong".
 
-- **Rete e realtime:** riconnessione automatica con backoff, stato visibile in UI.
+- **Rete e realtime:** riconnessione automatica con backoff, stato visibile. Al
+  rientro l'ospite riparte dallo snapshot.
 - **Quota e permessi:** messaggio esplicito con l'azione possibile, non un 500.
-- **Guasti del provider AI:** degrado, non blocco. La stanza continua a funzionare
-  se l'immagine non arriva.
+- **Guasti del provider AI:** degrado, non blocco. La call continua se l'immagine o
+  la traduzione non arrivano.
 - **Gesture non disponibili:** webcam negata o CPU satura non tolgono nessuna
-  funzione. Ogni comando resta raggiungibile col mouse.
+  funzione.
+- **Upload del pacchetto fallito:** retry dal browser dell'host finché è aperto;
+  poi offerta di scaricare il file in locale.
 
-## 11. Telemetria senza contenuto
+## 13. Telemetria senza contenuto
 
 Poiché non si possono loggare i contenuti (ADR-0001), i log devono essere ricchi di
 struttura: id di correlazione per sessione, passo della catena, esito, durata,
-codice di errore del provider. Mai prompt, mai testo trascritto, mai output.
+codice di errore del provider. Mai prompt, mai testo trascritto o tradotto, mai
+output, mai URL con frammento.

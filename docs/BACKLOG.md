@@ -5,9 +5,6 @@ slice e qui resta solo il riferimento.
 
 Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 
-> **Da allineare alla v3** (palco a finestre, `packages/bundle`, pacchetto cifrato,
-> sottotitoli). Fino ad allora, in caso di conflitto vale la spec.
-
 ## Slice 0 — Fondamenta
 
 - [x] Repository, struttura cartelle, documentazione di base
@@ -16,6 +13,7 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 - [x] Contratto delle variabili d'ambiente
 - [x] Workflow CI con typecheck, lint, test
 - [x] Spec v2 dopo il brainstorming del 22/09
+- [x] Spec v3 dopo il brainstorming del 23/09, architettura e modello dati allineati
 - [ ] `npm install` e workspace funzionante
 - [ ] Scaffolding Next.js in `apps/web` con TypeScript strict
 - [ ] Progetto Supabase creato, credenziali in `.env.local`
@@ -25,99 +23,108 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 
 ## Slice 1 — Auth e stanza
 
-- [ ] Registrazione ed email di conferma
-- [ ] Login e logout
-- [ ] Workspace personale creato automaticamente alla registrazione
-- [ ] Migrazione 0002: rooms, room_participants, con RLS
-- [ ] Dashboard con elenco stanze del workspace
+- [ ] Registrazione, login e logout dell'host
+- [ ] Workspace personale creato alla registrazione
+- [ ] Migrazione 0002: rooms, room_participants (ruolo, lingua), con RLS
 - [ ] Creazione stanza e generazione join code
-- [ ] Ingresso in stanza da link, con controllo permessi server-side
-- [ ] Shell UI della stanza: split 35/65, colonne ancora vuote
-- [ ] Gestione errori: stanza inesistente, chiusa, senza permesso
+- [ ] Ingresso ospite da link senza account: nome, lingua, riga in room_participants
+- [ ] Controlli permessi server-side all'ingresso
+- [ ] Shell UI: colonna video stretta e palco vuoto
+- [ ] Errori: stanza inesistente, chiusa, senza permesso
 
-## Slice 2 — Audio realtime
+## Slice 2 — Call
 
-- [ ] Astrazione `packages/realtime` sopra LiveKit, audio e video separabili
-- [ ] Emissione token di stanza lato server dopo verifica permessi
-- [ ] Join e leave con solo audio, tracce per partecipante
-- [ ] Mute microfono
+- [ ] `packages/realtime` sopra LiveKit: audio, video, `sendData`, `sendBytes`
+- [ ] Token di stanza emessi lato server, per host e ospite
+- [ ] Audio e video, 2+ partecipanti, mute e camera on/off
 - [ ] Presence via DataChannel, mai su Postgres
-- [ ] Stato di rete visibile e riconnessione con backoff
+- [ ] Riconnessione con backoff e stato visibile
+- [ ] Vista mobile base da browser
 - [ ] Test del ciclo di vita con due client
-- [ ] **Spike CPU (mezza giornata):** MediaPipe 30fps + encode WebRTC + STT insieme
+- [ ] **Spike CPU (mezza giornata):** MediaPipe + encode WebRTC + parola chiave + STT
+- [ ] **Spike iOS Safari:** audio, video e DataChannel su iPhone reale
 
-## Slice 3 — Agente e contabilità
+## Slice 3 — Palco
+
+- [ ] `packages/canvas`: Stage, Window, Content, riduttori puri
+- [ ] Slot magnetici: 1 grande più 3 piccole, aggancio al rilascio
+- [ ] Vassoio e archiviazione
+- [ ] Sincronizzazione a scrittore unico: `version`, comandi via DataChannel
+- [ ] Snapshot in KV e ripartenza di chi entra tardi o si riconnette
+- [ ] Trasferimento immagini via byte stream, mai su storage
+- [ ] Ogni comando raggiungibile col mouse
+- [ ] Vista mobile A: finestra in primo piano, segue l'host, swipe per sbirciare
+- [ ] Contenuti finti per provare il palco senza agente
+
+## Slice 4 — Agente
 
 - [ ] Migrazione 0003: ai_requests, credit_ledger, con RLS in sola lettura
-- [ ] `packages/stt`: cattura microfono e VAD lato client
-- [ ] Route che emette il token STT a vita breve dopo verifica permessi
-- [ ] Streaming al vendor STT, righe `{ speakerId, ts, text }` verso il server
-- [ ] Finestra scorrevole in KV con TTL 5 minuti, mai su disco
-- [ ] `AIService` con controllo quota **prima** della chiamata al provider
-- [ ] Scrittura ledger a ogni chiamata, anche fallita
-- [ ] Rate limit per utente e per workspace
-- [ ] Canale lento: riassunto e decisioni ogni ~90 secondi
-- [ ] Schede `kind: 'document'` renderizzate nel canvas
-- [ ] Contatore crediti visibile nella UI
+- [ ] `AIService` con risoluzione del pagante e quota **prima** del provider
+- [ ] Scrittura ledger a ogni chiamata, anche fallita; rate limit
+- [ ] Crediti caricati a mano (`manual_grant`)
+- [ ] Parola chiave locale in ONNX, nome scelto
+- [ ] Token STT a vita breve, solo all'host
+- [ ] `packages/stt`: VAD, stream a comando, fine richiesta al silenzio
+- [ ] `agent_generate`: grafici, testi, tabelle nel vassoio
+- [ ] Immagini dietro conferma esplicita
+- [ ] Contatore agente visibile all'host
+- [ ] Modalità companion, se il flusso a comando è stabile
 - [ ] Test di accounting: N chiamate, saldo corretto
-- [ ] Verifica del costo reale per ora con VAD attivo
 
-## Slice 4 — Final Bundle
+## Slice 5 — Gesture (prima demo)
 
-- [ ] Composizione PDF dalle schede tenute, con logo del workspace
-- [ ] Upload su R2 con URL firmato a 7 giorni
-- [ ] Email gate con consenso marketing non preselezionato
-- [ ] Watermark sul piano gratuito
-- [ ] Job di purga delle stanze abbandonate senza click dell'host
-- [ ] Test che verifica che dopo la purga i dati di sessione non esistano
-- [ ] **Gate di prodotto:** far provare a 5 consulenti veri e raccogliere reazioni
-
-## Slice 5 — Video
-
-- [ ] Pubblicazione traccia video sopra la sessione esistente
-- [ ] Tessere partecipanti nella colonna sinistra
-- [ ] Camera on e off
-- [ ] Comportamento con 2, 3 e 4 partecipanti
-
-## Slice 6 — Canvas generativo
-
-- [ ] `packages/canvas`: modello Card e riduttori puri
-- [ ] Sincronizzazione schede via DataChannel e KV
-- [ ] Canale veloce: classificatore di intento sulle ultime frasi
-- [ ] Bozze tratteggiate con `expiresAt` e scadenza automatica
-- [ ] Varianti per scheda, navigabili col mouse
-- [ ] Ridimensionamento scheda large/small, apertura al 58%
-- [ ] Adapter immagini in `AIService`, dietro conferma esplicita
-- [ ] Stato di caricamento credibile per le immagini (5-15 secondi)
-- [ ] Taratura della soglia di costo che separa bozza da conferma
-
-## Slice 7 — Gesture
-
-- [ ] `packages/gesture`: MediaPipe, landmark, classificatore (in parallelo dalla settimana 1)
-- [ ] Dizionario: SWIPE_LEFT, SWIPE_RIGHT, PINCH, OPEN_PALM
-- [ ] OPEN_PALM come interruttore di attivazione
-- [ ] Debounce e cooldown
-- [ ] Frequenza adattiva: il video vince sempre
-- [ ] Impostazioni: configurabili e disattivabili
-- [ ] Verifica che ogni gesto abbia il suo click equivalente
+- [ ] `packages/gesture`: MediaPipe, classificatore (in parallelo dal giorno 1)
+- [ ] Dizionario ADR-0010 caricato come configurazione
+- [ ] Palmo aperto come interruttore; debounce e cooldown
+- [ ] Pinch-trascina-rilascia dal vassoio alle finestre
+- [ ] Frequenza adattiva e degrado ordinato
 - [ ] Test del classificatore su landmark registrati, senza webcam
+- [ ] **Gate di prodotto:** far provare la demo a 5 consulenti veri
+
+## Slice 6 — Sottotitoli
+
+- [ ] Token STT per ogni partecipante quando i sottotitoli sono accesi
+- [ ] Traduzione per lingua presente in `AIService`
+- [ ] Sottotitoli via DataChannel, ognuno nella sua lingua
+- [ ] Interruttore e contatore separati
+- [ ] Misura latenza end-to-end (obiettivo sotto 2 secondi)
+
+## Slice 7 — Negoziazione
+
+- [ ] Apertura dall'host con tetto modifiche e snapshot dell'originale
+- [ ] Turno di scrittura all'ospite, agente in coda
+- [ ] «Offro io» con `guest_credit_cap`, applicato lato server
+- [ ] Tre esiti: tieni, torna, affianca; massimo due versioni
+- [ ] Bottone ✨ ospite su mobile solo in negoziazione
+
+## Slice 8 — Pacchetto
+
+- [ ] Migrazione 0004: bundles, con RLS
+- [ ] `packages/bundle`: raccolta, ZIP, cifratura AES-GCM nel browser
+- [ ] Upload firmato su R2 con lifecycle 7 giorni
+- [ ] Pagina `/p/<id>` che decifra nel browser, senza script di terze parti
+- [ ] PDF riassuntivo a quota
+- [ ] Avviso prima della chiusura: senza «termina» il pacchetto non esiste
+- [ ] Job di purga delle stanze abbandonate
+- [ ] Test: dopo la purga i dati di sessione non esistono
 
 ## Post-MVP
 
-- [ ] Stripe, piani, crediti, entitlement
+- [ ] Piani, prezzi, Stripe
+- [ ] Voce tradotta (doppiaggio live) a crediti
+- [ ] App native: Tauri desktop, React Native mobile
+- [ ] Host da mobile
 - [ ] Modalità massima privacy: Whisper WASM on-device (ADR-0006)
-- [ ] Whiteboard a mano libera (rinviata da ADR-0002)
-- [ ] Bundle come ZIP con asset sciolti
+- [ ] Disegno a mano libera nelle finestre (ADR-0002)
 - [ ] Recording opzionale con policy di consenso dedicata
 - [ ] Integrazioni calendario e storage
 - [ ] SSO, audit log, API pubblica
 
 ## Debito e rischi da sciogliere
 
-- [ ] Scegliere il vendor STT sul rapporto costo, latenza e qualità sull'italiano
+- [ ] Scegliere il vendor STT: qualità italiano, prezzo, zero retention
+- [ ] Scegliere il provider di traduzione: latenza e costo per carattere
+- [ ] Scegliere nome e modello della parola chiave; addestrarlo se serve
+- [ ] Scegliere il provider di immagini su costo e latenza
 - [ ] Firmare i DPA con vendor STT e LLM, zero retention per iscritto
-- [ ] Decidere il provider di generazione immagini su costo e latenza
-- [ ] Misurare il costo orario reale e rivedere i prezzi di conseguenza
-- [ ] Informativa privacy che distingue cosa resta nel browser e cosa va al vendor
-- [ ] Telemetria strutturale che permetta il debug senza contenuti
-- [ ] Composizione PDF: rendere leggibile come verbale un insieme di schede
+- [ ] Misurare i costi reali e decidere l'economia

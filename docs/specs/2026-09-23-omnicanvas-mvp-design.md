@@ -383,7 +383,7 @@ applicati da `AIService`, non dal client.
 
 Persistenti: `profiles`, `workspaces`, `workspace_members`, `rooms`,
 `room_participants`, `ai_requests`, `credit_ledger`, `bundles`. Colonne e policy in
-`docs/DATA-MODEL.md`, da allineare a questa versione.
+`docs/DATA-MODEL.md`.
 
 Effimeri in KV: `room:{id}:stage`, `room:{id}:presence`,
 `room:{id}:transcript_window`.

@@ -93,11 +93,11 @@ Prima demo = slice 0-5 (6-8 settimane), MVP = slice 0-8 (8-12 settimane).
 
 ### Ripresa — dove eravamo (23/09/2026)
 
-1. **Sean rilegge la spec v3** (`docs/specs/2026-09-23-omnicanvas-mvp-design.md`).
-2. **Allineare** `docs/ARCHITECTURE.md` e `docs/DATA-MODEL.md` alla v3.
-3. **Riscrivere il piano** in `docs/plans/` con `writing-plans`: quello esistente è
+Spec v3 approvata; `ARCHITECTURE.md`, `DATA-MODEL.md` e `BACKLOG.md` allineati.
+
+1. **Riscrivere il piano** in `docs/plans/` con `writing-plans`: quello esistente è
    obsoleto.
-4. **Poi** la slice 0 (`/slice 0`).
+2. **Poi** la slice 0 (`/slice 0`).
 
 Decisioni prese e non da riaprire senza un ADR nuovo: palco a slot magnetici, solo
 l'host scrive sul palco e attiva l'agente, negoziazione aperta dall'host con tetto e
