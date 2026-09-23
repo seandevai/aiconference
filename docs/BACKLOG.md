@@ -17,8 +17,8 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 - [x] `npm install` e workspace funzionante
 - [x] Scaffolding Next.js in `apps/web` con TypeScript strict
 - [x] Supabase inizializzato in locale (`supabase init`, migrazioni)
-- [x] Migrazione 0001: profiles, workspaces, workspace_members, con RLS
-- [x] Test che prova l'accesso RLS da utente non autorizzato
+- [x] Migrazione 0001: profiles, workspaces, workspace_members, con RLS (verificato su PGlite, non ancora su Supabase)
+- [x] Test che prova l'accesso RLS da utente non autorizzato (verificato su PGlite, non ancora su Supabase)
 - [ ] Progetto Supabase creato, credenziali in `.env.local`
 - [ ] Deploy preview su Vercel funzionante
 
@@ -26,10 +26,10 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 
 - [x] Registrazione, login e logout dell'host
 - [x] Workspace personale creato alla registrazione
-- [x] Migrazione 0002: rooms, room_participants (ruolo, lingua), con RLS
-- [x] Creazione stanza e generazione join code
-- [x] Ingresso ospite da link senza account: nome, lingua, riga in room_participants
-- [x] Controlli permessi server-side all'ingresso
+- [x] Migrazione 0002: rooms, room_participants (ruolo, lingua), con RLS (verificato su PGlite, non ancora su Supabase)
+- [x] Creazione stanza e generazione join code (verificato su PGlite, non ancora su Supabase)
+- [x] Ingresso ospite da link senza account: nome, lingua, riga in room_participants (verificato su PGlite, non ancora su Supabase)
+- [x] Controlli permessi server-side all'ingresso (verificato su PGlite, non ancora su Supabase)
 - [x] Shell UI: colonna video stretta e palco vuoto
 - [x] Errori: stanza inesistente, chiusa, senza permesso
 
@@ -117,6 +117,9 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 - [ ] `npm run test:e2e` completo (host e ospite, desktop e mobile)
 - [ ] prove manuali dei task 1.1, 1.4, 1.7 del piano
 - [ ] task 0.5: Supabase Cloud + Vercel preview
+- In alternativa a Docker: creare un remote GitHub, pushare `slice/0-fondamenta` e
+      `slice/1-auth-stanza`, aprire una PR: il job `db` della CI esegue `test:db` su
+      Supabase.
 
 ## Post-MVP
 
@@ -147,3 +150,9 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 - [ ] Codice stanza case-sensitive: normalizzare maiuscolo/trim quando si digita a
       mano
 - [ ] Tipi `packages/db` scritti a mano: rigenerare
+- [ ] `profiles.display_name` vuoto alla registrazione resta `''`: usare
+      `nullif(trim(...),'')` e un check di lunghezza
+- [ ] `rooms.created_by` senza `on delete`: blocca la cancellazione account quando
+      arriveranno workspace multi-membro (GDPR)
+- [ ] la pagina stanza scrive `room_participants` su GET: rivedere con la presence
+      della slice 2
