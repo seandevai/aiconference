@@ -1,5 +1,7 @@
 # Piano — Slice 0 e 1: fondamenta, auth, stanza
 
+> **Obsoleto.** Scritto sulla spec v1/v2. Va riscritto sulla v3 prima della slice 0.
+
 > **Per chi esegue:** usare `superpowers:subagent-driven-development` (consigliato) o
 > `superpowers:executing-plans` per eseguire task per task. I passi hanno checkbox.
 

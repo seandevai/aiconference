@@ -1,6 +1,6 @@
 # ADR-0007 — La scheda è l'unico oggetto del canvas
 
-**Data:** 22/09/2026 · **Stato:** accettato
+**Data:** 22/09/2026 · **Stato:** sostituito da ADR-0009
 
 ## Contesto
 

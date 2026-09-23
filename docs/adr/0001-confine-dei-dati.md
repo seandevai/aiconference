@@ -1,6 +1,6 @@
 # ADR-0001 — Il confine dei dati: metadati persistenti, contenuti effimeri
 
-**Data:** 22/09/2026 · **Stato:** accettato · **Sostituisce:** nulla
+**Data:** 22/09/2026 · **Stato:** accettato, in parte sostituito da ADR-0008 (uscita) · **Sostituisce:** nulla
 
 ## Contesto
 

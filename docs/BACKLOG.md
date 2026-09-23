@@ -3,7 +3,10 @@
 Una riga per lavoro. Quando una voce entra in una slice, si sposta nel piano della
 slice e qui resta solo il riferimento.
 
-Riferimento: `docs/specs/2026-09-22-omnicanvas-mvp-design.md` (v2).
+Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
+
+> **Da allineare alla v3** (palco a finestre, `packages/bundle`, pacchetto cifrato,
+> sottotitoli). Fino ad allora, in caso di conflitto vale la spec.
 
 ## Slice 0 — Fondamenta
 

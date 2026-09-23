@@ -2,7 +2,10 @@
 
 Documento vivo. Va aggiornato nello stesso commit che cambia la struttura, non dopo.
 
-Riferimento di prodotto: `docs/specs/2026-09-22-omnicanvas-mvp-design.md` (v2).
+Riferimento di prodotto: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
+
+> **Da allineare alla v3** (palco a finestre, `packages/bundle`, pacchetto cifrato,
+> sottotitoli). Fino ad allora, in caso di conflitto vale la spec.
 
 ## 1. Forma del repository
 

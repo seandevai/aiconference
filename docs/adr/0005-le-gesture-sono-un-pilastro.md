@@ -1,6 +1,6 @@
 # ADR-0005 — Le gesture sono un pilastro, non un accessorio
 
-**Data:** 22/09/2026 · **Stato:** accettato · **Sostituisce:** ADR-0003
+**Data:** 22/09/2026 · **Stato:** accettato; dizionario sostituito da ADR-0010 · **Sostituisce:** ADR-0003
 
 ## Contesto
 
