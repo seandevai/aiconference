@@ -44,7 +44,9 @@ describe('createRoomForUser', () => {
 
     const fresh = generateJoinCode();
     const codes = [first.joinCode, fresh];
-    const second = await createRoomForUser(client, host.id, { title: 'Second' }, () => codes.shift()!);
+    const second = await createRoomForUser(client, host.id, { title: 'Second' }, () =>
+      codes.shift()!,
+    );
     expect(second).toMatchObject({ ok: true, joinCode: fresh });
   });
 
@@ -52,7 +54,12 @@ describe('createRoomForUser', () => {
     const client = await signedInClient(host);
     const first = await createRoomForUser(client, host.id, { title: 'Taken' });
     if (!first.ok) throw new Error('setup failed');
-    const result = await createRoomForUser(client, host.id, { title: 'Stuck' }, () => first.joinCode);
+    const result = await createRoomForUser(
+      client,
+      host.id,
+      { title: 'Stuck' },
+      () => first.joinCode,
+    );
     expect(result).toEqual({ ok: false, error: 'JOIN_CODE_COLLISION' });
   });
 });
