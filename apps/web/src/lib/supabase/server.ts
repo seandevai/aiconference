@@ -14,6 +14,9 @@ export async function createServerSupabase() {
       cookies: {
         getAll: () => store.getAll(),
         setAll: (items) => {
+          // @supabase/ssr passerebbe qui anche gli header di cache da inoltrare sulla
+          // response, ma un Server Component/Action non può impostare header: ci pensa
+          // il proxy (apps/web/src/proxy.ts), che gira su ogni richiesta.
           try {
             for (const { name, value, options } of items) store.set(name, value, options);
           } catch {

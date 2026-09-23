@@ -14,7 +14,19 @@ describe('safeNextPath', () => {
     ['//evil.example'],
     ['/\\evil.example'],
     ['javascript:alert(1)'],
+    ['/\t/evil.example'],
+    ['/\n/evil.example'],
+    ['/\r/evil.example'],
+    ['/ok\\evil'],
   ])('falls back to /dashboard for %s', (value) => {
     expect(safeNextPath(value)).toBe('/dashboard');
+  });
+
+  it('takes the first element when next is an array', () => {
+    expect(safeNextPath(['/room/ABCD2345', '//evil'])).toBe('/room/ABCD2345');
+  });
+
+  it('falls back to /dashboard when the first array element is unsafe', () => {
+    expect(safeNextPath(['//evil'])).toBe('/dashboard');
   });
 });

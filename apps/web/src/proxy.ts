@@ -13,10 +13,14 @@ export async function proxy(request: NextRequest) {
     {
       cookies: {
         getAll: () => request.cookies.getAll(),
-        setAll: (items) => {
+        // @supabase/ssr passa anche gli header di cache: senza inoltrarli sulla nuova
+        // response, una pagina potrebbe restare cacheata con i cookie di sessione di
+        // un altro utente.
+        setAll: (items, headers) => {
           for (const { name, value } of items) request.cookies.set(name, value);
           response = NextResponse.next({ request });
           for (const { name, value, options } of items) response.cookies.set(name, value, options);
+          for (const [key, value] of Object.entries(headers)) response.headers.set(key, value);
         },
       },
     },

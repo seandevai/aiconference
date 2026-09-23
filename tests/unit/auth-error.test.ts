@@ -28,8 +28,6 @@ describe('authErrorMessage', () => {
     expect(authErrorMessage('something_new')).toBe(
       'Accesso non riuscito (something_new). Riprova tra poco.',
     );
-    expect(authErrorMessage(undefined)).toBe(
-      'Accesso non riuscito (unknown). Riprova tra poco.',
-    );
+    expect(authErrorMessage(undefined)).toBe('Accesso non riuscito (unknown). Riprova tra poco.');
   });
 });
