@@ -5,7 +5,8 @@ produce grafici, testi e immagini su un palco di finestre comandato con le mani.
 Sottotitoli tradotti, e a fine riunione un pacchetto cifrato nel browser con un link
 che scade.
 
-**Stato:** slice 0, fondamenta. Nessun codice applicativo ancora scritto.
+**Stato:** slice 0 fatta (tranne deploy), slice 1 fatta (da verificare su DB), slice
+2 prossima.
 
 ## Come è fatto
 
@@ -52,9 +53,9 @@ npm run test:e2e   # smoke del percorso principale
 
 | # | Slice | Stato |
 |---|---|---|
-| 0 | Fondamenta | in corso |
-| 1 | Auth e stanza | da fare |
-| 2 | Call | da fare |
+| 0 | Fondamenta | fatta (tranne deploy) |
+| 1 | Auth e stanza | fatta, da verificare su DB |
+| 2 | Call | prossima |
 | 3 | Palco | da fare |
 | 4 | Agente | da fare |
 | 5 | Gesture | da fare |

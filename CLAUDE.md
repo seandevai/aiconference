@@ -97,9 +97,21 @@ Spec v3 approvata; `ARCHITECTURE.md`, `DATA-MODEL.md` e `BACKLOG.md` allineati.
 
 Piano delle slice 0-1 pronto: `docs/plans/2026-09-23-slice-0-1-fondamenta-auth-stanza.md`.
 
-1. **Slice 0** con `/slice 0`. Prerequisiti: Docker Desktop per Supabase locale;
-   account Supabase Cloud e Vercel per il task 0.5.
-2. I piani delle slice 2-5 si scrivono all'inizio di ciascuna.
+Slice 0 e slice 1 implementate sui branch `slice/0-fondamenta` e
+`slice/1-auth-stanza` (impilati, non ancora in `main`). Le migrazioni sono state
+verificate su PGlite con uno stub di auth; `npm run test:db` reale su Supabase
+locale e `npm run test:e2e` completo non sono ancora girati (Docker non
+disponibile).
+
+Il passo successivo, in ordine:
+
+1. Installare Docker Desktop ed eseguire la sezione "Da verificare appena c'è
+   Docker" di `docs/BACKLOG.md` (`supabase start`/`db reset`, `db:types`,
+   `test:db`, `test:e2e` completo, prove manuali, task 0.5 Supabase Cloud +
+   Vercel preview).
+2. Merge di `slice/0-fondamenta` e `slice/1-auth-stanza` in `main`.
+3. Piano della slice 2 con `writing-plans` (vendor LiveKit già deciso: LiveKit
+   Cloud free tier; spike CPU e spike iOS Safari dentro la slice).
 
 Decisioni prese e non da riaprire senza un ADR nuovo: palco a slot magnetici, solo
 l'host scrive sul palco e attiva l'agente, negoziazione aperta dall'host con tetto e

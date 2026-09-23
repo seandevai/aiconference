@@ -16,21 +16,22 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 - [x] Spec v3 dopo il brainstorming del 23/09, architettura e modello dati allineati
 - [x] `npm install` e workspace funzionante
 - [x] Scaffolding Next.js in `apps/web` con TypeScript strict
+- [x] Supabase inizializzato in locale (`supabase init`, migrazioni)
+- [x] Migrazione 0001: profiles, workspaces, workspace_members, con RLS
+- [x] Test che prova l'accesso RLS da utente non autorizzato
 - [ ] Progetto Supabase creato, credenziali in `.env.local`
-- [ ] Migrazione 0001: profiles, workspaces, workspace_members, con RLS
-- [ ] Test che prova l'accesso RLS da utente non autorizzato
 - [ ] Deploy preview su Vercel funzionante
 
 ## Slice 1 — Auth e stanza
 
-- [ ] Registrazione, login e logout dell'host
-- [ ] Workspace personale creato alla registrazione
-- [ ] Migrazione 0002: rooms, room_participants (ruolo, lingua), con RLS
-- [ ] Creazione stanza e generazione join code
-- [ ] Ingresso ospite da link senza account: nome, lingua, riga in room_participants
-- [ ] Controlli permessi server-side all'ingresso
-- [ ] Shell UI: colonna video stretta e palco vuoto
-- [ ] Errori: stanza inesistente, chiusa, senza permesso
+- [x] Registrazione, login e logout dell'host
+- [x] Workspace personale creato alla registrazione
+- [x] Migrazione 0002: rooms, room_participants (ruolo, lingua), con RLS
+- [x] Creazione stanza e generazione join code
+- [x] Ingresso ospite da link senza account: nome, lingua, riga in room_participants
+- [x] Controlli permessi server-side all'ingresso
+- [x] Shell UI: colonna video stretta e palco vuoto
+- [x] Errori: stanza inesistente, chiusa, senza permesso
 
 ## Slice 2 — Call
 
@@ -108,6 +109,15 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 - [ ] Job di purga delle stanze abbandonate
 - [ ] Test: dopo la purga i dati di sessione non esistono
 
+## Da verificare appena c'è Docker
+
+- [ ] `npx supabase start`, `.env.local`, `npx supabase db reset`
+- [ ] `npm run db:types` e confronto con i tipi scritti a mano in `packages/db`
+- [ ] `npm run test:db` (rls-workspaces, rls-rooms, create-room, join-room)
+- [ ] `npm run test:e2e` completo (host e ospite, desktop e mobile)
+- [ ] prove manuali dei task 1.1, 1.4, 1.7 del piano
+- [ ] task 0.5: Supabase Cloud + Vercel preview
+
 ## Post-MVP
 
 - [ ] Piani, prezzi, Stripe
@@ -131,3 +141,13 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 - [ ] `apps/web/src/app/layout.tsx` ha ancora il boilerplate di `create-next-app`
       (`lang="en"`, titolo/metadata in inglese): fuori scope del task 0.2, da
       sistemare quando si scrive il layout reale (slice 0/1)
+- [ ] Indice unico host senza filtro `left_at`: l'host non rientra dopo l'uscita
+      (slice 2)
+- [ ] Ospite anonimo che reinvia il form crea righe aperte orfane; action pubblica
+      senza rate limit
+- [ ] Cookie ospite con path `/room/<code>`: le route di token della slice 2 vanno
+      sotto quel path
+- [ ] Codice stanza case-sensitive: normalizzare maiuscolo/trim quando si digita a
+      mano
+- [ ] Tipi `packages/db` scritti a mano: rigenerare
+- [ ] CI: `supabase/setup-cli` a `latest` mentre il CLI locale è 2.117.0
