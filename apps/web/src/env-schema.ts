@@ -9,7 +9,12 @@ const clientSchema = z.object({
 const serverSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   // Firma il cookie dell'ospite senza account: corto = falsificabile.
-  GUEST_SESSION_SECRET: z.string().min(32),
+  GUEST_SESSION_SECRET: z
+    .string()
+    .min(32)
+    .refine((value) => !value.startsWith('sostituisci'), {
+      message: 'GUEST_SESSION_SECRET must not be the .env.example placeholder value',
+    }),
 });
 
 export type ClientEnv = z.infer<typeof clientSchema>;
