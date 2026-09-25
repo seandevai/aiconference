@@ -10,3 +10,4 @@ export {
   type Finger,
 } from './geometry';
 export { PINCH_OFF, PINCH_ON, classifyPose } from './pose';
+export { DEFAULT_DICTIONARY, TIMINGS, createRecognizer, type Recognizer } from './recognizer';
