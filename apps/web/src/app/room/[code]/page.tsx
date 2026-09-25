@@ -37,7 +37,7 @@ export default async function RoomPage({ params }: { params: Promise<{ code: str
     if (result.kind === 'ended') return <RoomEnded />;
     if (result.kind === 'invalid') throw new Error(`profile invalid for join: ${result.field}`);
     return (
-      <RoomShell title={result.room.title} role={result.role} displayName={displayName} />
+      <RoomShell joinCode={code} title={result.room.title} role={result.role} displayName={displayName} />
     );
   }
 
@@ -58,7 +58,7 @@ export default async function RoomPage({ params }: { params: Promise<{ code: str
     ? await findActiveParticipant(admin, room.id, participantId)
     : null;
   if (participant) {
-    return <RoomShell title={room.title} role={participant.role} displayName={participant.displayName} />;
+    return <RoomShell joinCode={code} title={room.title} role={participant.role} displayName={participant.displayName} />;
   }
 
   return <GuestJoinForm joinCode={code} />;
