@@ -4,8 +4,12 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { serverEnv } from '@/env';
 import { GUEST_TOKEN_TTL_SECONDS, guestCookieName, signGuestToken } from '@/lib/rooms/guest-token';
+import { readGuestParticipantId } from '@/lib/rooms/guest-cookie';
 import { joinRoom } from '@/lib/rooms/join-room';
+import { leaveRoom } from '@/lib/rooms/leave-room';
+import { resolveParticipant } from '@/lib/rooms/resolve-participant';
 import { createAdminSupabase } from '@/lib/supabase/admin';
+import { createServerSupabase } from '@/lib/supabase/server';
 
 export type GuestJoinState = { error: string | null };
 
@@ -49,4 +53,23 @@ export async function joinAsGuestAction(
       redirect(`/room/${joinCode}`);
     }
   }
+}
+
+// L'uscita chiude la riga: da lì in poi la route del token risponde 403 a quel cookie.
+export async function leaveRoomAction(joinCode: string): Promise<{ left: boolean }> {
+  const admin = createAdminSupabase();
+  const supabase = await createServerSupabase();
+  const { data: auth } = await supabase.auth.getUser();
+  const store = await cookies();
+
+  const resolved = await resolveParticipant(admin, {
+    joinCode,
+    userId: auth.user?.id ?? null,
+    guestParticipantId: (roomId) => readGuestParticipantId(store, roomId),
+  });
+  if (resolved.kind !== 'ok') return { left: false };
+
+  return {
+    left: await leaveRoom(admin, { roomId: resolved.room.id, participantId: resolved.participant.id }),
+  };
 }
