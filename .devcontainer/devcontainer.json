@@ -9,15 +9,16 @@
   "hostRequirements": {
     "memory": "8gb"
   },
-  "forwardPorts": [3000, 54321, 54323, 54324],
+  "forwardPorts": [3000, 54321, 54323, 54324, 7880],
   "portsAttributes": {
     "3000": { "label": "app" },
     "54321": { "label": "supabase api" },
     "54323": { "label": "supabase studio" },
-    "54324": { "label": "mailpit" }
+    "54324": { "label": "mailpit" },
+    "7880": { "label": "livekit" }
   },
   "postCreateCommand": "npm ci && npx playwright install --with-deps chromium",
-  "postStartCommand": "bash .devcontainer/start-supabase.sh",
+  "postStartCommand": "bash .devcontainer/start-services.sh",
   "customizations": {
     "vscode": {
       "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode", "ms-playwright.playwright"]

@@ -38,6 +38,10 @@ attive**. Se una tabella non ha RLS, quella chiave la espone a Internet.
 | `STRIPE_WEBHOOK_SECRET` | verifica firma webhook, post-MVP |
 | `CRON_SECRET` | autentica il job di purga |
 
+In locale (Codespace e CI) LiveKit gira con `livekit-server --dev`: URL
+`ws://localhost:7880`, chiave `devkey`, segreto `secret`. Valgono solo per quel server;
+in preview e produzione si usano le chiavi del progetto LiveKit Cloud.
+
 `SUPABASE_SERVICE_ROLE_KEY` bypassa ogni policy RLS. Va usata solo nelle route
 server che ne hanno davvero bisogno, mai importata in un componente client, mai
 passata a un package che venga incluso nel bundle browser.
