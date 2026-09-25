@@ -116,15 +116,16 @@ di GitHub e nel Codespace (`.devcontainer/`), che avvia Supabase e scrive `.env.
 
 - [x] `npm run test:db` (rls-workspaces, rls-rooms, create-room, join-room): 22 test
       verdi nel job `db` della CI, PR #1 e #2 del 25/09
-- [ ] `npx supabase db reset` nel Codespace
-- [ ] `npm run db:types` e confronto con i tipi scritti a mano in `packages/db`
-- [ ] `npm run test:e2e` completo (host e ospite, desktop e mobile)
-- [ ] prove manuali dei task 1.1, 1.4, 1.7 del piano
+- [x] `npx supabase db reset` nel Codespace
+- [x] `npm run db:types` e confronto con i tipi scritti a mano in `packages/db`: colonne
+      e nullabilità identiche, file sostituito col generato
+- [x] `npm run test:e2e` completo (host e ospite, desktop e mobile): 4/4 nel Codespace
+- [x] prove manuali dei task 1.1, 1.4, 1.7 del piano: 14 controlli automatizzati con
+      Playwright e query SQL nel Codespace, screenshot a 390px verificato
 - [ ] task 0.5: Supabase Cloud + Vercel preview
-- [ ] CI: aggiornare `actions/checkout`, `setup-node`, `supabase/setup-cli` alle major
-      su Node 24 (Node 20 deprecato sui runner)
+- [x] CI: `actions/checkout@v7`, `setup-node@v7`, `supabase/setup-cli@v3`
 - [ ] CI: verificare il job `db` quando `ubuntu-latest` passa a Ubuntu 26 (19/10)
-- [ ] CI: aggiungere `test:e2e` come job (oggi gira solo a mano)
+- [x] CI: job `e2e` su Supabase locale nel runner
 
 ## Post-MVP
 
@@ -154,7 +155,7 @@ di GitHub e nel Codespace (`.devcontainer/`), che avvia Supabase e scrive `.env.
       sotto quel path
 - [ ] Codice stanza case-sensitive: normalizzare maiuscolo/trim quando si digita a
       mano
-- [ ] Tipi `packages/db` scritti a mano: rigenerare
+- [x] Tipi `packages/db` scritti a mano: rigenerare
 - [ ] `profiles.display_name` vuoto alla registrazione resta `''`: usare
       `nullif(trim(...),'')` e un check di lunghezza
 - [ ] `rooms.created_by` senza `on delete`: blocca la cancellazione account quando

@@ -80,7 +80,7 @@ Non toccare segreti, billing o policy di sicurezza senza dichiararlo nel piano.
 
 ## Stato attuale
 
-Slice 0 non ancora iniziata. Nessun codice applicativo scritto.
+Slice 0 e 1 completate e verificate, in attesa di merge in `main`. Prossima: slice 2.
 
 Spec v3 del 23/09, dopo un secondo brainstorming con Sean. Rispetto alla v2: palco a
 finestre a slot magnetici invece della lista di schede (ADR-0009), agente a comando
@@ -91,27 +91,23 @@ mobile in visione. Economia rinviata a dopo l'MVP.
 
 Prima demo = slice 0-5 (6-8 settimane), MVP = slice 0-8 (8-12 settimane).
 
-### Ripresa — dove eravamo (23/09/2026)
+### Ripresa — dove eravamo (25/09/2026)
 
 Spec v3 approvata; `ARCHITECTURE.md`, `DATA-MODEL.md` e `BACKLOG.md` allineati.
 
-Piano delle slice 0-1 pronto: `docs/plans/2026-09-23-slice-0-1-fondamenta-auth-stanza.md`.
+Piano delle slice 0-1: `docs/plans/2026-09-23-slice-0-1-fondamenta-auth-stanza.md`.
 
-Slice 0 e slice 1 implementate sui branch `slice/0-fondamenta` e
-`slice/1-auth-stanza` (impilati, non ancora in `main`). Le migrazioni sono state
-verificate su PGlite con uno stub di auth; `npm run test:db` reale su Supabase
-locale e `npm run test:e2e` completo non sono ancora girati (Docker non
-disponibile).
+Slice 0 e 1 implementate e verificate su Supabase reale. Docker locale non gira
+(virtualizzazione spenta nel BIOS), quindi si lavora con GitHub: repo privato
+`seandevai/aiconference`, CI con job `db` ed `e2e` su Supabase nel runner, e un
+Codespace (`.devcontainer/`) che avvia Supabase e scrive `.env.local`. `gh` è in
+`C:\Program Files\GitHub CLI\gh.exe` (non nel PATH della sessione).
 
 Il passo successivo, in ordine:
 
-1. Installare Docker Desktop ed eseguire la sezione "Da verificare appena c'è
-   Docker" di `docs/BACKLOG.md` (`supabase start`/`db reset`, `db:types`,
-   `test:db`, `test:e2e` completo, prove manuali, task 0.5 Supabase Cloud +
-   Vercel preview).
-2. Merge di `slice/0-fondamenta` e `slice/1-auth-stanza` in `main`.
-3. Piano della slice 2 con `writing-plans` (vendor LiveKit già deciso: LiveKit
-   Cloud free tier; spike CPU e spike iOS Safari dentro la slice).
+1. Task 0.5: Supabase Cloud + Vercel preview (servono gli account di Sean).
+2. Piano della slice 2 con `writing-plans` (LiveKit Cloud free tier; spike CPU e
+   spike iOS Safari dentro la slice).
 
 Decisioni prese e non da riaprire senza un ADR nuovo: palco a slot magnetici, solo
 l'host scrive sul palco e attiva l'agente, negoziazione aperta dall'host con tetto e
