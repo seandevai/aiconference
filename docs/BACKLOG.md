@@ -17,8 +17,8 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 - [x] `npm install` e workspace funzionante
 - [x] Scaffolding Next.js in `apps/web` con TypeScript strict
 - [x] Supabase inizializzato in locale (`supabase init`, migrazioni)
-- [x] Migrazione 0001: profiles, workspaces, workspace_members, con RLS (verificato su PGlite, non ancora su Supabase)
-- [x] Test che prova l'accesso RLS da utente non autorizzato (verificato su PGlite, non ancora su Supabase)
+- [x] Migrazione 0001: profiles, workspaces, workspace_members, con RLS (verificato su Supabase in CI)
+- [x] Test che prova l'accesso RLS da utente non autorizzato (verificato su Supabase in CI)
 - [ ] Progetto Supabase creato, credenziali in `.env.local`
 - [ ] Deploy preview su Vercel funzionante
 
@@ -26,10 +26,10 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 
 - [x] Registrazione, login e logout dell'host
 - [x] Workspace personale creato alla registrazione
-- [x] Migrazione 0002: rooms, room_participants (ruolo, lingua), con RLS (verificato su PGlite, non ancora su Supabase)
-- [x] Creazione stanza e generazione join code (verificato su PGlite, non ancora su Supabase)
-- [x] Ingresso ospite da link senza account: nome, lingua, riga in room_participants (verificato su PGlite, non ancora su Supabase)
-- [x] Controlli permessi server-side all'ingresso (verificato su PGlite, non ancora su Supabase)
+- [x] Migrazione 0002: rooms, room_participants (ruolo, lingua), con RLS (verificato su Supabase in CI)
+- [x] Creazione stanza e generazione join code (verificato su Supabase in CI)
+- [x] Ingresso ospite da link senza account: nome, lingua, riga in room_participants (verificato su Supabase in CI)
+- [x] Controlli permessi server-side all'ingresso (verificato su Supabase in CI)
 - [x] Shell UI: colonna video stretta e palco vuoto
 - [x] Errori: stanza inesistente, chiusa, senza permesso
 
@@ -109,17 +109,22 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 - [ ] Job di purga delle stanze abbandonate
 - [ ] Test: dopo la purga i dati di sessione non esistono
 
-## Da verificare appena c'è Docker
+## Da verificare su Supabase reale
 
-- [ ] `npx supabase start`, `.env.local`, `npx supabase db reset`
+Docker locale non disponibile (virtualizzazione spenta nel BIOS). Si verifica nella CI
+di GitHub e nel Codespace (`.devcontainer/`), che avvia Supabase e scrive `.env.local`.
+
+- [x] `npm run test:db` (rls-workspaces, rls-rooms, create-room, join-room): 22 test
+      verdi nel job `db` della CI, PR #1 e #2 del 25/09
+- [ ] `npx supabase db reset` nel Codespace
 - [ ] `npm run db:types` e confronto con i tipi scritti a mano in `packages/db`
-- [ ] `npm run test:db` (rls-workspaces, rls-rooms, create-room, join-room)
 - [ ] `npm run test:e2e` completo (host e ospite, desktop e mobile)
 - [ ] prove manuali dei task 1.1, 1.4, 1.7 del piano
 - [ ] task 0.5: Supabase Cloud + Vercel preview
-- In alternativa a Docker: creare un remote GitHub, pushare `slice/0-fondamenta` e
-      `slice/1-auth-stanza`, aprire una PR: il job `db` della CI esegue `test:db` su
-      Supabase.
+- [ ] CI: aggiornare `actions/checkout`, `setup-node`, `supabase/setup-cli` alle major
+      su Node 24 (Node 20 deprecato sui runner)
+- [ ] CI: verificare il job `db` quando `ubuntu-latest` passa a Ubuntu 26 (19/10)
+- [ ] CI: aggiungere `test:e2e` come job (oggi gira solo a mano)
 
 ## Post-MVP
 
