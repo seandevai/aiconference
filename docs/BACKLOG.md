@@ -76,13 +76,15 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 
 ## Slice 5 — Gesture (prima demo)
 
-- [ ] `packages/gesture`: MediaPipe, classificatore (in parallelo dal giorno 1)
-- [ ] Dizionario ADR-0010 caricato come configurazione
-- [ ] Palmo aperto come interruttore; debounce e cooldown
-- [ ] Pinch-trascina-rilascia dal vassoio alle finestre
-- [ ] Frequenza adattiva e degrado ordinato
-- [ ] Test del classificatore su landmark registrati, senza webcam
-- [ ] **Gate di prodotto:** far provare la demo a 5 consulenti veri
+- [x] `packages/gesture`: MediaPipe, classificatore (in parallelo dal giorno 1)
+- [x] Dizionario ADR-0010 caricato come configurazione
+- [x] Palmo aperto come interruttore; debounce e cooldown
+- [x] Pinch-trascina-rilascia dal vassoio alle finestre
+- [x] Frequenza adattiva e degrado ordinato
+- [x] Test del classificatore su landmark sintetici, senza webcam (registrazioni reali:
+      `/dev/gesture-recorder`, le aggiunge Sean)
+- [ ] **Gate di prodotto:** far provare la demo a 5 consulenti veri (protocollo in
+      `docs/spikes/2026-09-26-test-demo-consulenti.md`, lo conduce Sean)
 
 ## Slice 6 — Sottotitoli
 
@@ -177,5 +179,9 @@ di GitHub e nel Codespace (`.devcontainer/`), che avvia Supabase e scrive `.env.
 - [ ] Contenuti di prova nel vassoio: toglierli quando `AI_PROVIDER=anthropic` è attivo
 - [ ] Prezzi in `packages/ai/src/pricing.ts` scritti a mano: aggiornarli se cambia il listino
 - [ ] Preview Vercel: `AI_PROVIDER=anthropic` e `ANTHROPIC_API_KEY` (con il task 0.5)
+- [ ] Registrare gesture reali con `/dev/gesture-recorder` e aggiungerle ai test
+- [ ] CONFIRM/REJECT a gesto non fanno ancora nulla: servono le immagini con conferma (4B)
+- [ ] MediaPipe si scarica da jsdelivr e googleapis: valutare l'hosting dei file
+- [ ] Soglie delle gesture tarate su mani sintetiche: ritararle con le registrazioni reali
 - [ ] Preview Vercel: aggiungere `NEXT_PUBLIC_LIVEKIT_URL`, `LIVEKIT_API_KEY`,
       `LIVEKIT_API_SECRET` del progetto LiveKit Cloud (con il task 0.5)
