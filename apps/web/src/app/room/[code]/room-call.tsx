@@ -80,6 +80,7 @@ export function RoomCall({ joinCode, role }: Props) {
           )}
           {live && (
             <StageArea
+              joinCode={joinCode}
               role={role}
               stage={stageApi.stage}
               ready={stageApi.ready}

@@ -1,11 +1,13 @@
 'use client';
 
 import { MAX_WINDOWS, type ImageMime, type Stage, type StageCommand } from '@omnicanvas/canvas';
+import { AgentPanel } from './agent-panel';
 import { MobileStage } from './mobile-stage';
 import { StageBoard } from './stage-board';
 import { Tray } from './tray';
 
 type Props = {
+  joinCode: string;
   role: 'host' | 'guest';
   stage: Stage;
   ready: boolean;
@@ -14,7 +16,7 @@ type Props = {
   addImage: (bytes: Uint8Array, mime: ImageMime, title: string, alt: string) => void;
 };
 
-export function StageArea({ role, stage, ready, assetUrls, dispatch, addImage }: Props) {
+export function StageArea({ joinCode, role, stage, ready, assetUrls, dispatch, addImage }: Props) {
   if (!ready) return <p className="text-sm text-neutral-500">Caricamento del palco…</p>;
 
   if (role === 'guest') {
@@ -32,6 +34,7 @@ export function StageArea({ role, stage, ready, assetUrls, dispatch, addImage }:
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-2">
+      <AgentPanel joinCode={joinCode} dispatch={dispatch} />
       <div className="flex flex-wrap gap-2 text-xs">
         <button
           onClick={() =>
