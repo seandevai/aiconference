@@ -58,7 +58,8 @@ describe('ai ledger', () => {
       p_output_tokens: 50,
       p_latency_ms: 12,
       p_success: true,
-      p_error_code: null,
+      // supabase gen types rende non nullabili i parametri delle funzioni: null è valido in SQL.
+      p_error_code: null as unknown as string,
       p_cost_usd: 0.0123,
       p_reserved: 60,
       p_charged: 2,
