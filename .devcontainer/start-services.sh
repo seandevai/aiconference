@@ -12,6 +12,14 @@ if ! docker ps --format '{{.Names}}' | grep -qx livekit; then
   docker run -d --name livekit --network host livekit/livekit-server:v1.13.7 --dev --bind 0.0.0.0
 fi
 
+# KV con la stessa API REST di Upstash: Redis più serverless-redis-http.
+docker network inspect kv >/dev/null 2>&1 || docker network create kv >/dev/null
+if ! docker ps --format '{{.Names}}' | grep -qx kv-srh; then
+  docker rm -f kv-redis kv-srh >/dev/null 2>&1 || true
+  docker run -d --name kv-redis --network kv redis:7-alpine
+  docker run -d --name kv-srh --network kv -p 8079:80     -e SRH_MODE=env -e SRH_TOKEN=local_kv_token     -e SRH_CONNECTION_STRING=redis://kv-redis:6379     hiett/serverless-redis-http:0.0.10
+fi
+
 eval "$(npx supabase status -o env)"
 touch .env.local
 ensure() { grep -q "^$1=" .env.local || echo "$1=$2" >> .env.local; }
@@ -25,3 +33,5 @@ ensure GUEST_SESSION_SECRET "$(openssl rand -hex 32)"
 # Chiavi fisse di `livekit-server --dev`: valgono solo per il server locale.
 ensure LIVEKIT_API_KEY devkey
 ensure LIVEKIT_API_SECRET secret
+ensure KV_REST_API_URL "http://localhost:8079"
+ensure KV_REST_API_TOKEN local_kv_token

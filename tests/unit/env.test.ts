@@ -13,6 +13,8 @@ const serverOk = {
   GUEST_SESSION_SECRET: 'x'.repeat(32),
   LIVEKIT_API_KEY: 'devkey',
   LIVEKIT_API_SECRET: 'secret',
+  KV_REST_API_URL: 'http://localhost:8079',
+  KV_REST_API_TOKEN: 'local_kv_token',
 };
 
 describe('env', () => {
@@ -47,6 +49,17 @@ describe('env', () => {
   it('names a missing livekit secret', () => {
     const { LIVEKIT_API_SECRET: _omitted, ...incomplete } = serverOk;
     expect(() => parseServerEnv(incomplete)).toThrow(/LIVEKIT_API_SECRET/);
+  });
+
+  it('names a missing kv token', () => {
+    const { KV_REST_API_TOKEN: _omitted, ...incomplete } = serverOk;
+    expect(() => parseServerEnv(incomplete)).toThrow(/KV_REST_API_TOKEN/);
+  });
+
+  it('rejects a kv url that is not a url', () => {
+    expect(() => parseServerEnv({ ...serverOk, KV_REST_API_URL: 'localhost' })).toThrow(
+      /KV_REST_API_URL/,
+    );
   });
 
   it('accepts a valid server env', () => {

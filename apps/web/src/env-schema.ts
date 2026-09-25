@@ -20,6 +20,9 @@ const serverSchema = z.object({
   // Firmano i token di stanza. In locale valgono devkey/secret di `livekit-server --dev`.
   LIVEKIT_API_KEY: z.string().min(1),
   LIVEKIT_API_SECRET: z.string().min(1),
+  // Stato di sessione (snapshot del palco). In locale: Redis + serverless-redis-http.
+  KV_REST_API_URL: z.string().url(),
+  KV_REST_API_TOKEN: z.string().min(1),
 });
 
 export type ClientEnv = z.infer<typeof clientSchema>;
