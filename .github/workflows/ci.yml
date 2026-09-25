@@ -46,6 +46,7 @@ jobs:
           LIVEKIT_API_SECRET: dummy
           KV_REST_API_URL: http://127.0.0.1:8079
           KV_REST_API_TOKEN: dummy
+          AI_PROVIDER: fake
 
       - name: Nessun segreto nel bundle client
         run: |
@@ -136,6 +137,7 @@ jobs:
             echo "LIVEKIT_API_SECRET=secret"
             echo "KV_REST_API_URL=http://localhost:8079"
             echo "KV_REST_API_TOKEN=local_kv_token"
+            echo "AI_PROVIDER=fake"
           } > .env.local
 
       - name: E2E

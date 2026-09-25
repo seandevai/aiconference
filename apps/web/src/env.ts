@@ -19,6 +19,8 @@ export function serverEnv(): ServerEnv {
     LIVEKIT_API_SECRET: process.env.LIVEKIT_API_SECRET,
     KV_REST_API_URL: process.env.KV_REST_API_URL,
     KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN,
+    AI_PROVIDER: process.env.AI_PROVIDER,
+    ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
   });
   return cachedServerEnv;
 }
