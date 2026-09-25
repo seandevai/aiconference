@@ -39,7 +39,7 @@ export function RoomCall({ joinCode, role }: Props) {
           </ul>
         </aside>
 
-        <section aria-label="Palco" className="min-h-0 flex-1 p-2 lg:p-4">
+        <section aria-label="Palco" className="min-h-0 flex-1 p-2 pr-20 lg:p-4">
           {message && (
             <div
               role="status"
