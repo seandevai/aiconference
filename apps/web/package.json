@@ -14,6 +14,7 @@
     "@omnicanvas/ai": "^0.0.0",
     "@omnicanvas/canvas": "^0.0.0",
     "@omnicanvas/db": "^0.0.0",
+    "@omnicanvas/gesture": "^0.0.0",
     "@omnicanvas/realtime": "^0.0.0",
     "@ricky0123/vad-web": "^0.0.31",
     "@supabase/ssr": "^0.12.7",

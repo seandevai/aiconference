@@ -1,14 +1,7 @@
 'use client';
 
-import { useRef } from 'react';
-import {
-  SLOTS,
-  nearestSlot,
-  type Rect,
-  type Slot,
-  type Stage,
-  type StageCommand,
-} from '@omnicanvas/canvas';
+import { nearestSlot, type Slot, type Stage, type StageCommand } from '@omnicanvas/canvas';
+import { resolveDrop, slotRectsFromDom } from '@/lib/stage/drop';
 import { DRAG_TYPE, WindowView, type DragItem } from './window-view';
 
 const SLOT_LABELS: Record<Slot, string> = {
@@ -36,26 +29,14 @@ function readDragItem(event: React.DragEvent): DragItem | null {
 }
 
 export function StageBoard({ stage, assetUrls, dispatch }: Props) {
-  const slotElements = useRef<Partial<Record<Slot, HTMLDivElement | null>>>({});
-
   function handleDrop(event: React.DragEvent) {
     if (!dispatch) return;
     event.preventDefault();
     const item = readDragItem(event);
     if (!item) return;
-    const rects: Partial<Record<Slot, Rect>> = {};
-    for (const slot of SLOTS) {
-      const box = slotElements.current[slot]?.getBoundingClientRect();
-      if (box) rects[slot] = { x: box.x, y: box.y, width: box.width, height: box.height };
-    }
-    const slot = nearestSlot({ x: event.clientX, y: event.clientY }, rects);
-    if (!slot) return;
-    if (item.type === 'window') {
-      dispatch({ type: 'WINDOW_MOVE', windowId: item.id, slot });
-      return;
-    }
-    const target = stage.windows.find((w) => w.slot === slot);
-    if (target) dispatch({ type: 'CONTENT_PLACE', contentId: item.id, windowId: target.id });
+    const slot = nearestSlot({ x: event.clientX, y: event.clientY }, slotRectsFromDom());
+    const command = slot ? resolveDrop(stage, item, slot) : null;
+    if (command) dispatch(command);
   }
 
   const renderSlot = (slot: Slot, className: string) => {
@@ -65,9 +46,7 @@ export function StageBoard({ stage, assetUrls, dispatch }: Props) {
         key={slot}
         role="region"
         aria-label={SLOT_LABELS[slot]}
-        ref={(element) => {
-          slotElements.current[slot] = element;
-        }}
+        data-slot={slot}
         className={className}
       >
         {window ? (

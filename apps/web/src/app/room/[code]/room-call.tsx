@@ -81,6 +81,8 @@ export function RoomCall({ joinCode, role }: Props) {
           {live && (
             <StageArea
               joinCode={joinCode}
+              session={session}
+              cameraOn={local?.camOn ?? false}
               role={role}
               stage={stageApi.stage}
               ready={stageApi.ready}

@@ -1,13 +1,19 @@
 'use client';
 
+import { useRef, useState } from 'react';
 import { MAX_WINDOWS, type ImageMime, type Stage, type StageCommand } from '@omnicanvas/canvas';
+import type { RealtimeSession } from '@omnicanvas/realtime';
+import { useGestures } from '@/lib/stage/use-gestures';
 import { AgentPanel } from './agent-panel';
+import { GestureControl } from './gesture-control';
 import { MobileStage } from './mobile-stage';
 import { StageBoard } from './stage-board';
 import { Tray } from './tray';
 
 type Props = {
   joinCode: string;
+  session: RealtimeSession | null;
+  cameraOn: boolean;
   role: 'host' | 'guest';
   stage: Stage;
   ready: boolean;
@@ -16,7 +22,8 @@ type Props = {
   addImage: (bytes: Uint8Array, mime: ImageMime, title: string, alt: string) => void;
 };
 
-export function StageArea({ joinCode, role, stage, ready, assetUrls, dispatch, addImage }: Props) {
+export function StageArea(props: Props) {
+  const { role, stage, ready, assetUrls } = props;
   if (!ready) return <p className="text-sm text-neutral-500">Caricamento del palco…</p>;
 
   if (role === 'guest') {
@@ -32,9 +39,37 @@ export function StageArea({ joinCode, role, stage, ready, assetUrls, dispatch, a
     );
   }
 
+  return <HostStage {...props} />;
+}
+
+// Ramo dell'host: possiede gli hook di agente e gesture (solo l'host comanda il palco).
+function HostStage({ joinCode, session, cameraOn, stage, assetUrls, dispatch, addImage }: Props) {
+  const areaRef = useRef<HTMLDivElement>(null);
+  const [agentOpen, setAgentOpen] = useState(false);
+  const gestures = useGestures({
+    session,
+    cameraOn,
+    stage,
+    dispatch,
+    onAgent: () => setAgentOpen(true),
+    areaRef,
+  });
+
   return (
-    <div className="flex h-full min-h-0 flex-col gap-2">
-      <AgentPanel joinCode={joinCode} dispatch={dispatch} />
+    <div ref={areaRef} className="flex h-full min-h-0 flex-col gap-2">
+      <AgentPanel
+        joinCode={joinCode}
+        dispatch={dispatch}
+        open={agentOpen}
+        onOpenChange={setAgentOpen}
+      />
+      <GestureControl
+        status={gestures.status}
+        armed={gestures.armed}
+        cursor={gestures.cursor}
+        videoRef={gestures.videoRef}
+        onToggle={() => void gestures.toggle()}
+      />
       <div className="flex flex-wrap gap-2 text-xs">
         <button
           onClick={() =>

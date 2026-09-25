@@ -57,6 +57,8 @@ export function Tray({ stage, dispatch, addImage }: Props) {
           {stage.tray.map((content) => (
             <li
               key={content.id}
+              data-drag-type="content"
+              data-drag-id={content.id}
               draggable
               onDragStart={(event) => {
                 const item: DragItem = { type: 'content', id: content.id };
