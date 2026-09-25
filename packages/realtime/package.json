@@ -7,7 +7,9 @@
     ".": "./src/index.ts",
     "./server": "./src/server.ts"
   },
-  "scripts": { "typecheck": "tsc --noEmit" },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
   "dependencies": {
     "livekit-client": "^2.22.3",
     "livekit-server-sdk": "^2.19.1",
