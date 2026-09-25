@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.128.0",
+    "@omnicanvas/canvas": "^0.0.0",
     "server-only": "^0.0.1",
     "zod": "^4.6.5"
   }

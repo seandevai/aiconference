@@ -74,16 +74,18 @@ export async function executeAgent(
     return { ok: true, content: result.content, charged };
   } catch (error) {
     const code: ProviderErrorCode = error instanceof ProviderError ? error.code : 'provider_error';
+    const usage = error instanceof ProviderError ? error.usage : undefined;
+    const costUsd = usage ? estimateCostUsd(usage.model, usage.inputTokens, usage.outputTokens) : 0;
     await ledger.record({
       ...base,
-      model: adapter.model,
-      inputTokens: null,
-      outputTokens: null,
+      model: usage?.model ?? adapter.model,
+      inputTokens: usage?.inputTokens ?? null,
+      outputTokens: usage?.outputTokens ?? null,
       latencyMs: now() - started,
       success: false,
       errorCode: code,
-      costUsd: 0,
-      charged: 0,
+      costUsd,
+      charged: creditsFor(costUsd),
     });
     return { ok: false, reason: 'provider_failed', code };
   }

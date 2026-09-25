@@ -12,14 +12,18 @@ export type ProviderErrorCode =
   | 'invalid_output'
   | 'provider_error';
 
-// Porta solo un codice: il messaggio del provider può contenere pezzi del prompt.
+export type ProviderUsage = { model: string; inputTokens: number; outputTokens: number };
+
+// Porta solo un codice e i token spesi: il messaggio del provider può contenere pezzi del prompt.
 export class ProviderError extends Error {
   readonly code: ProviderErrorCode;
+  readonly usage: ProviderUsage | undefined;
 
-  constructor(code: ProviderErrorCode) {
+  constructor(code: ProviderErrorCode, usage?: ProviderUsage) {
     super(`provider failed: ${code}`);
     this.name = 'ProviderError';
     this.code = code;
+    this.usage = usage;
   }
 }
 

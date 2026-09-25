@@ -139,4 +139,22 @@ describe('executeAgent', () => {
     await executeAgent({ ledger: l.port, adapter: adapter('ok'), now: () => (t += 250) }, request);
     expect(l.records[0]?.latencyMs).toBe(250);
   });
+
+  it('charges the tokens spent even when the output has to be thrown away', async () => {
+    const l = ledger(100);
+    const spent = new ProviderError('invalid_output', {
+      model: 'claude-opus-5',
+      inputTokens: 1_000,
+      outputTokens: 400,
+    });
+    const result = await executeAgent({ ledger: l.port, adapter: adapter(spent) }, request);
+    expect(result).toEqual({ ok: false, reason: 'provider_failed', code: 'invalid_output' });
+    expect(l.records[0]).toMatchObject({
+      success: false,
+      inputTokens: 1_000,
+      outputTokens: 400,
+      charged: 2,
+    });
+    expect(l.balance()).toBe(98);
+  });
 });
