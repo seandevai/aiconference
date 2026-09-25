@@ -19,6 +19,7 @@ import { isFromHost } from './peek';
 
 const PERSIST_DELAY_MS = 1_000;
 const SYNC_THROTTLE_MS = 1_000;
+const SYNC_RETRY_MS = 2_000;
 const ASSET_RETRY_MS = 3_000;
 
 const encoder = new TextEncoder();
@@ -118,9 +119,12 @@ export function useStage({ joinCode, role, session, roster }: Options) {
   }, [role, session, ready]);
 
   // Ospite: accetta solo messaggi dell'host, chiede lo snapshot quando perde il filo.
+  // Finché non ha ricevuto nulla dall'host ripete la richiesta: la prima può perdersi
+  // se l'host non è ancora pronto o se il canale dati dell'ospite non è ancora aperto.
   useEffect(() => {
     if (role !== 'guest' || !session || !hostIdentity) return;
     let lastSync = 0;
+    let synced = false;
     const requestSync = () => {
       const now = Date.now();
       if (now - lastSync < SYNC_THROTTLE_MS) return;
@@ -136,12 +140,16 @@ export function useStage({ joinCode, role, session, roster }: Options) {
       const result = followMessage(stageRef.current, message);
       if (result.stage !== stageRef.current) commit(result.stage);
       if (result.outOfSync) requestSync();
+      else synced = true;
     });
     const offSnapshot = session.onBytes('stage-snapshot', (bytes, from) => {
       if (!fromHost(from)) return;
       try {
         const snapshot = parseStage(JSON.parse(decoder.decode(bytes)));
-        if (snapshot) commit(snapshot);
+        if (snapshot) {
+          commit(snapshot);
+          synced = true;
+        }
       } catch {
         // Snapshot illeggibile: si aspetta il prossimo.
       }
@@ -152,23 +160,33 @@ export function useStage({ joinCode, role, session, roster }: Options) {
       if (asset) storeAsset(asset.header.assetId, asset.header.mime, asset.bytes);
     });
     requestSync();
+    const retry = setInterval(() => {
+      if (!synced) requestSync();
+    }, SYNC_RETRY_MS);
     return () => {
+      clearInterval(retry);
       offCommand();
       offSnapshot();
       offAsset();
     };
   }, [role, session, hostIdentity, commit, storeAsset]);
 
-  // Ospite: chiede all'host le immagini che il palco cita e che non ha ancora.
+  // Ospite: chiede all'host le immagini che il palco cita e che non ha ancora. Riprova
+  // ogni pochi secondi: richiesta o risposta possono perdersi mentre il canale si apre.
   useEffect(() => {
     if (role !== 'guest' || !session || !hostIdentity) return;
-    const now = Date.now();
-    for (const assetId of imageAssetIds(stage)) {
-      if (assetsRef.current.has(assetId)) continue;
-      if (now - (requestedRef.current.get(assetId) ?? 0) < ASSET_RETRY_MS) continue;
-      requestedRef.current.set(assetId, now);
-      void session.sendData('asset-request', { assetId }, [hostIdentity]).catch(() => {});
-    }
+    const requestMissing = () => {
+      const now = Date.now();
+      for (const assetId of imageAssetIds(stageRef.current)) {
+        if (assetsRef.current.has(assetId)) continue;
+        if (now - (requestedRef.current.get(assetId) ?? 0) < ASSET_RETRY_MS) continue;
+        requestedRef.current.set(assetId, now);
+        void session.sendData('asset-request', { assetId }, [hostIdentity]).catch(() => {});
+      }
+    };
+    requestMissing();
+    const retry = setInterval(requestMissing, ASSET_RETRY_MS);
+    return () => clearInterval(retry);
   }, [role, session, hostIdentity, stage]);
 
   // I blob URL restano validi finché la pagina vive: si liberano all'uscita.
