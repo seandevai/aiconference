@@ -156,6 +156,13 @@ client
   → risposta al client
 ```
 
+Implementazione: `packages/ai/src/service.ts` (`executeAgent`) con le porte `AiLedger` e
+`GenerateAdapter`. La quota è una riserva atomica (`ai_reserve_credits`) prima della
+chiamata; dopo, `ai_record_request` registra la richiesta, scala il costo reale e
+restituisce il resto della riserva. 1 credito = 0,01 USD stimati. Adapter: `anthropic`
+(`claude-opus-5`, structured output, `fallbacks: 'default'`) e `fake` per sviluppo, CI
+ed e2e (`AI_PROVIDER`).
+
 Se i passi 1-2 falliscono, il provider non viene chiamato. La quota è un cancello,
 non un avviso. Nessun codice fuori da `packages/ai` conosce chiavi API o nomi di
 modello.
