@@ -80,7 +80,8 @@ Non toccare segreti, billing o policy di sicurezza senza dichiararlo nel piano.
 
 ## Stato attuale
 
-Slice 0 e 1 completate e verificate, in attesa di merge in `main`. Prossima: slice 2.
+Slice 0 e 1 completate e verificate, in attesa di merge in `main`. Slice 2 (call)
+implementata su `slice/2-call` (PR #3), spike CPU e iOS in attesa di misura.
 
 Spec v3 del 23/09, dopo un secondo brainstorming con Sean. Rispetto alla v2: palco a
 finestre a slot magnetici invece della lista di schede (ADR-0009), agente a comando
@@ -103,11 +104,19 @@ Slice 0 e 1 implementate e verificate su Supabase reale. Docker locale non gira
 Codespace (`.devcontainer/`) che avvia Supabase e scrive `.env.local`. `gh` è in
 `C:\Program Files\GitHub CLI\gh.exe` (non nel PATH della sessione).
 
+Branch impilati: `slice/0-fondamenta` (PR #1) → `slice/1-auth-stanza` (PR #2) →
+`slice/2-call` (PR #3). Il merge in `main` lo fa Sean.
+
+Nel Codespace, `git` via SSH richiede `set -a; . /workspaces/.codespaces/shared/.env; set +a`
+(il token non è esportato nelle sessioni SSH). LiveKit locale: `ws://localhost:7880`,
+`devkey`/`secret`, avviato da `.devcontainer/start-services.sh`.
+
 Il passo successivo, in ordine:
 
-1. Task 0.5: Supabase Cloud + Vercel preview (servono gli account di Sean).
-2. Piano della slice 2 con `writing-plans` (LiveKit Cloud free tier; spike CPU e
-   spike iOS Safari dentro la slice).
+1. Sean: merge delle PR #1, #2, #3; task 0.5 (Supabase Cloud, Vercel, LiveKit Cloud);
+   misura degli spike CPU e iOS Safari (`docs/spikes/`).
+2. Piano della slice 3 (palco) con `writing-plans`: serve un account Upstash KV,
+   oppure un emulatore locale per lo sviluppo.
 
 Decisioni prese e non da riaprire senza un ADR nuovo: palco a slot magnetici, solo
 l'host scrive sul palco e attiva l'agente, negoziazione aperta dall'host con tetto e
