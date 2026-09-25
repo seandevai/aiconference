@@ -41,7 +41,10 @@ export async function joinAsGuestAction(
       const store = await cookies();
       store.set(
         guestCookieName(result.room.id),
-        signGuestToken({ participantId: result.participantId, roomId: result.room.id }, serverEnv().GUEST_SESSION_SECRET),
+        signGuestToken(
+          { participantId: result.participantId, roomId: result.room.id },
+          serverEnv().GUEST_SESSION_SECRET,
+        ),
         {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
@@ -70,6 +73,9 @@ export async function leaveRoomAction(joinCode: string): Promise<{ left: boolean
   if (resolved.kind !== 'ok') return { left: false };
 
   return {
-    left: await leaveRoom(admin, { roomId: resolved.room.id, participantId: resolved.participant.id }),
+    left: await leaveRoom(admin, {
+      roomId: resolved.room.id,
+      participantId: resolved.participant.id,
+    }),
   };
 }

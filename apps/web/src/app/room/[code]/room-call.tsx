@@ -4,7 +4,9 @@ import { useRouter } from 'next/navigation';
 import { useCall } from '@/lib/call/use-call';
 import { cameraButtonLabel, micButtonLabel } from '@/lib/call/labels';
 import { phaseMessage, type CallPhase } from '@/lib/call/phase';
+import { useStage } from '@/lib/stage/use-stage';
 import { leaveRoomAction } from './actions';
+import { StageArea } from './stage-area';
 import { VideoTile } from './video-tile';
 
 type Props = { joinCode: string; role: 'host' | 'guest' };
@@ -13,8 +15,9 @@ const LIVE_PHASES: CallPhase[] = ['connecting', 'connected', 'reconnecting'];
 
 export function RoomCall({ joinCode, role }: Props) {
   const router = useRouter();
-  const { state, toggleMic, toggleCamera, startAudio, retry, leave, attachVideo } =
+  const { state, session, toggleMic, toggleCamera, startAudio, retry, leave, attachVideo } =
     useCall(joinCode);
+  const stageApi = useStage({ joinCode, role, session, roster: state.roster });
   const local = state.roster.find((entry) => entry.isLocal);
   const message = phaseMessage(state.phase);
   const live = LIVE_PHASES.includes(state.phase);
@@ -39,7 +42,10 @@ export function RoomCall({ joinCode, role }: Props) {
           </ul>
         </aside>
 
-        <section aria-label="Palco" className="min-h-0 flex-1 p-2 pr-20 lg:p-4">
+        <section
+          aria-label="Palco"
+          className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto p-2 pr-20 lg:p-4"
+        >
           {message && (
             <div
               role="status"
@@ -72,7 +78,16 @@ export function RoomCall({ joinCode, role }: Props) {
               Attiva l&apos;audio
             </button>
           )}
-          {/* slice 3: finestre, slot, vassoio */}
+          {live && (
+            <StageArea
+              role={role}
+              stage={stageApi.stage}
+              ready={stageApi.ready}
+              assetUrls={stageApi.assetUrls}
+              dispatch={stageApi.dispatch}
+              addImage={stageApi.addImage}
+            />
+          )}
         </section>
       </div>
 
