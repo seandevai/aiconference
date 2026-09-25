@@ -70,17 +70,21 @@ questo a rendere «ogni gesto ha il suo click» una proprietà del codice.
 ### 3.1 Sincronizzazione: un solo scrittore
 
 ```
-scrittore (host, o chi ha il turno in negoziazione)
-  comando → riduttore locale → version+1 → sendData('stage', { version, command })
-                                         → snapshot in KV ogni N secondi
+host (unico scrittore)
+  comando → applyCommand → version+1 → sendData('stage', { type: 'command', version, command })
+         → dopo 1 s senza comandi: POST /room/<code>/stage (solo host) → KV room:{id}:stage
 ospiti
-  onData('stage') → stesso riduttore → stesso stato
-  version fuori sequenza → chiedono lo snapshot e ripartono da lì
+  onData('stage') solo dall'identità con ruolo host → followMessage → stesso stato
+  buco di versione → sendData('stage-sync') all'host → sendBytes('stage-snapshot') al richiedente
+entrata tardiva o ripartenza
+  GET /room/<code>/stage → snapshot in KV; l'host riparte da lì e lo ritrasmette a tutti
 ```
 
-Niente CRDT, niente merge. Chi non è scrittore non invia comandi di palco: li
-propone, e lo scrittore decide. Il server valida chi è scrittore quando emette il
-token (host) e quando apre il turno di negoziazione.
+Niente CRDT, niente merge. Chi non è scrittore non invia comandi di palco; chi riceve
+scarta i messaggi che non vengono dall'host del roster (ruolo firmato nel token).
+Tutto ciò che arriva dalla rete passa dagli schemi Zod di `packages/canvas`. Finché
+non ha ricevuto nulla dall'host, l'ospite ripete `stage-sync` ogni 2 secondi: la prima
+richiesta può perdersi mentre il suo canale dati si apre.
 
 ### 3.2 Contenuti pesanti
 
@@ -89,6 +93,11 @@ viaggiano come byte stream LiveKit dal browser dell'host agli ospiti e restano i
 memoria. Lo snapshot in KV contiene solo il riferimento; chi entra tardi chiede i
 byte al browser dell'host. **Le immagini non passano mai dal nostro storage** fino
 al pacchetto cifrato.
+
+Il formato del pacchetto è `packAsset`: 4 byte di lunghezza, header JSON
+`{ assetId, mime }`, byte. L'ospite richiede le immagini mancanti ogni 3 secondi.
+Se l'host ricarica la pagina perde i byte delle immagini: il riferimento resta nel
+palco e mostra «Immagine in arrivo…».
 
 ## 4. Flusso dell'agente
 
