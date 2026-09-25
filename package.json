@@ -25,7 +25,8 @@
     "format:check": "prettier --check .",
     "verify": "npm run typecheck && npm run lint && npm run test:unit",
     "db:migrate": "supabase db push",
-    "db:types": "supabase gen types typescript --local > packages/db/src/database.types.ts"
+    "db:types": "supabase gen types typescript --local > packages/db/src/database.types.ts",
+    "credits:grant": "node --env-file=.env.local scripts/grant-credits.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
