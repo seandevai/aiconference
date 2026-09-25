@@ -48,11 +48,14 @@ export function useCall(joinCode: string) {
   const [state, setState] = useState<CallState>(initialState);
   const sessionRef = useRef<RealtimeSession | null>(null);
   const reconnectorRef = useRef<Reconnector | null>(null);
+  // Condiviso con leave(): chi esce mentre una connessione è in volo deve fermarla.
+  const lifecycleRef = useRef<{ stopped: boolean } | null>(null);
 
   useEffect(() => {
-    let disposed = false;
+    const lifecycle = { stopped: false };
+    lifecycleRef.current = lifecycle;
     const patch = (next: Partial<CallState>) => {
-      if (!disposed) setState((current) => ({ ...current, ...next }));
+      if (!lifecycle.stopped) setState((current) => ({ ...current, ...next }));
     };
 
     const connect = async (): Promise<void> => {
@@ -67,9 +70,10 @@ export function useCall(joinCode: string) {
         }
         throw error;
       }
+      if (lifecycle.stopped) return;
 
       const session = await connectToRoom(credentials.url, credentials.token);
-      if (disposed) {
+      if (lifecycle.stopped) {
         await session.disconnect();
         return;
       }
@@ -106,7 +110,7 @@ export function useCall(joinCode: string) {
     connect().catch(() => reconnector.handleDisconnect('network'));
 
     return () => {
-      disposed = true;
+      lifecycle.stopped = true;
       reconnector.cancel();
       void sessionRef.current?.disconnect();
       sessionRef.current = null;
@@ -134,6 +138,7 @@ export function useCall(joinCode: string) {
   const retry = useCallback(() => reconnectorRef.current?.retryNow(), []);
 
   const leave = useCallback(async () => {
+    if (lifecycleRef.current) lifecycleRef.current.stopped = true;
     reconnectorRef.current?.cancel();
     await sessionRef.current?.disconnect();
     sessionRef.current = null;
