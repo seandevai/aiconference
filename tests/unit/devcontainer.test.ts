@@ -25,6 +25,10 @@ describe('devcontainer', () => {
     expect(Object.keys(config.features).some((f) => f.includes('docker-in-docker'))).toBe(true);
   });
 
+  it('exposes sshd so gh codespace ssh can drive it', () => {
+    expect(Object.keys(config.features).some((f) => f.includes('/sshd:'))).toBe(true);
+  });
+
   it('forwards app, Supabase API and Studio ports', () => {
     expect(config.forwardPorts).toEqual(expect.arrayContaining([3000, 54321, 54323]));
   });
