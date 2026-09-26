@@ -210,3 +210,16 @@ jobs:
             exit 1
           fi
           echo "ok"
+
+      - name: Vendor STT solo in packages/stt
+        run: |
+          hits=$(grep -rIl 'api\.deepgram\.com\|@deepgram/' \
+                 --include='*.ts' --include='*.tsx' \
+                 --exclude-dir=node_modules apps packages 2>/dev/null \
+                 | grep -v '^packages/stt/' || true)
+          if [ -n "$hits" ]; then
+            echo "::error::Deepgram nominato fuori da packages/stt:"
+            echo "$hits"
+            exit 1
+          fi
+          echo "ok"

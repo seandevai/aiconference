@@ -21,6 +21,9 @@ export function serverEnv(): ServerEnv {
     KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN,
     AI_PROVIDER: process.env.AI_PROVIDER,
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+    DEEPGRAM_API_KEY: process.env.DEEPGRAM_API_KEY,
+    FAL_KEY: process.env.FAL_KEY,
+    FAL_IMAGE_MODEL: process.env.FAL_IMAGE_MODEL,
   });
   return cachedServerEnv;
 }

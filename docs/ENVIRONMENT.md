@@ -24,11 +24,11 @@ attive**. Se una tabella non ha RLS, quella chiave la espone a Internet.
 | `GUEST_SESSION_SECRET` | firma HMAC del cookie dell'ospite senza account. Almeno 32 caratteri |
 | `LIVEKIT_API_KEY` | firma dei token di stanza |
 | `LIVEKIT_API_SECRET` | firma dei token di stanza |
-| `DEEPGRAM_API_KEY` | emissione dei token STT a vita breve. Mai esposta al client (ADR-0006) |
+| `DEEPGRAM_API_KEY` | emissione dei token STT a vita breve. Mai esposta al client (ADR-0006, ADR-0011). Senza, la voce è spenta e resta la richiesta scritta |
 | `ANTHROPIC_API_KEY` | agente, riassunti, classificazione intento |
 | `AI_PROVIDER` | `anthropic` o `fake`; con `fake` l'agente risponde senza modello e senza costi (sviluppo, CI, e2e) |
-| `OPENAI_API_KEY` | generazione immagini |
-| `FAL_KEY` | generazione immagini alternativa |
+| `FAL_KEY` | generazione immagini (ADR-0013). Senza, le immagini sono spente |
+| `FAL_IMAGE_MODEL` | modello fal; solo quelli con un prezzo nel listino di `packages/ai`. Default `fal-ai/flux/schnell` |
 | `R2_ACCOUNT_ID` | Cloudflare R2 |
 | `R2_ACCESS_KEY_ID` | Cloudflare R2 |
 | `R2_SECRET_ACCESS_KEY` | Cloudflare R2 |

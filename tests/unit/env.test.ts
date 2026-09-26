@@ -97,3 +97,18 @@ describe('env', () => {
     ).toThrow(/GUEST_SESSION_SECRET/);
   });
 });
+
+describe('voice and image variables', () => {
+  it('keeps Deepgram and fal optional: without them voice and images are off', () => {
+    const env = parseServerEnv({ ...serverOk, AI_PROVIDER: 'fake' });
+    expect(env.DEEPGRAM_API_KEY).toBeUndefined();
+    expect(env.FAL_KEY).toBeUndefined();
+    expect(env.FAL_IMAGE_MODEL).toBe('fal-ai/flux/schnell');
+  });
+
+  it('accepts only image models with a known price', () => {
+    expect(() => parseServerEnv({ ...serverOk, FAL_IMAGE_MODEL: 'fal-ai/something-new' })).toThrow(
+      /FAL_IMAGE_MODEL/,
+    );
+  });
+});

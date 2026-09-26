@@ -1,0 +1,16 @@
+{
+  "name": "@omnicanvas/stt",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "server-only": "^0.0.1"
+  }
+}

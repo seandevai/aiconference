@@ -27,6 +27,11 @@ const serverSchema = z
     // 'fake' in sviluppo, CI ed e2e: nessuna chiamata a pagamento.
     AI_PROVIDER: z.enum(['anthropic', 'fake']).default('anthropic'),
     ANTHROPIC_API_KEY: z.string().min(1).optional(),
+    // Voce e immagini sono degradabili: senza chiave la richiesta scritta resta (ADR-0011, 0013).
+    DEEPGRAM_API_KEY: z.string().min(1).optional(),
+    FAL_KEY: z.string().min(1).optional(),
+    // Solo modelli con un prezzo in IMAGE_PRICES_USD_PER_MP.
+    FAL_IMAGE_MODEL: z.enum(['fal-ai/flux/schnell']).default('fal-ai/flux/schnell'),
   })
   .refine((env) => env.AI_PROVIDER !== 'anthropic' || Boolean(env.ANTHROPIC_API_KEY), {
     message: 'ANTHROPIC_API_KEY is required when AI_PROVIDER is anthropic',
