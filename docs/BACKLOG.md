@@ -65,11 +65,11 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 - [x] `AIService` con risoluzione del pagante e quota **prima** del provider (pagante: host)
 - [x] Scrittura ledger a ogni chiamata, anche fallita; rate limit
 - [x] Crediti caricati a mano (`manual_grant`, `npm run credits:grant`)
-- [ ] Parola chiave locale in ONNX, nome scelto (slice 4B, serve la decisione di Sean)
+- [ ] Parola chiave locale in ONNX, nome scelto (slice 4B, ADR-0012)
 - [ ] Token STT a vita breve, solo all'host (slice 4B, serve il vendor STT)
 - [ ] `packages/stt`: VAD, stream a comando, fine richiesta al silenzio (slice 4B)
 - [x] `agent_generate`: grafici, testi, tabelle nel vassoio (richiesta scritta finché manca lo STT)
-- [ ] Immagini dietro conferma esplicita (slice 4B, serve il provider di immagini)
+- [ ] Immagini dietro conferma esplicita (slice 4B, ADR-0013)
 - [x] Contatore agente visibile all'host
 - [ ] Modalità companion, se il flusso a comando è stabile (slice 4B)
 - [x] Test di accounting: N chiamate, saldo corretto
@@ -145,10 +145,14 @@ di GitHub e nel Codespace (`.devcontainer/`), che avvia Supabase e scrive `.env.
 
 ## Debito e rischi da sciogliere
 
-- [ ] Scegliere il vendor STT: qualità italiano, prezzo, zero retention
+- [x] Scegliere il vendor STT: Deepgram Nova-3 (ADR-0011)
 - [ ] Scegliere il provider di traduzione: latenza e costo per carattere
-- [ ] Scegliere nome e modello della parola chiave; addestrarlo se serve
-- [ ] Scegliere il provider di immagini su costo e latenza
+- [x] Scegliere il modello della parola chiave: openWakeWord (ADR-0012)
+- [ ] Addestrare il modello openWakeWord su «Ehi Omnia» (provvisorio) con voci Piper
+- [ ] Scegliere un nome definitivo più amichevole per la parola chiave e riaddestrare (ADR-0012)
+- [x] Scegliere il provider di immagini: fal.ai FLUX schnell (ADR-0013)
+- [ ] Togliere `OPENAI_API_KEY` dal contratto env se non serve altrove (ADR-0013)
+- [ ] Verificare retention e DPA di fal.ai prima dei clienti veri (ADR-0013)
 - [ ] Firmare i DPA con vendor STT e LLM, zero retention per iscritto
 - [ ] Misurare i costi reali e decidere l'economia
 - [x] Indice unico host senza filtro `left_at`: l'host non rientra dopo l'uscita

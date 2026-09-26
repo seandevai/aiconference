@@ -85,7 +85,7 @@ resta valido su questo punto).
 
 Si attiva in tre modi equivalenti:
 
-- **Parola chiave** («Ehi Omni», nome da decidere), riconosciuta **nel browser**
+- **Parola chiave** («Ehi Omnia», nome provvisorio, ADR-0012), riconosciuta **nel browser**
 - **Gesto**: indice alzato tenuto un secondo
 - **Bottone ✨**
 
@@ -228,11 +228,12 @@ sessione; blob cifrato del pacchetto su object storage per 7 giorni.
 - **Stato sessione:** KV con TTL (Upstash Redis o equivalente).
 - **Storage:** Cloudflare R2 con lifecycle a 7 giorni. Riceve solo blob cifrati.
 - **STT:** vendor in streaming con DPA zero-retention, chiamato **dal browser** con
-  token a vita breve (ADR-0006). Vendor da scegliere (§12).
-- **Parola chiave:** modello piccolo in ONNX nel browser (openWakeWord o
-  equivalente). Nessuna API, nessun costo per minuto.
+  token a vita breve (ADR-0006). Deepgram Nova-3 (ADR-0011).
+- **Parola chiave:** modello piccolo in ONNX nel browser (openWakeWord,
+  ADR-0012). Nessuna API, nessun costo per minuto.
 - **Traduzione:** passa da `AIService`, provider da scegliere (§12).
-- **AI:** un solo ingresso `AIService` in `packages/ai`, adapter per provider.
+- **AI:** un solo ingresso `AIService` in `packages/ai`, adapter per provider. Immagini:
+  fal.ai FLUX schnell (ADR-0013).
 - **Computer vision:** MediaPipe `@mediapipe/tasks-vision`, interamente client-side.
 - **Cifratura del pacchetto:** Web Crypto API (AES-GCM), nel browser.
 - **Deploy:** Vercel. Nessun processo long-running da ospitare altrove.
@@ -434,7 +435,7 @@ Tutto quanto in v2, più:
 | 7 | Negoziazione | snapshot, turno di scrittura, tetto, «offro io», tre esiti |
 | 8 | Pacchetto | ZIP cifrato nel browser, upload R2, link con chiave nel frammento, PDF a quota, purga |
 
-**Prima demo = slice 0-5.** Due persone in call, l'host dice «Ehi Omni, fammi un
+**Prima demo = slice 0-5.** Due persone in call, l'host dice «Ehi Omnia, fammi un
 grafico delle vendite», il grafico arriva nel vassoio, con un pinch va sul palco, il
 cliente lo vede anche dal telefono.
 
@@ -506,9 +507,9 @@ Scritti prima dell'implementazione.
 
 | Decisione | Quando serve | Criterio |
 |---|---|---|
-| Vendor STT (Deepgram, AssemblyAI, altro) | slice 4 | qualità italiano, prezzo reale, zero-retention |
+| ~~Vendor STT~~ deciso: Deepgram Nova-3 (ADR-0011) | slice 4 | qualità italiano, prezzo reale, zero-retention |
 | Provider di traduzione | slice 6 | latenza, costo per carattere, lingue |
-| Nome e modello della parola chiave | slice 4 | riconoscibilità, falsi positivi |
+| Nome della parola chiave (modello deciso: openWakeWord, ADR-0012; «Ehi Omnia» provvisorio) | prima del test con utenti | riconoscibilità, tono amichevole, falsi positivi |
 | Dizionario gesture definitivo | dopo la prima demo | test con utenti veri |
 | Durata del link del pacchetto | slice 8 | default 7 giorni, forse per piano |
 | Piani, prezzi, crediti | dopo l'MVP | costi misurati |

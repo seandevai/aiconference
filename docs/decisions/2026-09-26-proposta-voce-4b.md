@@ -1,6 +1,6 @@
 # Proposta — le tre decisioni per la voce dell'agente (slice 4B)
 
-**Stato:** proposta, da approvare da Sean. Chiude le righe «vendor STT», «parola chiave»
+**Stato:** approvata da Sean il 26/09/2026, diventata ADR-0011, ADR-0012 (nome provvisorio) e ADR-0013. Chiude le righe «vendor STT», «parola chiave»
 e «provider immagini» della spec §12. Approvata, ogni scelta diventa un ADR.
 **Prezzi:** verificati a settembre 2026 da fonti pubbliche (link in fondo); da ricontrollare
 sulle pagine ufficiali prima di firmare.
