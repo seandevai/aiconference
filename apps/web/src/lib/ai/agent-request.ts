@@ -16,7 +16,7 @@ const REFUSALS: Record<'not_found' | 'ended' | 'forbidden', Result> = {
 };
 
 // Solo l'host attiva l'agente e paga il workspace della stanza (spec §2.3).
-async function resolveHost(admin: Admin, input: ResolveParticipantInput) {
+export async function resolveHost(admin: Admin, input: ResolveParticipantInput) {
   const resolved = await resolveParticipant(admin, input);
   if (resolved.kind !== 'ok') return { refusal: REFUSALS[resolved.kind] } as const;
   if (resolved.participant.role !== 'host') {
@@ -32,6 +32,7 @@ async function resolveHost(admin: Admin, input: ResolveParticipantInput) {
     roomId: resolved.room.id,
     participantId: resolved.participant.id,
     workspaceId: room.workspace_id,
+    language: resolved.participant.language,
   } as const;
 }
 
