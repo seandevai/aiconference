@@ -14,18 +14,26 @@ export type ProviderErrorCode =
 
 export type ProviderUsage = { model: string; inputTokens: number; outputTokens: number };
 
-// Porta solo un codice e i token spesi: il messaggio del provider può contenere pezzi del prompt.
+export type AiOperation = 'agent_generate' | 'image' | 'stt_session';
+
+// Porta solo un codice, i token spesi e, per i prezzi fissi, quanto è già costata la
+// chiamata: il messaggio del provider può contenere pezzi del prompt.
 export class ProviderError extends Error {
   readonly code: ProviderErrorCode;
   readonly usage: ProviderUsage | undefined;
+  readonly costUsd: number | undefined;
 
-  constructor(code: ProviderErrorCode, usage?: ProviderUsage) {
+  constructor(code: ProviderErrorCode, usage?: ProviderUsage, costUsd?: number) {
     super(`provider failed: ${code}`);
     this.name = 'ProviderError';
     this.code = code;
     this.usage = usage;
+    this.costUsd = costUsd;
   }
 }
+
+// Il task 4B.9 lo allarga con la proposta d'immagine.
+export type AgentOutcome = AgentContent;
 
 export type GenerateResult = {
   content: AgentContent;
@@ -48,7 +56,7 @@ export type RecordEntry = {
   workspaceId: string;
   provider: string;
   model: string;
-  operation: 'agent_generate';
+  operation: AiOperation;
   inputTokens: number | null;
   outputTokens: number | null;
   latencyMs: number;

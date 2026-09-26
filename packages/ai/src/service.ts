@@ -1,38 +1,46 @@
 import { creditsFor, estimateCostUsd } from './pricing';
 import {
   ProviderError,
-  type AgentContent,
+  type AgentOutcome,
   type AiLedger,
+  type AiOperation,
   type GenerateAdapter,
   type ProviderErrorCode,
+  type ProviderUsage,
 } from './types';
 
-export const RATE_LIMITS = { perParticipantPerMinute: 6, perWorkspacePerMinute: 30 } as const;
+// Una richiesta a voce fa due righe (token STT + agente): i limiti contano ogni operazione.
+export const RATE_LIMITS = { perParticipantPerMinute: 12, perWorkspacePerMinute: 60 } as const;
 
-export type AgentRequest = {
-  roomId: string;
-  participantId: string;
-  workspaceId: string;
-  prompt: string;
+export type Payer = { roomId: string; participantId: string; workspaceId: string };
+
+export type MeteredCall<T> = {
+  operation: AiOperation;
+  provider: string;
+  model: string;
+  // Crediti da riservare prima della chiamata: il costo massimo plausibile.
+  reserveCredits: number;
+  run(): Promise<{ value: T; usage: ProviderUsage | null; costUsd: number }>;
 };
 
-export type AgentResult =
-  | { ok: true; content: AgentContent; charged: number }
+export type MeteredResult<T> =
+  | { ok: true; value: T; charged: number }
   | { ok: false; reason: 'quota_exceeded' | 'rate_limited' }
   | { ok: false; reason: 'provider_failed'; code: ProviderErrorCode };
 
-// Catena di ARCHITECTURE §6: rate limit, quota (riserva), provider, misura, registro, scalo.
-// Il prompt attraversa questa funzione e non viene mai salvato.
-export async function executeAgent(
-  deps: { ledger: AiLedger; adapter: GenerateAdapter; now?: () => number },
-  request: AgentRequest,
-): Promise<AgentResult> {
+// Catena di ARCHITECTURE §6: rate limit, quota (riserva), chiamata, misura, registro, scalo.
+// Il contenuto attraversa questa funzione e non viene mai salvato.
+export async function executeMetered<T>(
+  deps: { ledger: AiLedger; now?: () => number },
+  who: Payer,
+  call: MeteredCall<T>,
+): Promise<MeteredResult<T>> {
   const now = deps.now ?? Date.now;
-  const { ledger, adapter } = deps;
+  const { ledger } = deps;
 
   const recent = await ledger.recentRequests({
-    participantId: request.participantId,
-    workspaceId: request.workspaceId,
+    participantId: who.participantId,
+    workspaceId: who.workspaceId,
     sinceMs: 60_000,
   });
   if (
@@ -42,43 +50,45 @@ export async function executeAgent(
     return { ok: false, reason: 'rate_limited' };
   }
 
-  const reserved = adapter.reserveCredits;
-  if (reserved > 0 && !(await ledger.reserve(request.workspaceId, reserved))) {
+  const reserved = call.reserveCredits;
+  if (reserved > 0 && !(await ledger.reserve(who.workspaceId, reserved))) {
     return { ok: false, reason: 'quota_exceeded' };
   }
 
   const base = {
-    roomId: request.roomId,
-    participantId: request.participantId,
-    workspaceId: request.workspaceId,
-    provider: adapter.provider,
-    operation: 'agent_generate' as const,
+    roomId: who.roomId,
+    participantId: who.participantId,
+    workspaceId: who.workspaceId,
+    provider: call.provider,
+    operation: call.operation,
     reserved,
   };
   const started = now();
   try {
-    const result = await adapter.generate(request.prompt);
-    const costUsd = estimateCostUsd(result.model, result.inputTokens, result.outputTokens);
+    const { value, usage, costUsd } = await call.run();
     const charged = creditsFor(costUsd);
     await ledger.record({
       ...base,
-      model: result.model,
-      inputTokens: result.inputTokens,
-      outputTokens: result.outputTokens,
+      model: usage?.model ?? call.model,
+      inputTokens: usage?.inputTokens ?? null,
+      outputTokens: usage?.outputTokens ?? null,
       latencyMs: now() - started,
       success: true,
       errorCode: null,
       costUsd,
       charged,
     });
-    return { ok: true, content: result.content, charged };
+    return { ok: true, value, charged };
   } catch (error) {
-    const code: ProviderErrorCode = error instanceof ProviderError ? error.code : 'provider_error';
-    const usage = error instanceof ProviderError ? error.usage : undefined;
-    const costUsd = usage ? estimateCostUsd(usage.model, usage.inputTokens, usage.outputTokens) : 0;
+    const failure = error instanceof ProviderError ? error : null;
+    const code: ProviderErrorCode = failure?.code ?? 'provider_error';
+    const usage = failure?.usage;
+    const costUsd =
+      failure?.costUsd ??
+      (usage ? estimateCostUsd(usage.model, usage.inputTokens, usage.outputTokens) : 0);
     await ledger.record({
       ...base,
-      model: usage?.model ?? adapter.model,
+      model: usage?.model ?? call.model,
       inputTokens: usage?.inputTokens ?? null,
       outputTokens: usage?.outputTokens ?? null,
       latencyMs: now() - started,
@@ -89,4 +99,34 @@ export async function executeAgent(
     });
     return { ok: false, reason: 'provider_failed', code };
   }
+}
+
+export type AgentRequest = Payer & { prompt: string };
+
+export type AgentResult =
+  | { ok: true; content: AgentOutcome; charged: number }
+  | { ok: false; reason: 'quota_exceeded' | 'rate_limited' }
+  | { ok: false; reason: 'provider_failed'; code: ProviderErrorCode };
+
+export async function executeAgent(
+  deps: { ledger: AiLedger; adapter: GenerateAdapter; now?: () => number },
+  request: AgentRequest,
+): Promise<AgentResult> {
+  const { adapter } = deps;
+  const result = await executeMetered(deps, request, {
+    operation: 'agent_generate',
+    provider: adapter.provider,
+    model: adapter.model,
+    reserveCredits: adapter.reserveCredits,
+    async run() {
+      const r = await adapter.generate(request.prompt);
+      const usage = { model: r.model, inputTokens: r.inputTokens, outputTokens: r.outputTokens };
+      return {
+        value: r.content,
+        usage,
+        costUsd: estimateCostUsd(r.model, r.inputTokens, r.outputTokens),
+      };
+    },
+  });
+  return result.ok ? { ok: true, content: result.value, charged: result.charged } : result;
 }

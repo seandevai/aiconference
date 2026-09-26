@@ -24,3 +24,31 @@ export function creditsFor(costUsd: number): number {
   if (costUsd <= 0) return 0;
   return Math.max(1, Math.ceil(Number((costUsd / USD_PER_CREDIT).toFixed(6))));
 }
+
+// Prezzi di listino verificati a settembre 2026 (ADR-0011, ADR-0013).
+export const STT_PRICES_USD_PER_MIN: Record<string, number> = {
+  'nova-3': 0.0077,
+  'fake-stt': 0,
+};
+
+export const IMAGE_PRICES_USD_PER_MP: Record<string, number> = {
+  'fal-ai/flux/schnell': 0.003,
+  'fake-image': 0,
+};
+
+// Il browser parla direttamente con Deepgram: non misuriamo i secondi reali, quindi una
+// richiesta a voce si paga come la durata massima che il client consente.
+export const STT_COMMAND_MAX_SECONDS = 30;
+
+const maxOf = (table: Record<string, number>) => Math.max(...Object.values(table));
+
+export function sttSessionCostUsd(model: string): number {
+  const perMin = STT_PRICES_USD_PER_MIN[model] ?? maxOf(STT_PRICES_USD_PER_MIN);
+  return (perMin * STT_COMMAND_MAX_SECONDS) / 60;
+}
+
+// fal fattura per megapixel iniziato.
+export function imageCostUsd(model: string, megapixels: number): number {
+  const perMp = IMAGE_PRICES_USD_PER_MP[model] ?? maxOf(IMAGE_PRICES_USD_PER_MP);
+  return perMp * Math.max(1, Math.ceil(megapixels));
+}
