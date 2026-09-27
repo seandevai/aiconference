@@ -85,7 +85,8 @@ implementata su `slice/2-call` (PR #3), spike CPU e iOS in attesa di misura. Sli
 (palco) implementata su `slice/3-palco` (PR #4). Slice 4A (agente a comando con richiesta
 scritta, `AIService`, ledger) su `slice/4a-agente` (PR #5). Slice 5 (gesture) su
 `slice/5-gesture` (PR #6). Prima demo = slice 0-5: completa lato codice salvo la voce
-(slice 4B), in attesa del test con i consulenti.
+(slice 4B), in attesa del test con i consulenti. Slice 4B (voce e immagini) in corso su
+`slice/4b-voce`: task 4B.1-4B.4 fatti (parte server), 4B.5-4B.13 da fare.
 
 Spec v3 del 23/09, dopo un secondo brainstorming con Sean. Rispetto alla v2: palco a
 finestre a slot magnetici invece della lista di schede (ADR-0009), agente a comando
@@ -96,7 +97,7 @@ mobile in visione. Economia rinviata a dopo l'MVP.
 
 Prima demo = slice 0-5 (6-8 settimane), MVP = slice 0-8 (8-12 settimane).
 
-### Ripresa — dove eravamo (25/09/2026)
+### Ripresa — dove eravamo (27/09/2026)
 
 Spec v3 approvata; `ARCHITECTURE.md`, `DATA-MODEL.md` e `BACKLOG.md` allineati.
 
@@ -109,7 +110,20 @@ Codespace (`.devcontainer/`) che avvia Supabase e scrive `.env.local`. `gh` è i
 `C:\Program Files\GitHub CLI\gh.exe` (non nel PATH della sessione).
 
 Branch impilati: `slice/0-fondamenta` (PR #1) → `slice/1-auth-stanza` (PR #2) →
-`slice/2-call` (PR #3) → `slice/3-palco` (PR #4) → `slice/4a-agente` (PR #5) → `slice/5-gesture` (PR #6). Il merge in `main` lo fa Sean.
+`slice/2-call` (PR #3) → `slice/3-palco` (PR #4) → `slice/4a-agente` (PR #5) → `slice/5-gesture` (PR #6)
+→ `slice/4b-voce` (ancora senza PR). Il merge in `main` lo fa Sean.
+
+Slice 4B: piano `docs/plans/2026-09-26-slice-4b-voce.md`, eseguito inline (Native). Il
+registro dei task sta in `.superpowers/sdd/2026-09-26-slice-4b-voce/progress.md` (ignorato
+da git): una riga per task completato, da lì si riprende. Fatti: 4B.1 `executeMetered`
+generico, 4B.2 `packages/stt` e token Deepgram, 4B.3 route `stt-token`, 4B.4 regole di fine
+richiesta. Companion fuori dalla 4B (va in BACKLOG al 4B.13).
+
+I test su DB girano nel Codespace, in un worktree separato `/workspaces/aiconf-4b` (branch
+`slice/4b-voce`): la copia principale `/workspaces/aiconference` ha un
+`e2e/gestures.spec.ts` non tracciato che non va toccato. Per portare file non ancora
+committati: `gh codespace cp -c <nome> -e <file> remote:/workspaces/aiconf-4b/<file>`; dopo
+il push, riallineare con `git stash push -u` + `git merge --ff-only origin/slice/4b-voce`.
 
 Nel Codespace, `git` via SSH richiede `set -a; . /workspaces/.codespaces/shared/.env; set +a`
 (il token non è esportato nelle sessioni SSH). LiveKit locale: `ws://localhost:7880`,
@@ -119,12 +133,17 @@ Codespace: `pkill -f "[n]ext-server"` (il processo non si chiama `next dev`).
 
 Il passo successivo, in ordine:
 
-1. Sean: merge delle PR #1-#6; task 0.5 (Supabase Cloud, Vercel, LiveKit Cloud,
-   Upstash, `ANTHROPIC_API_KEY`); misura degli spike CPU e iOS Safari; registrazioni
-   reali delle gesture; test della demo con 5 consulenti (`docs/spikes/`).
-2. Slice 4B (parola chiave, STT, immagini, companion): servono le decisioni di Sean
-   (spec §12) e le chiavi dei vendor.
-3. Dopo il test con i consulenti: slice 6-8 (sottotitoli, negoziazione, pacchetto).
+1. Sean, in corso: task 0.5 seguendo `docs/decisions/2026-09-26-guida-task-0-5-staging.md`
+   (ha già account Supabase e Vercel; mancano LiveKit Cloud e Upstash). Aggiungere anche
+   `DEEPGRAM_API_KEY` e `FAL_KEY` (le chiavi le ha; mai incollarle in chat). Poi Claude
+   pubblica la preview e prova il percorso completo.
+2. Sean usa la call vera e decide se fare un passaggio di UI/UX prima dei task 4B che
+   toccano il pannello (4B.6 in poi). Non è nella spec: se sì, va pianificato come lavoro
+   esplicito.
+3. Claude riprende la 4B dal task 4B.5 (microfono), fino al 4B.13 e alla PR.
+4. Sean: merge delle PR #1-#6; spike CPU e iOS Safari; registrazioni reali delle gesture;
+   test della demo con 5 consulenti (`docs/spikes/`).
+5. Dopo il test con i consulenti: slice 6-8 (sottotitoli, negoziazione, pacchetto).
 
 Decisioni prese e non da riaprire senza un ADR nuovo: palco a slot magnetici, solo
 l'host scrive sul palco e attiva l'agente, negoziazione aperta dall'host con tetto e
@@ -132,8 +151,13 @@ massimo due versioni, sottotitoli sì e voce tradotta dopo, desktop con gesture 
 mobile in visione, host non da mobile, pacchetto cifrato lato client, gesture
 nell'MVP, STT vendor chiamato dal client con VAD, niente disegno a mano libera.
 
-Decisioni aperte: spec §12 (vendor STT, traduzione, parola chiave, durata link,
-prezzi).
+Decise il 26/09: STT Deepgram Nova-3 (ADR-0011), parola chiave openWakeWord con «Ehi
+Omnia» provvisorio (ADR-0012, Sean vuole poi un nome più amichevole), immagini fal.ai
+FLUX schnell (ADR-0013; se la qualità non basta: FLUX Pro o Ideogram v3 sullo stesso
+account fal).
+
+Decisioni aperte: spec §12 (nome definitivo della parola chiave, traduzione, durata
+link, prezzi).
 
 I mockup stanno in `.superpowers/brainstorm/` (ignorato da git, resta su disco).
 
