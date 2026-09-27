@@ -131,6 +131,17 @@ di GitHub e nel Codespace (`.devcontainer/`), che avvia Supabase e scrive `.env.
 - [ ] CI: verificare il job `db` quando `ubuntu-latest` passa a Ubuntu 26 (19/10)
 - [x] CI: job `e2e` su Supabase locale nel runner
 
+## Mobile — richieste dal primo test su staging (27/09)
+
+Fuori dalla spec (§2.5 prevede solo la vista mobile base). Da prioritizzare con Sean.
+
+- [ ] Orientamento orizzontale: la call si riadatta ruotando il telefono
+- [ ] Tocco su un partecipante: la sua videocamera a tutto schermo, tocco per uscire
+- [ ] Cambio fotocamera anteriore/posteriore da telefono (`facingMode`, in `packages/realtime`)
+- [ ] Picture-in-Picture quando l'app va in background, come WhatsApp e FaceTime.
+      Limite del browser: in background iOS ferma la fotocamera locale; si vede
+      solo il video remoto
+
 ## Post-MVP
 
 - [ ] Piani, prezzi, Stripe
@@ -182,10 +193,16 @@ di GitHub e nel Codespace (`.devcontainer/`), che avvia Supabase e scrive `.env.
 - [ ] Richiesta scritta all'agente: tenerla anche dopo lo STT come via senza microfono?
 - [ ] Contenuti di prova nel vassoio: toglierli quando `AI_PROVIDER=anthropic` è attivo
 - [ ] Prezzi in `packages/ai/src/pricing.ts` scritti a mano: aggiornarli se cambia il listino
-- [ ] Preview Vercel: `AI_PROVIDER=anthropic` e `ANTHROPIC_API_KEY` (con il task 0.5)
+- [x] Preview Vercel: `AI_PROVIDER=anthropic` e `ANTHROPIC_API_KEY` (con il task 0.5)
 - [ ] Registrare gesture reali con `/dev/gesture-recorder` e aggiungerle ai test
 - [ ] CONFIRM/REJECT a gesto non fanno ancora nulla: servono le immagini con conferma (4B)
 - [ ] MediaPipe si scarica da jsdelivr e googleapis: valutare l'hosting dei file
 - [ ] Soglie delle gesture tarate su mani sintetiche: ritararle con le registrazioni reali
-- [ ] Preview Vercel: aggiungere `NEXT_PUBLIC_LIVEKIT_URL`, `LIVEKIT_API_KEY`,
+- [x] Preview Vercel: aggiungere `NEXT_PUBLIC_LIVEKIT_URL`, `LIVEKIT_API_KEY`,
       `LIVEKIT_API_SECRET` del progetto LiveKit Cloud (con il task 0.5)
+- [ ] Advisor Supabase su staging: `search_path` fisso per `ai_reserve_credits`,
+      `ai_record_request`, `grant_credits`; revocare `execute` su `handle_new_user` e
+      `is_workspace_member` da `anon`/`authenticated`; `(select auth.uid())` nelle policy
+- [ ] Upstash di staging creato nella regione predefinita: per la produzione ricrearlo in UE
+- [ ] Vercel: `installCommand` impostato a mano sul progetto (`cd ../.. && npm ci`);
+      valutare `apps/web/vercel.json` per tenerlo nel repo
