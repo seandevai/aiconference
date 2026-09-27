@@ -41,10 +41,14 @@ test('tapping a face opens it full screen and closes when that person leaves', a
   await host.getByRole('button', { name: 'Mostra Cliente a tutto schermo' }).click();
   const dialog = host.getByRole('dialog', { name: 'Cliente a tutto schermo' });
   await expect(dialog).toBeVisible();
+  // Non modale: i controlli della call restano usabili anche con lo screen reader.
+  await expect(dialog).not.toHaveAttribute('aria-modal', 'true');
+  await expect(host.getByRole('button', { name: 'Chiudi tutto schermo' })).toBeFocused();
   await expect(host.getByRole('button', { name: 'Esci' })).toBeVisible();
 
   await host.getByRole('button', { name: 'Chiudi tutto schermo' }).click();
   await expect(dialog).toBeHidden();
+  await expect(host.getByRole('button', { name: 'Mostra Cliente a tutto schermo' })).toBeFocused();
 
   await host.getByRole('button', { name: 'Mostra Cliente a tutto schermo' }).click();
   await host.keyboard.press('Escape');

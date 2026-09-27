@@ -21,15 +21,20 @@ export function nextLastSpeaker(
 }
 
 // Il video del PiP: spotlight, poi chi ha parlato per ultimo, poi il primo remoto con la
-// camera accesa (il roster mette l'host per primo). Mai se stessi.
+// camera accesa (il roster mette l'host per primo). Mai se stessi, mai una camera spenta:
+// un PiP nero non serve e su una camera spenta il browser rifiuta di aprirlo.
 export function pipTarget(
   roster: readonly RosterEntry[],
   spotlight: string | null,
   lastSpeaker: string | null,
 ): string | null {
+  const withVideo = (identity: string | null) => {
+    const entry = remote(roster, identity);
+    return entry?.camOn ? entry.identity : undefined;
+  };
   return (
-    remote(roster, spotlight)?.identity ??
-    remote(roster, lastSpeaker)?.identity ??
+    withVideo(spotlight) ??
+    withVideo(lastSpeaker) ??
     roster.find((entry) => !entry.isLocal && entry.camOn)?.identity ??
     null
   );

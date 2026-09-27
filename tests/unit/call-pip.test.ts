@@ -36,6 +36,25 @@ describe('openPip', () => {
     expect(video.webkitSetPresentationMode).toHaveBeenCalledWith('picture-in-picture');
   });
 
+  it('waits for the video metadata before asking, as the browser requires', async () => {
+    const listeners: Record<string, () => void> = {};
+    const video = {
+      readyState: 0,
+      requestPictureInPicture: vi.fn().mockResolvedValue({}),
+      addEventListener: (type: string, listener: () => void) => {
+        listeners[type] = listener;
+      },
+      removeEventListener: vi.fn(),
+    };
+    const opening = openPip({ pictureInPictureEnabled: true }, video);
+    await Promise.resolve();
+    expect(video.requestPictureInPicture).not.toHaveBeenCalled();
+    video.readyState = 1;
+    listeners.loadedmetadata?.();
+    await expect(opening).resolves.toBe(true);
+    expect(video.requestPictureInPicture).toHaveBeenCalledOnce();
+  });
+
   it('does nothing without support', async () => {
     await expect(openPip({}, {})).resolves.toBe(false);
   });

@@ -8,7 +8,7 @@ import {
   type Participant,
   type RemoteTrack,
 } from 'livekit-client';
-import { countVideoInputs, createCameraPreference } from './camera';
+import { countVideoInputs, createCameraController } from './camera';
 import { assertChannel, decodeData, encodeData } from './data-codec';
 import { sortRoster, toRosterEntry } from './roster';
 import type {
@@ -69,7 +69,16 @@ function subscribe<T>(set: Set<T>, handler: T): Unsubscribe {
 export async function connectToRoom(url: string, token: string): Promise<RealtimeSession> {
   // In background il video remoto deve continuare: il PiP lo mostra sopra le altre app.
   const room = new Room({ adaptiveStream: { pauseVideoInBackground: false }, dynacast: true });
-  const facing = createCameraPreference();
+  const camera = createCameraController({
+    isEnabled: () => room.localParticipant.isCameraEnabled,
+    async setEnabled(on, facingMode) {
+      await room.localParticipant.setCameraEnabled(on, on ? { facingMode } : undefined);
+    },
+    async restart(facingMode) {
+      const track = room.localParticipant.getTrackPublication(Track.Source.Camera)?.track;
+      if (track instanceof LocalVideoTrack) await track.restartTrack({ facingMode });
+    },
+  });
 
   // L'audio remoto suona da elementi <audio> nascosti: la UI mostra solo i video.
   const audioSink = document.createElement('div');
@@ -165,10 +174,7 @@ export async function connectToRoom(url: string, token: string): Promise<Realtim
     },
 
     async setCameraEnabled(enabled) {
-      await room.localParticipant.setCameraEnabled(
-        enabled,
-        enabled ? { facingMode: facing.get() } : undefined,
-      );
+      await camera.setEnabled(enabled);
       emitRoster();
     },
 
@@ -178,10 +184,7 @@ export async function connectToRoom(url: string, token: string): Promise<Realtim
     },
 
     async switchCamera() {
-      const facingMode = facing.toggle();
-      if (!room.localParticipant.isCameraEnabled) return;
-      const track = room.localParticipant.getTrackPublication(Track.Source.Camera)?.track;
-      if (track instanceof LocalVideoTrack) await track.restartTrack({ facingMode });
+      await camera.switchCamera();
     },
 
     attachVideo(identity, element) {

@@ -65,4 +65,9 @@ describe('pipTarget', () => {
   it('never shows the local participant', () => {
     expect(pipTarget([me], null, 'me')).toBeNull();
   });
+  it('skips people with the camera off: a black PiP helps nobody', () => {
+    expect(pipTarget([host, me, { ...ana, camOn: false }], 'ana', null)).toBe('host');
+    expect(pipTarget([host, me, { ...ana, camOn: false }], null, 'ana')).toBe('host');
+    expect(pipTarget([{ ...host, camOn: false }, me], null, 'host')).toBeNull();
+  });
 });

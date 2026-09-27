@@ -14,6 +14,16 @@ type Props = {
 export function SpotlightView({ entry, local, attachVideo, onClose }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const selfRef = useRef<HTMLVideoElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+
+  // Il focus va su ✕ all'apertura e torna alla tessera alla chiusura.
+  useEffect(() => {
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    closeRef.current?.focus();
+    return () => {
+      if (opener?.isConnected) opener.focus();
+    };
+  }, []);
 
   useEffect(() => {
     if (!entry.camOn || !videoRef.current) return;
@@ -35,8 +45,8 @@ export function SpotlightView({ entry, local, attachVideo, onClose }: Props) {
 
   return (
     <div
+      // Non modale: i controlli della call, fuori dal dialog, restano usabili.
       role="dialog"
-      aria-modal="true"
       aria-label={`${entry.name} a tutto schermo`}
       className="absolute inset-0 z-20 bg-black"
     >
@@ -61,6 +71,7 @@ export function SpotlightView({ entry, local, attachVideo, onClose }: Props) {
         />
       )}
       <button
+        ref={closeRef}
         type="button"
         onClick={onClose}
         aria-label="Chiudi tutto schermo"
