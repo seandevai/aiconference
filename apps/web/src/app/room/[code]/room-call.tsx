@@ -1,11 +1,14 @@
 'use client';
 
+import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCall } from '@/lib/call/use-call';
 import { cameraButtonLabel, micButtonLabel } from '@/lib/call/labels';
 import { phaseMessage, type CallPhase } from '@/lib/call/phase';
+import { resolveSpotlight } from '@/lib/call/spotlight';
 import { useStage } from '@/lib/stage/use-stage';
 import { leaveRoomAction } from './actions';
+import { SpotlightView } from './spotlight-view';
 import { StageArea } from './stage-area';
 import { VideoTile } from './video-tile';
 
@@ -21,6 +24,12 @@ export function RoomCall({ joinCode, role }: Props) {
   const local = state.roster.find((entry) => entry.isLocal);
   const message = phaseMessage(state.phase);
   const live = LIVE_PHASES.includes(state.phase);
+  const [selected, setSelected] = useState<string | null>(null);
+  const spotlight = resolveSpotlight(selected, state.roster);
+  // Chi esce chiude lo spotlight: senza azzerare, rientrando lo riaprirebbe.
+  if (selected !== null && spotlight === null) setSelected(null);
+  const spotlightEntry = state.roster.find((entry) => entry.identity === spotlight);
+  const closeSpotlight = useCallback(() => setSelected(null), []);
 
   async function handleLeave() {
     await leave();
@@ -37,7 +46,12 @@ export function RoomCall({ joinCode, role }: Props) {
         >
           <ul className="flex flex-col gap-2">
             {state.roster.map((entry) => (
-              <VideoTile key={entry.identity} entry={entry} attachVideo={attachVideo} />
+              <VideoTile
+                key={entry.identity}
+                entry={entry}
+                attachVideo={attachVideo}
+                onSelect={entry.isLocal ? undefined : () => setSelected(entry.identity)}
+              />
             ))}
           </ul>
         </aside>
@@ -92,6 +106,15 @@ export function RoomCall({ joinCode, role }: Props) {
             />
           )}
         </section>
+
+        {live && spotlightEntry && (
+          <SpotlightView
+            entry={spotlightEntry}
+            local={local}
+            attachVideo={attachVideo}
+            onClose={closeSpotlight}
+          />
+        )}
       </div>
 
       {live && (

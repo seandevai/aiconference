@@ -26,3 +26,31 @@ test('phone in landscape hides the header and keeps faces on the right', async (
   expect(faces!.width).toBeGreaterThanOrEqual(90);
   await expect(guest.getByRole('button', { name: 'Esci' })).toBeInViewport();
 });
+
+test('tapping a face opens it full screen and closes when that person leaves', async ({
+  browser,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile', 'one run is enough');
+  const { host, roomUrl } = await signUpHostWithRoom(browser);
+  const guest = await joinAsAnonymousGuest(browser, roomUrl);
+  await expect(tiles(host)).toHaveCount(2, { timeout: 30_000 });
+
+  // La propria tessera non si apre.
+  await expect(host.getByRole('button', { name: /^Mostra Sean/ })).toHaveCount(0);
+
+  await host.getByRole('button', { name: 'Mostra Cliente a tutto schermo' }).click();
+  const dialog = host.getByRole('dialog', { name: 'Cliente a tutto schermo' });
+  await expect(dialog).toBeVisible();
+  await expect(host.getByRole('button', { name: 'Esci' })).toBeVisible();
+
+  await host.getByRole('button', { name: 'Chiudi tutto schermo' }).click();
+  await expect(dialog).toBeHidden();
+
+  await host.getByRole('button', { name: 'Mostra Cliente a tutto schermo' }).click();
+  await host.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+
+  await host.getByRole('button', { name: 'Mostra Cliente a tutto schermo' }).click();
+  await guest.getByRole('button', { name: 'Esci' }).click();
+  await expect(dialog).toBeHidden({ timeout: 30_000 });
+});
