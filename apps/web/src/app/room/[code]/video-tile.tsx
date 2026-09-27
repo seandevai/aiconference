@@ -20,7 +20,7 @@ export function VideoTile({ entry, attachVideo }: Props) {
   return (
     <li
       aria-label={tileLabel(entry)}
-      className={`relative aspect-[3/4] overflow-hidden rounded bg-neutral-800 lg:aspect-video ${
+      className={`relative aspect-[3/4] overflow-hidden rounded bg-neutral-800 phone-landscape:aspect-video lg:aspect-video ${
         entry.speaking ? 'ring-2 ring-emerald-400' : ''
       }`}
     >

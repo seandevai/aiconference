@@ -33,7 +33,7 @@ export function RoomCall({ joinCode, role }: Props) {
       <div className="relative flex min-h-0 flex-1">
         <aside
           aria-label="Partecipanti"
-          className="absolute right-2 top-2 z-10 w-16 lg:static lg:w-48 lg:border-r lg:border-neutral-800 lg:p-3"
+          className="absolute right-2 top-2 z-10 w-16 phone-landscape:bottom-2 phone-landscape:w-24 phone-landscape:overflow-y-auto lg:static lg:w-48 lg:border-r lg:border-neutral-800 lg:p-3"
         >
           <ul className="flex flex-col gap-2">
             {state.roster.map((entry) => (
@@ -44,7 +44,7 @@ export function RoomCall({ joinCode, role }: Props) {
 
         <section
           aria-label="Palco"
-          className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto p-2 pr-20 lg:p-4"
+          className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto p-2 pr-20 phone-landscape:pr-28 lg:p-4"
         >
           {message && (
             <div
@@ -97,7 +97,7 @@ export function RoomCall({ joinCode, role }: Props) {
       {live && (
         <nav
           aria-label="Controlli della chiamata"
-          className="flex items-center justify-center gap-2 border-t border-neutral-800 px-4 py-2"
+          className="flex items-center justify-center gap-2 border-t border-neutral-800 px-4 py-2 phone-landscape:py-1"
         >
           <button
             onClick={toggleMic}
