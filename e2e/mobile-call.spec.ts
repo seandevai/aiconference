@@ -54,3 +54,10 @@ test('tapping a face opens it full screen and closes when that person leaves', a
   await guest.getByRole('button', { name: 'Esci' }).click();
   await expect(dialog).toBeHidden({ timeout: 30_000 });
 });
+
+test('switch camera is hidden on a device with a single camera', async ({ browser }) => {
+  const { host } = await signUpHostWithRoom(browser);
+  await expect(tiles(host)).toHaveCount(1, { timeout: 30_000 });
+  await expect(host.getByRole('button', { name: 'Disattiva camera' })).toBeVisible();
+  await expect(host.getByRole('button', { name: 'Gira fotocamera' })).toHaveCount(0);
+});

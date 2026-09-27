@@ -18,8 +18,17 @@ const LIVE_PHASES: CallPhase[] = ['connecting', 'connected', 'reconnecting'];
 
 export function RoomCall({ joinCode, role }: Props) {
   const router = useRouter();
-  const { state, session, toggleMic, toggleCamera, startAudio, retry, leave, attachVideo } =
-    useCall(joinCode);
+  const {
+    state,
+    session,
+    toggleMic,
+    toggleCamera,
+    switchCamera,
+    startAudio,
+    retry,
+    leave,
+    attachVideo,
+  } = useCall(joinCode);
   const stageApi = useStage({ joinCode, role, session, roster: state.roster });
   const local = state.roster.find((entry) => entry.isLocal);
   const message = phaseMessage(state.phase);
@@ -136,6 +145,11 @@ export function RoomCall({ joinCode, role }: Props) {
           >
             {cameraButtonLabel(local?.camOn ?? false)}
           </button>
+          {state.canSwitchCamera && (
+            <button onClick={switchCamera} className="rounded bg-neutral-800 px-3 py-2 text-sm">
+              Gira fotocamera
+            </button>
+          )}
           <button onClick={handleLeave} className="rounded bg-red-600 px-3 py-2 text-sm">
             Esci
           </button>

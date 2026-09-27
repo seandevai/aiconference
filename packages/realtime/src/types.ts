@@ -34,6 +34,10 @@ export interface RealtimeSession {
   startAudio(): Promise<void>;
   setMicrophoneEnabled(enabled: boolean): Promise<void>;
   setCameraEnabled(enabled: boolean): Promise<void>;
+  // Vero se il dispositivo ha almeno due fotocamere (tipicamente un telefono).
+  canSwitchCamera(): Promise<boolean>;
+  // Anteriore ↔ posteriore. A camera spenta cambia solo la scelta per la riaccensione.
+  switchCamera(): Promise<void>;
   attachVideo(identity: string, element: HTMLVideoElement): Unsubscribe;
   // Messaggi piccoli (≤ 15 KB di JSON). Per le immagini c'è sendBytes.
   sendData(channel: string, payload: unknown, to?: string[]): Promise<void>;

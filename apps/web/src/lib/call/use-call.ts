@@ -21,6 +21,7 @@ export type CallState = {
   roster: RosterEntry[];
   audioBlocked: boolean;
   mediaError: string | null;
+  canSwitchCamera: boolean;
 };
 
 class TokenRefusedError extends Error {
@@ -42,6 +43,7 @@ const initialState: CallState = {
   roster: [],
   audioBlocked: false,
   mediaError: null,
+  canSwitchCamera: false,
 };
 
 export function useCall(joinCode: string) {
@@ -106,6 +108,8 @@ export function useCall(joinCode: string) {
       patch({
         mediaError: results.some((r) => r.status === 'rejected') ? MEDIA_ERROR_MESSAGE : null,
       });
+      const canSwitchCamera = await live.canSwitchCamera().catch(() => false);
+      patch({ canSwitchCamera });
     };
 
     const reconnector = createReconnector({ connect, onGiveUp: () => patch({ phase: 'failed' }) });
@@ -134,6 +138,12 @@ export function useCall(joinCode: string) {
       .catch(() => setState((s) => ({ ...s, mediaError: MEDIA_ERROR_MESSAGE })));
   }, [local?.camOn]);
 
+  const switchCamera = useCallback(() => {
+    sessionRef.current
+      ?.switchCamera()
+      .catch(() => setState((s) => ({ ...s, mediaError: MEDIA_ERROR_MESSAGE })));
+  }, []);
+
   const startAudio = useCallback(() => {
     void sessionRef.current?.startAudio();
   }, []);
@@ -155,5 +165,15 @@ export function useCall(joinCode: string) {
     [],
   );
 
-  return { state, session, toggleMic, toggleCamera, startAudio, retry, leave, attachVideo };
+  return {
+    state,
+    session,
+    toggleMic,
+    toggleCamera,
+    switchCamera,
+    startAudio,
+    retry,
+    leave,
+    attachVideo,
+  };
 }
