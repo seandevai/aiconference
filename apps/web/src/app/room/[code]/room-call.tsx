@@ -1,13 +1,15 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCall } from '@/lib/call/use-call';
 import { cameraButtonLabel, micButtonLabel } from '@/lib/call/labels';
 import { phaseMessage, type CallPhase } from '@/lib/call/phase';
-import { resolveSpotlight } from '@/lib/call/spotlight';
+import { openPip, pipMode } from '@/lib/call/pip';
+import { nextLastSpeaker, pipTarget, resolveSpotlight } from '@/lib/call/spotlight';
 import { useStage } from '@/lib/stage/use-stage';
 import { leaveRoomAction } from './actions';
+import { PipVideo } from './pip-video';
 import { SpotlightView } from './spotlight-view';
 import { StageArea } from './stage-area';
 import { VideoTile } from './video-tile';
@@ -39,6 +41,20 @@ export function RoomCall({ joinCode, role }: Props) {
   if (selected !== null && spotlight === null) setSelected(null);
   const spotlightEntry = state.roster.find((entry) => entry.identity === spotlight);
   const closeSpotlight = useCallback(() => setSelected(null), []);
+  const [speaker, setSpeaker] = useState<{ roster: typeof state.roster; id: string | null }>({
+    roster: state.roster,
+    id: null,
+  });
+  // Aggiornato durante il render quando cambia il roster: niente effetto in più.
+  if (speaker.roster !== state.roster) {
+    setSpeaker({ roster: state.roster, id: nextLastSpeaker(speaker.id, state.roster) });
+  }
+  const pipIdentity = pipTarget(state.roster, spotlight, speaker.id);
+  const pipRef = useRef<HTMLVideoElement>(null);
+  const [pipSupported, setPipSupported] = useState(false);
+  useEffect(() => {
+    if (pipRef.current) setPipSupported(pipMode(document, pipRef.current) !== null);
+  }, [live]);
 
   async function handleLeave() {
     await leave();
@@ -126,6 +142,8 @@ export function RoomCall({ joinCode, role }: Props) {
         )}
       </div>
 
+      {live && <PipVideo identity={pipIdentity} attachVideo={attachVideo} videoRef={pipRef} />}
+
       {live && (
         <nav
           aria-label="Controlli della chiamata"
@@ -148,6 +166,16 @@ export function RoomCall({ joinCode, role }: Props) {
           {state.canSwitchCamera && (
             <button onClick={switchCamera} className="rounded bg-neutral-800 px-3 py-2 text-sm">
               Gira fotocamera
+            </button>
+          )}
+          {pipSupported && pipIdentity && (
+            <button
+              onClick={() => {
+                if (pipRef.current) void openPip(document, pipRef.current).catch(() => {});
+              }}
+              className="rounded bg-neutral-800 px-3 py-2 text-sm"
+            >
+              Riquadro
             </button>
           )}
           <button onClick={handleLeave} className="rounded bg-red-600 px-3 py-2 text-sm">

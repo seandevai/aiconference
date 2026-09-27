@@ -67,7 +67,8 @@ function subscribe<T>(set: Set<T>, handler: T): Unsubscribe {
 }
 
 export async function connectToRoom(url: string, token: string): Promise<RealtimeSession> {
-  const room = new Room({ adaptiveStream: true, dynacast: true });
+  // In background il video remoto deve continuare: il PiP lo mostra sopra le altre app.
+  const room = new Room({ adaptiveStream: { pauseVideoInBackground: false }, dynacast: true });
   const facing = createCameraPreference();
 
   // L'audio remoto suona da elementi <audio> nascosti: la UI mostra solo i video.

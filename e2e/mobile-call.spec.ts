@@ -61,3 +61,19 @@ test('switch camera is hidden on a device with a single camera', async ({ browse
   await expect(host.getByRole('button', { name: 'Disattiva camera' })).toBeVisible();
   await expect(host.getByRole('button', { name: 'Gira fotocamera' })).toHaveCount(0);
 });
+
+test('picture-in-picture button opens the video of the other participant', async ({
+  browser,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'headless PiP needs desktop Chromium');
+  const { host, roomUrl } = await signUpHostWithRoom(browser);
+  await joinAsAnonymousGuest(browser, roomUrl);
+  await expect(tiles(host)).toHaveCount(2, { timeout: 30_000 });
+
+  await host.getByRole('button', { name: 'Riquadro' }).click();
+  await expect
+    .poll(() => host.evaluate(() => document.pictureInPictureElement !== null), {
+      timeout: 10_000,
+    })
+    .toBe(true);
+});
