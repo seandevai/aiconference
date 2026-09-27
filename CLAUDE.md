@@ -109,7 +109,18 @@ Codespace (`.devcontainer/`) che avvia Supabase e scrive `.env.local`. `gh` è i
 `C:\Program Files\GitHub CLI\gh.exe` (non nel PATH della sessione).
 
 Branch impilati: `slice/0-fondamenta` (PR #1) → `slice/1-auth-stanza` (PR #2) →
-`slice/2-call` (PR #3) → `slice/3-palco` (PR #4) → `slice/4a-agente` (PR #5) → `slice/5-gesture` (PR #6). Il merge in `main` lo fa Sean.
+`slice/2-call` (PR #3) → `slice/3-palco` (PR #4) → `slice/4a-agente` (PR #5) → `slice/5-gesture` (PR #6)
+→ `slice/mobile-call` (ancora senza PR). Il merge in `main` lo fa Sean.
+
+Call da telefono (`slice/mobile-call`, 27/09): orizzontale, tocco sul volto a tutto schermo,
+«Gira fotocamera», PiP di chi parla. Worktree e2e nel Codespace: `/workspaces/aiconf-mobile`.
+
+Staging (27/09): progetto Vercel `omnicanvas` (Root Directory `apps/web`, install
+`cd ../.. && npm ci`), alias fisso `https://omnicanvas-staging.vercel.app`, Supabase
+`aiconference` (ref `okymzngnbxkwklhfdrjj`, migrazioni 0001-0004), Upstash via Marketplace,
+Deployment Protection disattivata, variabili su Preview. Deploy: `npx vercel deploy --yes`
+poi `npx vercel alias set <url> omnicanvas-staging.vercel.app`. In Git Bash le chiamate
+`npx vercel api /v...` vogliono `MSYS_NO_PATHCONV=1`.
 
 Nel Codespace, `git` via SSH richiede `set -a; . /workspaces/.codespaces/shared/.env; set +a`
 (il token non è esportato nelle sessioni SSH). LiveKit locale: `ws://localhost:7880`,
@@ -119,8 +130,8 @@ Codespace: `pkill -f "[n]ext-server"` (il processo non si chiama `next dev`).
 
 Il passo successivo, in ordine:
 
-1. Sean: merge delle PR #1-#6; task 0.5 (Supabase Cloud, Vercel, LiveKit Cloud,
-   Upstash, `ANTHROPIC_API_KEY`); misura degli spike CPU e iOS Safari; registrazioni
+1. Sean: checklist su telefono `docs/spikes/2026-09-27-spike-mobile-call.md`; merge delle
+   PR #1-#6; task 0.5 fatto il 27/09 (staging sopra); misura degli spike CPU e iOS Safari; registrazioni
    reali delle gesture; test della demo con 5 consulenti (`docs/spikes/`).
 2. Slice 4B (parola chiave, STT, immagini, companion): servono le decisioni di Sean
    (spec §12) e le chiavi dei vendor.

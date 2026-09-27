@@ -133,12 +133,14 @@ di GitHub e nel Codespace (`.devcontainer/`), che avvia Supabase e scrive `.env.
 
 ## Mobile — richieste dal primo test su staging (27/09)
 
-Fuori dalla spec (§2.5 prevede solo la vista mobile base). Da prioritizzare con Sean.
+Fuori dalla spec MVP (§2.5). Fatte su `slice/mobile-call`: spec
+`docs/specs/2026-09-27-mobile-call-design.md`, piano `docs/plans/2026-09-27-mobile-call.md`.
+Verifica su telefono: `docs/spikes/2026-09-27-spike-mobile-call.md`.
 
-- [ ] Orientamento orizzontale: la call si riadatta ruotando il telefono
-- [ ] Tocco su un partecipante: la sua videocamera a tutto schermo, tocco per uscire
-- [ ] Cambio fotocamera anteriore/posteriore da telefono (`facingMode`, in `packages/realtime`)
-- [ ] Picture-in-Picture quando l'app va in background, come WhatsApp e FaceTime.
+- [x] Orientamento orizzontale: la call si riadatta ruotando il telefono
+- [x] Tocco su un partecipante: la sua videocamera a tutto schermo, tocco per uscire
+- [x] Cambio fotocamera anteriore/posteriore da telefono (`facingMode`, in `packages/realtime`)
+- [x] Picture-in-Picture quando l'app va in background, come WhatsApp e FaceTime.
       Limite del browser: in background iOS ferma la fotocamera locale; si vede
       solo il video remoto
 
