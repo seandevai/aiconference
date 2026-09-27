@@ -143,6 +143,15 @@ Verifica su telefono: `docs/spikes/2026-09-27-spike-mobile-call.md`.
 - [x] Picture-in-Picture quando l'app va in background, come WhatsApp e FaceTime.
       Limite del browser: in background iOS ferma la fotocamera locale; si vede
       solo il video remoto
+- [ ] PiP: `openPip` nel gestore Media Session senza `.catch` (rifiuto non gestito)
+- [ ] PiP in bassa qualità: adaptiveStream dimensiona sul riquadro più grande, non sulla
+      finestra PiP (valutare `pixelDensity: 'screen'`)
+- [ ] PiP: cambiando persona si stacca e riattacca lo stesso `<video>`; verificare che il
+      PiP resti aperto (checklist, controllo 10)
+- [ ] Esc del tutto schermo scatta anche mentre si scrive nel palco o all'agente
+- [ ] Pulsante della tessera: il nome accessibile perde lo stato del microfono
+- [ ] Dopo una riconnessione completa tessere, spotlight e PiP restano legati alle tracce
+      della sessione vecchia (da slice 2)
 
 ## Post-MVP
 
