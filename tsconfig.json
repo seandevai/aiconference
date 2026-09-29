@@ -2,8 +2,9 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "types": ["node"],
+    "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": { "@/*": ["apps/web/src/*"] }
   },
-  "include": ["tests/**/*.ts", "e2e/**/*.ts", "vitest.config.ts", "playwright.config.ts"]
+  "include": ["tests/**/*.ts", "tests/**/*.tsx", "e2e/**/*.ts", "vitest.config.ts", "playwright.config.ts"]
 }

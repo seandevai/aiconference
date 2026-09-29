@@ -1,0 +1,19 @@
+/* Token di Nod (spec 2026-09-29, §1). Unica fonte dei colori: nelle schermate niente
+   esadecimali. Il token «text» della spec qui si chiama fg (classe text-fg). */
+@theme {
+  --color-bg: #282828;
+  --color-surface: #303030;
+  --color-stage: #202020;
+  --color-raised: #3a3a3a;
+  --color-line: #3d3d3d;
+  --color-fg: #ededed;
+  --color-muted: #a6a6a6;
+  --color-accent: #c8f25a;
+  --color-on-accent: #202020;
+  --color-danger: #ff6b6b;
+
+  --radius-tile: 10px;
+  --radius-panel: 14px;
+
+  --font-sans: var(--font-manrope), system-ui, sans-serif;
+}
