@@ -46,5 +46,7 @@ yarn-error.log*
 scratch/
 *.stackdump
 .superpowers/
+# Bozze di design (logo, marchio): restano su disco come i mockup
+design/
 
 .vercel
