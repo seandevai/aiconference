@@ -131,6 +131,42 @@ di GitHub e nel Codespace (`.devcontainer/`), che avvia Supabase e scrive `.env.
 - [ ] CI: verificare il job `db` quando `ubuntu-latest` passa a Ubuntu 26 (19/10)
 - [x] CI: job `e2e` su Supabase locale nel runner
 
+## Mobile — richieste dal primo test su staging (27/09)
+
+Fuori dalla spec MVP (§2.5). Fatte su `slice/mobile-call`: spec
+`docs/specs/2026-09-27-mobile-call-design.md`, piano `docs/plans/2026-09-27-mobile-call.md`.
+Verifica su telefono: `docs/spikes/2026-09-27-spike-mobile-call.md`.
+
+- [x] Orientamento orizzontale: la call si riadatta ruotando il telefono
+- [x] Tocco su un partecipante: la sua videocamera a tutto schermo, tocco per uscire
+- [x] Cambio fotocamera anteriore/posteriore da telefono (`facingMode`, in `packages/realtime`)
+- [x] Picture-in-Picture quando l'app va in background, come WhatsApp e FaceTime.
+      Limite del browser: in background iOS ferma la fotocamera locale; si vede
+      solo il video remoto
+- [ ] PiP: `openPip` nel gestore Media Session senza `.catch` (rifiuto non gestito)
+- [ ] PiP in bassa qualità: adaptiveStream dimensiona sul riquadro più grande, non sulla
+      finestra PiP (valutare `pixelDensity: 'screen'`)
+- [ ] PiP: cambiando persona si stacca e riattacca lo stesso `<video>`; verificare che il
+      PiP resti aperto (checklist, controllo 10)
+- [ ] PiP su iPhone (checklist 29/09, Safari iOS 17+): mancava il pulsante «Riquadro».
+      Causa trovata con `?debugpip`: Safari supporta il PiP (`mode: standard`), ma l'ospite
+      era su un PC senza webcam e senza una camera remota il PiP è nascosto per scelta.
+      Pannello `?debugpip` tolto dopo la verifica (29/09): il PiP manuale funziona
+- [x] PiP anche quando l'altro ha la camera spenta: riquadro con iniziale e nome, disegnati
+      su un canvas e mandati nel `<video>` con `captureStream()` (come l'audio di WhatsApp).
+      Da verificare su iPhone
+- [ ] PiP automatico su iPhone (swipe alla home): Safari lo fa solo per un video a tutto
+      schermo nativo, non per un video dentro la pagina. Deciso il 29/09: resta il pulsante
+      «Riquadro», da rendere più visibile nel redesign della UI. Automatico con l'app nativa
+- [ ] Specchio del proprio riquadro con la fotocamera anteriore: da verificare su iPhone
+- [ ] Checklist mobile su Android: ancora da fare (nessun telefono disponibile al 29/09)
+- [ ] UI della call da rifare, desktop e mobile: richiesta di Sean dopo il test del 29/09.
+      Serve una spec prima di iniziare
+- [ ] Esc del tutto schermo scatta anche mentre si scrive nel palco o all'agente
+- [ ] Pulsante della tessera: il nome accessibile perde lo stato del microfono
+- [ ] Dopo una riconnessione completa tessere, spotlight e PiP restano legati alle tracce
+      della sessione vecchia (da slice 2)
+
 ## Post-MVP
 
 - [ ] Piani, prezzi, Stripe
@@ -182,10 +218,16 @@ di GitHub e nel Codespace (`.devcontainer/`), che avvia Supabase e scrive `.env.
 - [ ] Richiesta scritta all'agente: tenerla anche dopo lo STT come via senza microfono?
 - [ ] Contenuti di prova nel vassoio: toglierli quando `AI_PROVIDER=anthropic` è attivo
 - [ ] Prezzi in `packages/ai/src/pricing.ts` scritti a mano: aggiornarli se cambia il listino
-- [ ] Preview Vercel: `AI_PROVIDER=anthropic` e `ANTHROPIC_API_KEY` (con il task 0.5)
+- [x] Preview Vercel: `AI_PROVIDER=anthropic` e `ANTHROPIC_API_KEY` (con il task 0.5)
 - [ ] Registrare gesture reali con `/dev/gesture-recorder` e aggiungerle ai test
 - [ ] CONFIRM/REJECT a gesto non fanno ancora nulla: servono le immagini con conferma (4B)
 - [ ] MediaPipe si scarica da jsdelivr e googleapis: valutare l'hosting dei file
 - [ ] Soglie delle gesture tarate su mani sintetiche: ritararle con le registrazioni reali
-- [ ] Preview Vercel: aggiungere `NEXT_PUBLIC_LIVEKIT_URL`, `LIVEKIT_API_KEY`,
+- [x] Preview Vercel: aggiungere `NEXT_PUBLIC_LIVEKIT_URL`, `LIVEKIT_API_KEY`,
       `LIVEKIT_API_SECRET` del progetto LiveKit Cloud (con il task 0.5)
+- [ ] Advisor Supabase su staging: `search_path` fisso per `ai_reserve_credits`,
+      `ai_record_request`, `grant_credits`; revocare `execute` su `handle_new_user` e
+      `is_workspace_member` da `anon`/`authenticated`; `(select auth.uid())` nelle policy
+- [ ] Upstash di staging creato nella regione predefinita: per la produzione ricrearlo in UE
+- [ ] Vercel: `installCommand` impostato a mano sul progetto (`cd ../.. && npm ci`);
+      valutare `apps/web/vercel.json` per tenerlo nel repo

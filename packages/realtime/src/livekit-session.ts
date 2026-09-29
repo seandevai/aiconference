@@ -1,12 +1,14 @@
 import {
   ConnectionState,
   DisconnectReason,
+  LocalVideoTrack,
   Room,
   RoomEvent,
   Track,
   type Participant,
   type RemoteTrack,
 } from 'livekit-client';
+import { countVideoInputs, createCameraController } from './camera';
 import { assertChannel, decodeData, encodeData } from './data-codec';
 import { sortRoster, toRosterEntry } from './roster';
 import type {
@@ -65,7 +67,18 @@ function subscribe<T>(set: Set<T>, handler: T): Unsubscribe {
 }
 
 export async function connectToRoom(url: string, token: string): Promise<RealtimeSession> {
-  const room = new Room({ adaptiveStream: true, dynacast: true });
+  // In background il video remoto deve continuare: il PiP lo mostra sopra le altre app.
+  const room = new Room({ adaptiveStream: { pauseVideoInBackground: false }, dynacast: true });
+  const camera = createCameraController({
+    isEnabled: () => room.localParticipant.isCameraEnabled,
+    async setEnabled(on, facingMode) {
+      await room.localParticipant.setCameraEnabled(on, on ? { facingMode } : undefined);
+    },
+    async restart(facingMode) {
+      const track = room.localParticipant.getTrackPublication(Track.Source.Camera)?.track;
+      if (track instanceof LocalVideoTrack) await track.restartTrack({ facingMode });
+    },
+  });
 
   // L'audio remoto suona da elementi <audio> nascosti: la UI mostra solo i video.
   const audioSink = document.createElement('div');
@@ -161,8 +174,21 @@ export async function connectToRoom(url: string, token: string): Promise<Realtim
     },
 
     async setCameraEnabled(enabled) {
-      await room.localParticipant.setCameraEnabled(enabled);
+      await camera.setEnabled(enabled);
       emitRoster();
+    },
+
+    async canSwitchCamera() {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      return countVideoInputs(devices) >= 2;
+    },
+
+    async switchCamera() {
+      await camera.switchCamera();
+    },
+
+    cameraFacing() {
+      return camera.facing();
     },
 
     attachVideo(identity, element) {

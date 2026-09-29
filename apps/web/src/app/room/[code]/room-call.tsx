@@ -1,11 +1,17 @@
 'use client';
 
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCall } from '@/lib/call/use-call';
 import { cameraButtonLabel, micButtonLabel } from '@/lib/call/labels';
 import { phaseMessage, type CallPhase } from '@/lib/call/phase';
+import { isMirrored } from '@/lib/call/mirror';
+import { openPip, watchPipSupport } from '@/lib/call/pip';
+import { nextLastSpeaker, pipTarget, resolveSpotlight } from '@/lib/call/spotlight';
 import { useStage } from '@/lib/stage/use-stage';
 import { leaveRoomAction } from './actions';
+import { PipVideo } from './pip-video';
+import { SpotlightView } from './spotlight-view';
 import { StageArea } from './stage-area';
 import { VideoTile } from './video-tile';
 
@@ -15,12 +21,44 @@ const LIVE_PHASES: CallPhase[] = ['connecting', 'connected', 'reconnecting'];
 
 export function RoomCall({ joinCode, role }: Props) {
   const router = useRouter();
-  const { state, session, toggleMic, toggleCamera, startAudio, retry, leave, attachVideo } =
-    useCall(joinCode);
+  const {
+    state,
+    session,
+    toggleMic,
+    toggleCamera,
+    switchCamera,
+    startAudio,
+    retry,
+    leave,
+    attachVideo,
+  } = useCall(joinCode);
   const stageApi = useStage({ joinCode, role, session, roster: state.roster });
   const local = state.roster.find((entry) => entry.isLocal);
   const message = phaseMessage(state.phase);
   const live = LIVE_PHASES.includes(state.phase);
+  const [selected, setSelected] = useState<string | null>(null);
+  const spotlight = resolveSpotlight(selected, state.roster);
+  // Chi esce chiude lo spotlight: senza azzerare, rientrando lo riaprirebbe.
+  if (selected !== null && spotlight === null) setSelected(null);
+  const spotlightEntry = state.roster.find((entry) => entry.identity === spotlight);
+  const closeSpotlight = useCallback(() => setSelected(null), []);
+  const [speaker, setSpeaker] = useState<{ roster: typeof state.roster; id: string | null }>({
+    roster: state.roster,
+    id: null,
+  });
+  // Aggiornato durante il render quando cambia il roster: niente effetto in più.
+  if (speaker.roster !== state.roster) {
+    setSpeaker({ roster: state.roster, id: nextLastSpeaker(speaker.id, state.roster) });
+  }
+  const pipIdentity = pipTarget(state.roster, spotlight, speaker.id);
+  const pipEntry = state.roster.find((entry) => entry.identity === pipIdentity);
+  const pipRef = useRef<HTMLVideoElement>(null);
+  const [pipSupported, setPipSupported] = useState(false);
+  useEffect(() => {
+    const video = pipRef.current;
+    if (!video) return;
+    return watchPipSupport(document, video, setPipSupported);
+  }, [live]);
 
   async function handleLeave() {
     await leave();
@@ -33,18 +71,24 @@ export function RoomCall({ joinCode, role }: Props) {
       <div className="relative flex min-h-0 flex-1">
         <aside
           aria-label="Partecipanti"
-          className="absolute right-2 top-2 z-10 w-16 lg:static lg:w-48 lg:border-r lg:border-neutral-800 lg:p-3"
+          className="absolute right-2 top-2 z-10 w-16 phone-landscape:bottom-2 phone-landscape:w-24 phone-landscape:overflow-y-auto lg:static lg:w-48 lg:border-r lg:border-neutral-800 lg:p-3"
         >
           <ul className="flex flex-col gap-2">
             {state.roster.map((entry) => (
-              <VideoTile key={entry.identity} entry={entry} attachVideo={attachVideo} />
+              <VideoTile
+                key={entry.identity}
+                entry={entry}
+                attachVideo={attachVideo}
+                onSelect={entry.isLocal ? undefined : () => setSelected(entry.identity)}
+                mirrored={isMirrored(entry, state.cameraFacing)}
+              />
             ))}
           </ul>
         </aside>
 
         <section
           aria-label="Palco"
-          className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto p-2 pr-20 lg:p-4"
+          className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto p-2 pr-20 phone-landscape:pr-28 lg:p-4"
         >
           {message && (
             <div
@@ -92,12 +136,32 @@ export function RoomCall({ joinCode, role }: Props) {
             />
           )}
         </section>
+
+        {live && spotlightEntry && (
+          <SpotlightView
+            entry={spotlightEntry}
+            local={local}
+            mirrorSelf={local ? isMirrored(local, state.cameraFacing) : false}
+            attachVideo={attachVideo}
+            onClose={closeSpotlight}
+          />
+        )}
       </div>
+
+      {live && (
+        <PipVideo
+          identity={pipIdentity}
+          name={pipEntry?.name ?? ''}
+          camOn={pipEntry?.camOn ?? false}
+          attachVideo={attachVideo}
+          videoRef={pipRef}
+        />
+      )}
 
       {live && (
         <nav
           aria-label="Controlli della chiamata"
-          className="flex items-center justify-center gap-2 border-t border-neutral-800 px-4 py-2"
+          className="flex items-center justify-center gap-2 border-t border-neutral-800 px-4 py-2 phone-landscape:py-1"
         >
           <button
             onClick={toggleMic}
@@ -113,6 +177,21 @@ export function RoomCall({ joinCode, role }: Props) {
           >
             {cameraButtonLabel(local?.camOn ?? false)}
           </button>
+          {state.canSwitchCamera && (
+            <button onClick={switchCamera} className="rounded bg-neutral-800 px-3 py-2 text-sm">
+              Gira fotocamera
+            </button>
+          )}
+          {pipSupported && pipIdentity && (
+            <button
+              onClick={() => {
+                if (pipRef.current) void openPip(document, pipRef.current).catch(() => {});
+              }}
+              className="rounded bg-neutral-800 px-3 py-2 text-sm"
+            >
+              Riquadro
+            </button>
+          )}
           <button onClick={handleLeave} className="rounded bg-red-600 px-3 py-2 text-sm">
             Esci
           </button>
