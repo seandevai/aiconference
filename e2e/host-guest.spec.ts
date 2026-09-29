@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { joinAsAnonymousGuest, signUpHostWithRoom } from './helpers';
+import { closeParticipants, joinAsAnonymousGuest, signUpHostWithRoom } from './helpers';
+
+test.afterEach(closeParticipants);
 
 test('host creates a room, anonymous guest joins and survives a reload', async ({ browser }) => {
   const { host, roomUrl } = await signUpHostWithRoom(browser);

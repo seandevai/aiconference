@@ -44,6 +44,8 @@ jobs:
           NEXT_PUBLIC_LIVEKIT_URL: ws://127.0.0.1:7880
           LIVEKIT_API_KEY: devkey
           LIVEKIT_API_SECRET: dummy
+          KV_REST_API_URL: http://127.0.0.1:8079
+          KV_REST_API_TOKEN: dummy
 
       - name: Nessun segreto nel bundle client
         run: |
@@ -113,6 +115,12 @@ jobs:
       - name: Start LiveKit
         run: docker run -d --name livekit --network host livekit/livekit-server:v1.13.7 --dev --bind 0.0.0.0
 
+      - name: Start KV
+        run: |
+          docker network create kv
+          docker run -d --name kv-redis --network kv redis:7-alpine
+          docker run -d --name kv-srh --network kv -p 8079:80             -e SRH_MODE=env -e SRH_TOKEN=local_kv_token             -e SRH_CONNECTION_STRING=redis://kv-redis:6379             hiett/serverless-redis-http:0.0.10
+
       # Next legge .env.local dalla root (next.config), quindi lo scriviamo qui.
       - name: Write .env.local
         run: |
@@ -126,6 +134,8 @@ jobs:
             echo "NEXT_PUBLIC_LIVEKIT_URL=ws://localhost:7880"
             echo "LIVEKIT_API_KEY=devkey"
             echo "LIVEKIT_API_SECRET=secret"
+            echo "KV_REST_API_URL=http://localhost:8079"
+            echo "KV_REST_API_TOKEN=local_kv_token"
           } > .env.local
 
       - name: E2E

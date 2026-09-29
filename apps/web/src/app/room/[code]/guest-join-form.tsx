@@ -19,7 +19,12 @@ export function GuestJoinForm({ joinCode }: { joinCode: string }) {
         <h1 className="text-xl font-semibold">Entra nella riunione</h1>
         <label className="flex flex-col gap-1 text-sm">
           Il tuo nome
-          <input name="display_name" required maxLength={40} className="rounded bg-neutral-900 px-3 py-2" />
+          <input
+            name="display_name"
+            required
+            maxLength={40}
+            className="rounded bg-neutral-900 px-3 py-2"
+          />
         </label>
         <label className="flex flex-col gap-1 text-sm">
           In che lingua vuoi leggere gli altri?
@@ -31,13 +36,23 @@ export function GuestJoinForm({ joinCode }: { joinCode: string }) {
             ))}
           </select>
         </label>
-        {state.error && <p role="alert" className="text-sm text-red-400">{state.error}</p>}
-        <button disabled={pending} className="rounded bg-neutral-100 px-4 py-2 text-neutral-900 disabled:opacity-50">
+        {state.error && (
+          <p role="alert" className="text-sm text-red-400">
+            {state.error}
+          </p>
+        )}
+        <button
+          disabled={pending}
+          className="rounded bg-neutral-100 px-4 py-2 text-neutral-900 disabled:opacity-50"
+        >
           Entra
         </button>
         <p className="text-sm text-neutral-400">
           Conduci tu la riunione?{' '}
-          <Link className="underline" href={`/login?next=${encodeURIComponent(`/room/${joinCode}`)}`}>
+          <Link
+            className="underline"
+            href={`/login?next=${encodeURIComponent(`/room/${joinCode}`)}`}
+          >
             Accedi come host
           </Link>
         </p>

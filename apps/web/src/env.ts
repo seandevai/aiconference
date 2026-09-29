@@ -17,6 +17,8 @@ export function serverEnv(): ServerEnv {
     GUEST_SESSION_SECRET: process.env.GUEST_SESSION_SECRET,
     LIVEKIT_API_KEY: process.env.LIVEKIT_API_KEY,
     LIVEKIT_API_SECRET: process.env.LIVEKIT_API_SECRET,
+    KV_REST_API_URL: process.env.KV_REST_API_URL,
+    KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN,
   });
   return cachedServerEnv;
 }

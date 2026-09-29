@@ -58,4 +58,12 @@ describe('devcontainer', () => {
     expect(script).toContain('ensure NEXT_PUBLIC_LIVEKIT_URL');
     expect(script).not.toMatch(/eyJhbGciOi/);
   });
+
+  it('starts a local Upstash-compatible KV', () => {
+    const script = read('.devcontainer/start-services.sh');
+    expect(script).toContain('redis:7-alpine');
+    expect(script).toContain('hiett/serverless-redis-http:0.0.10');
+    expect(script).toContain('ensure KV_REST_API_URL');
+    expect(script).toContain('ensure KV_REST_API_TOKEN');
+  });
 });

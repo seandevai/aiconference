@@ -1,5 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
-import { joinAsAnonymousGuest, signUpHostWithRoom } from './helpers';
+import { closeParticipants, joinAsAnonymousGuest, signUpHostWithRoom } from './helpers';
+
+test.afterEach(closeParticipants);
 
 const tiles = (page: Page) =>
   page.getByRole('complementary', { name: 'Partecipanti' }).getByRole('listitem');

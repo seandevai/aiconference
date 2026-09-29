@@ -46,6 +46,7 @@ const initialState: CallState = {
 
 export function useCall(joinCode: string) {
   const [state, setState] = useState<CallState>(initialState);
+  const [session, setSession] = useState<RealtimeSession | null>(null);
   const sessionRef = useRef<RealtimeSession | null>(null);
   const reconnectorRef = useRef<Reconnector | null>(null);
   // Condiviso con leave(): chi esce mentre una connessione è in volo deve fermarla.
@@ -72,33 +73,35 @@ export function useCall(joinCode: string) {
       }
       if (lifecycle.stopped) return;
 
-      const session = await connectToRoom(credentials.url, credentials.token);
+      const live = await connectToRoom(credentials.url, credentials.token);
       if (lifecycle.stopped) {
-        await session.disconnect();
+        await live.disconnect();
         return;
       }
-      sessionRef.current = session;
-      session.onStatusChange((status) => {
+      sessionRef.current = live;
+      setSession(live);
+      live.onStatusChange((status) => {
         const phase = phaseFromStatus(status);
         if (phase) patch({ phase });
       });
-      session.onRosterChange((roster) => patch({ roster }));
-      session.onAudioBlockedChange((audioBlocked) => patch({ audioBlocked }));
-      session.onDisconnected((cause) => {
+      live.onRosterChange((roster) => patch({ roster }));
+      live.onAudioBlockedChange((audioBlocked) => patch({ audioBlocked }));
+      live.onDisconnected((cause) => {
         sessionRef.current = null;
+        if (!lifecycle.stopped) setSession(null);
         patch({ phase: phaseAfterDisconnect(cause) });
         reconnectorRef.current?.handleDisconnect(cause);
       });
       patch({
         phase: 'connected',
-        roster: session.getRoster(),
-        audioBlocked: session.isAudioBlocked(),
+        roster: live.getRoster(),
+        audioBlocked: live.isAudioBlocked(),
       });
 
       // Microfono e camera separati: se uno manca, l'altro funziona lo stesso.
       const results = await Promise.allSettled([
-        session.setMicrophoneEnabled(true),
-        session.setCameraEnabled(true),
+        live.setMicrophoneEnabled(true),
+        live.setCameraEnabled(true),
       ]);
       patch({
         mediaError: results.some((r) => r.status === 'rejected') ? MEDIA_ERROR_MESSAGE : null,
@@ -142,6 +145,7 @@ export function useCall(joinCode: string) {
     reconnectorRef.current?.cancel();
     await sessionRef.current?.disconnect();
     sessionRef.current = null;
+    setSession(null);
     setState((s) => ({ ...s, phase: 'left', roster: [] }));
   }, []);
 
@@ -151,5 +155,5 @@ export function useCall(joinCode: string) {
     [],
   );
 
-  return { state, toggleMic, toggleCamera, startAudio, retry, leave, attachVideo };
+  return { state, session, toggleMic, toggleCamera, startAudio, retry, leave, attachVideo };
 }

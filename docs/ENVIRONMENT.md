@@ -42,6 +42,9 @@ In locale (Codespace e CI) LiveKit gira con `livekit-server --dev`: URL
 `ws://localhost:7880`, chiave `devkey`, segreto `secret`. Valgono solo per quel server;
 in preview e produzione si usano le chiavi del progetto LiveKit Cloud.
 
+KV in locale (Codespace e CI): Redis 7 dietro `serverless-redis-http`, che espone la
+stessa API REST di Upstash. URL `http://localhost:8079`, token `local_kv_token`.
+
 `SUPABASE_SERVICE_ROLE_KEY` bypassa ogni policy RLS. Va usata solo nelle route
 server che ne hanno davvero bisogno, mai importata in un componente client, mai
 passata a un package che venga incluso nel bundle browser.

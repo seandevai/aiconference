@@ -49,15 +49,15 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 
 ## Slice 3 — Palco
 
-- [ ] `packages/canvas`: Stage, Window, Content, riduttori puri
-- [ ] Slot magnetici: 1 grande più 3 piccole, aggancio al rilascio
-- [ ] Vassoio e archiviazione
-- [ ] Sincronizzazione a scrittore unico: `version`, comandi via DataChannel
-- [ ] Snapshot in KV e ripartenza di chi entra tardi o si riconnette
-- [ ] Trasferimento immagini via byte stream, mai su storage
-- [ ] Ogni comando raggiungibile col mouse
-- [ ] Vista mobile A: finestra in primo piano, segue l'host, swipe per sbirciare
-- [ ] Contenuti finti per provare il palco senza agente
+- [x] `packages/canvas`: Stage, Window, Content, riduttori puri
+- [x] Slot magnetici: 1 grande più 3 piccole, aggancio al rilascio
+- [x] Vassoio e archiviazione
+- [x] Sincronizzazione a scrittore unico: `version`, comandi via DataChannel
+- [x] Snapshot in KV e ripartenza di chi entra tardi o si riconnette
+- [x] Trasferimento immagini via byte stream, mai su storage
+- [x] Ogni comando raggiungibile col mouse
+- [x] Vista mobile A: finestra in primo piano, segue l'host, swipe per sbirciare
+- [x] Contenuti finti per provare il palco senza agente
 
 ## Slice 4 — Agente
 
@@ -167,5 +167,11 @@ di GitHub e nel Codespace (`.devcontainer/`), che avvia Supabase e scrive `.env.
 - [ ] Token route senza rate limit: gratuita, ma va limitata prima del lancio
 - [ ] Chi chiude la scheda senza «Esci» lascia la riga aperta: la chiude la purga (slice 8)
 - [ ] Rimuovere `/dev/spike-cpu` e le sue dipendenze dopo la misura
+- [ ] L'host che ricarica perde i byte delle immagini: recuperarli da un ospite che li ha
+- [ ] Contenuto `file` (documenti caricati) non ancora supportato dal palco
+- [ ] `room:{id}:presence` in KV non serve finché LiveKit dà la presence: rivedere
+- [ ] Contenuti di prova nel vassoio: nasconderli quando arriva l'agente (slice 4)
+- [ ] Nessun heartbeat di versione: un ospite che perde l'ultimo comando resta indietro
+      fino al comando successivo
 - [ ] Preview Vercel: aggiungere `NEXT_PUBLIC_LIVEKIT_URL`, `LIVEKIT_API_KEY`,
       `LIVEKIT_API_SECRET` del progetto LiveKit Cloud (con il task 0.5)
