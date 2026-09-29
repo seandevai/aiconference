@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": { "@/*": ["apps/web/src/*"] }
+  },
+  "include": ["tests/**/*.ts", "e2e/**/*.ts", "vitest.config.ts", "playwright.config.ts"]
+}

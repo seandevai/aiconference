@@ -21,6 +21,7 @@ attive**. Se una tabella non ha RLS, quella chiave la espone a Internet.
 | nome | uso |
 |---|---|
 | `SUPABASE_SERVICE_ROLE_KEY` | scritture su ledger e job di purga. Bypassa RLS |
+| `GUEST_SESSION_SECRET` | firma HMAC del cookie dell'ospite senza account. Almeno 32 caratteri |
 | `LIVEKIT_API_KEY` | firma dei token di stanza |
 | `LIVEKIT_API_SECRET` | firma dei token di stanza |
 | `DEEPGRAM_API_KEY` | emissione dei token STT a vita breve. Mai esposta al client (ADR-0006) |
