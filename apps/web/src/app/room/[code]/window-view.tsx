@@ -1,5 +1,6 @@
 import type { StageCommand, StageWindow } from '@omnicanvas/canvas';
 import type { DragItem } from '@/lib/stage/drop';
+import { Button } from '@omnicanvas/ui';
 import { ContentView } from './content-view';
 
 export type { DragItem };
@@ -22,7 +23,9 @@ export function WindowView({ window, assetUrls, dispatch }: Props) {
   return (
     <article
       aria-label={window.title}
-      className="flex h-full flex-col gap-2 rounded border border-neutral-700 bg-neutral-900 p-2"
+      className={`flex h-full flex-col gap-2 rounded-tile border bg-raised p-3 ${
+        window.slot === 'main' ? 'border-accent' : 'border-line'
+      }`}
     >
       <header
         data-drag-type="window"
@@ -31,28 +34,25 @@ export function WindowView({ window, assetUrls, dispatch }: Props) {
         onDragStart={editable ? startDrag({ type: 'window', id: window.id }) : undefined}
         className={`flex items-center justify-between gap-2 ${editable ? 'cursor-grab' : ''}`}
       >
-        <h2 className="truncate text-sm font-medium">{window.title}</h2>
+        <h2 className="truncate text-sm font-semibold">{window.title}</h2>
         {dispatch && (
           <div className="flex gap-1">
             {window.slot !== 'main' && (
-              <button
-                onClick={() => dispatch({ type: 'FOCUS', windowId: window.id })}
-                className="rounded bg-neutral-800 px-2 py-0.5 text-xs"
-              >
+              <Button size="sm" onClick={() => dispatch({ type: 'FOCUS', windowId: window.id })}>
                 Metti in primo piano
-              </button>
+              </Button>
             )}
-            <button
+            <Button
+              size="sm"
               onClick={() => dispatch({ type: 'WINDOW_ARCHIVE', windowId: window.id })}
-              className="rounded bg-neutral-800 px-2 py-0.5 text-xs"
             >
               Archivia finestra
-            </button>
+            </Button>
           </div>
         )}
       </header>
       {window.contents.length === 0 ? (
-        <p className="text-xs text-neutral-500">Finestra vuota</p>
+        <p className="text-xs text-muted">Finestra vuota</p>
       ) : (
         <ul className="flex min-h-0 flex-col gap-3 overflow-auto">
           {window.contents.map((content) => (
@@ -71,12 +71,13 @@ export function WindowView({ window, assetUrls, dispatch }: Props) {
                 }
               />
               {dispatch && (
-                <button
+                <Button
+                  size="sm"
+                  className="w-fit"
                   onClick={() => dispatch({ type: 'CONTENT_REMOVE', contentId: content.id })}
-                  className="w-fit rounded bg-neutral-800 px-2 py-0.5 text-xs"
                 >
                   Rimetti nel vassoio
-                </button>
+                </Button>
               )}
             </li>
           ))}

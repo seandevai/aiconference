@@ -52,7 +52,7 @@ export function StageBoard({ stage, assetUrls, dispatch }: Props) {
         {window ? (
           <WindowView window={window} assetUrls={assetUrls} dispatch={dispatch} />
         ) : (
-          <div className="flex h-full items-center justify-center rounded border border-dashed border-neutral-800 text-xs text-neutral-600">
+          <div className="flex h-full items-center justify-center rounded-tile border border-dashed border-line text-xs text-muted">
             {slot === 'main' ? 'Nessuna finestra' : 'Slot libero'}
           </div>
         )}
