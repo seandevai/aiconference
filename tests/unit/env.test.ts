@@ -37,4 +37,13 @@ describe('env', () => {
       /GUEST_SESSION_SECRET/,
     );
   });
+
+  it('rejects the .env.example placeholder', () => {
+    expect(() =>
+      parseServerEnv({
+        ...serverOk,
+        GUEST_SESSION_SECRET: 'sostituisci_con_64_caratteri_esadecimali_casuali_0000000000000000',
+      }),
+    ).toThrow(/GUEST_SESSION_SECRET/);
+  });
 });

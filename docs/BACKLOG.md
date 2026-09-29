@@ -16,21 +16,22 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 - [x] Spec v3 dopo il brainstorming del 23/09, architettura e modello dati allineati
 - [x] `npm install` e workspace funzionante
 - [x] Scaffolding Next.js in `apps/web` con TypeScript strict
+- [x] Supabase inizializzato in locale (`supabase init`, migrazioni)
+- [x] Migrazione 0001: profiles, workspaces, workspace_members, con RLS (verificato su Supabase in CI)
+- [x] Test che prova l'accesso RLS da utente non autorizzato (verificato su Supabase in CI)
 - [ ] Progetto Supabase creato, credenziali in `.env.local`
-- [ ] Migrazione 0001: profiles, workspaces, workspace_members, con RLS
-- [ ] Test che prova l'accesso RLS da utente non autorizzato
 - [ ] Deploy preview su Vercel funzionante
 
 ## Slice 1 — Auth e stanza
 
-- [ ] Registrazione, login e logout dell'host
-- [ ] Workspace personale creato alla registrazione
-- [ ] Migrazione 0002: rooms, room_participants (ruolo, lingua), con RLS
-- [ ] Creazione stanza e generazione join code
-- [ ] Ingresso ospite da link senza account: nome, lingua, riga in room_participants
-- [ ] Controlli permessi server-side all'ingresso
-- [ ] Shell UI: colonna video stretta e palco vuoto
-- [ ] Errori: stanza inesistente, chiusa, senza permesso
+- [x] Registrazione, login e logout dell'host
+- [x] Workspace personale creato alla registrazione
+- [x] Migrazione 0002: rooms, room_participants (ruolo, lingua), con RLS (verificato su Supabase in CI)
+- [x] Creazione stanza e generazione join code (verificato su Supabase in CI)
+- [x] Ingresso ospite da link senza account: nome, lingua, riga in room_participants (verificato su Supabase in CI)
+- [x] Controlli permessi server-side all'ingresso (verificato su Supabase in CI)
+- [x] Shell UI: colonna video stretta e palco vuoto
+- [x] Errori: stanza inesistente, chiusa, senza permesso
 
 ## Slice 2 — Call
 
@@ -108,6 +109,24 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 - [ ] Job di purga delle stanze abbandonate
 - [ ] Test: dopo la purga i dati di sessione non esistono
 
+## Da verificare su Supabase reale
+
+Docker locale non disponibile (virtualizzazione spenta nel BIOS). Si verifica nella CI
+di GitHub e nel Codespace (`.devcontainer/`), che avvia Supabase e scrive `.env.local`.
+
+- [x] `npm run test:db` (rls-workspaces, rls-rooms, create-room, join-room): 22 test
+      verdi nel job `db` della CI, PR #1 e #2 del 25/09
+- [x] `npx supabase db reset` nel Codespace
+- [x] `npm run db:types` e confronto con i tipi scritti a mano in `packages/db`: colonne
+      e nullabilità identiche, file sostituito col generato
+- [x] `npm run test:e2e` completo (host e ospite, desktop e mobile): 4/4 nel Codespace
+- [x] prove manuali dei task 1.1, 1.4, 1.7 del piano: 14 controlli automatizzati con
+      Playwright e query SQL nel Codespace, screenshot a 390px verificato
+- [ ] task 0.5: Supabase Cloud + Vercel preview
+- [x] CI: `actions/checkout@v7`, `setup-node@v7`, `supabase/setup-cli@v3`
+- [ ] CI: verificare il job `db` quando `ubuntu-latest` passa a Ubuntu 26 (19/10)
+- [x] CI: job `e2e` su Supabase locale nel runner
+
 ## Post-MVP
 
 - [ ] Piani, prezzi, Stripe
@@ -128,6 +147,18 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 - [ ] Scegliere il provider di immagini su costo e latenza
 - [ ] Firmare i DPA con vendor STT e LLM, zero retention per iscritto
 - [ ] Misurare i costi reali e decidere l'economia
-- [ ] `apps/web/src/app/layout.tsx` ha ancora il boilerplate di `create-next-app`
-      (`lang="en"`, titolo/metadata in inglese): fuori scope del task 0.2, da
-      sistemare quando si scrive il layout reale (slice 0/1)
+- [ ] Indice unico host senza filtro `left_at`: l'host non rientra dopo l'uscita
+      (slice 2)
+- [ ] Ospite anonimo che reinvia il form crea righe aperte orfane; action pubblica
+      senza rate limit
+- [ ] Cookie ospite con path `/room/<code>`: le route di token della slice 2 vanno
+      sotto quel path
+- [ ] Codice stanza case-sensitive: normalizzare maiuscolo/trim quando si digita a
+      mano
+- [x] Tipi `packages/db` scritti a mano: rigenerare
+- [ ] `profiles.display_name` vuoto alla registrazione resta `''`: usare
+      `nullif(trim(...),'')` e un check di lunghezza
+- [ ] `rooms.created_by` senza `on delete`: blocca la cancellazione account quando
+      arriveranno workspace multi-membro (GDPR)
+- [ ] la pagina stanza scrive `room_participants` su GET: rivedere con la presence
+      della slice 2
