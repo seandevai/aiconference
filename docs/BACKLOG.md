@@ -35,15 +35,17 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 
 ## Slice 2 — Call
 
-- [ ] `packages/realtime` sopra LiveKit: audio, video, `sendData`, `sendBytes`
-- [ ] Token di stanza emessi lato server, per host e ospite
-- [ ] Audio e video, 2+ partecipanti, mute e camera on/off
-- [ ] Presence via DataChannel, mai su Postgres
-- [ ] Riconnessione con backoff e stato visibile
-- [ ] Vista mobile base da browser
-- [ ] Test del ciclo di vita con due client
+- [x] `packages/realtime` sopra LiveKit: audio, video, `sendData`, `sendBytes`
+- [x] Token di stanza emessi lato server, per host e ospite
+- [x] Audio e video, 2+ partecipanti, mute e camera on/off
+- [x] Presence dagli eventi LiveKit, mai su Postgres
+- [x] Riconnessione con backoff e stato visibile
+- [x] Vista mobile base da browser
+- [x] Test del ciclo di vita con due client (`e2e/call.spec.ts`)
 - [ ] **Spike CPU (mezza giornata):** MediaPipe + encode WebRTC + parola chiave + STT
-- [ ] **Spike iOS Safari:** audio, video e DataChannel su iPhone reale
+      (protocollo e pagina `/dev/spike-cpu` pronti, misura di Sean)
+- [ ] **Spike iOS Safari:** audio, video e DataChannel su iPhone reale (protocollo
+      pronto, serve la preview con LiveKit Cloud, misura di Sean)
 
 ## Slice 3 — Palco
 
@@ -59,7 +61,7 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 
 ## Slice 4 — Agente
 
-- [ ] Migrazione 0003: ai_requests, credit_ledger, con RLS in sola lettura
+- [ ] Migrazione 0004: ai_requests, credit_ledger, con RLS in sola lettura
 - [ ] `AIService` con risoluzione del pagante e quota **prima** del provider
 - [ ] Scrittura ledger a ogni chiamata, anche fallita; rate limit
 - [ ] Crediti caricati a mano (`manual_grant`)
@@ -100,7 +102,7 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 
 ## Slice 8 — Pacchetto
 
-- [ ] Migrazione 0004: bundles, con RLS
+- [ ] Migrazione 0005: bundles, con RLS
 - [ ] `packages/bundle`: raccolta, ZIP, cifratura AES-GCM nel browser
 - [ ] Upload firmato su R2 con lifecycle 7 giorni
 - [ ] Pagina `/p/<id>` che decifra nel browser, senza script di terze parti
@@ -147,11 +149,11 @@ di GitHub e nel Codespace (`.devcontainer/`), che avvia Supabase e scrive `.env.
 - [ ] Scegliere il provider di immagini su costo e latenza
 - [ ] Firmare i DPA con vendor STT e LLM, zero retention per iscritto
 - [ ] Misurare i costi reali e decidere l'economia
-- [ ] Indice unico host senza filtro `left_at`: l'host non rientra dopo l'uscita
+- [x] Indice unico host senza filtro `left_at`: l'host non rientra dopo l'uscita
       (slice 2)
 - [ ] Ospite anonimo che reinvia il form crea righe aperte orfane; action pubblica
       senza rate limit
-- [ ] Cookie ospite con path `/room/<code>`: le route di token della slice 2 vanno
+- [x] Cookie ospite con path `/room/<code>`: le route di token della slice 2 vanno
       sotto quel path
 - [ ] Codice stanza case-sensitive: normalizzare maiuscolo/trim quando si digita a
       mano
@@ -162,3 +164,8 @@ di GitHub e nel Codespace (`.devcontainer/`), che avvia Supabase e scrive `.env.
       arriveranno workspace multi-membro (GDPR)
 - [ ] la pagina stanza scrive `room_participants` su GET: rivedere con la presence
       della slice 2
+- [ ] Token route senza rate limit: gratuita, ma va limitata prima del lancio
+- [ ] Chi chiude la scheda senza «Esci» lascia la riga aperta: la chiude la purga (slice 8)
+- [ ] Rimuovere `/dev/spike-cpu` e le sue dipendenze dopo la misura
+- [ ] Preview Vercel: aggiungere `NEXT_PUBLIC_LIVEKIT_URL`, `LIVEKIT_API_KEY`,
+      `LIVEKIT_API_SECRET` del progetto LiveKit Cloud (con il task 0.5)

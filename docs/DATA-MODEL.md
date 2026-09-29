@@ -72,7 +72,7 @@ per il costo per sessione.
 | joined_at, left_at | timestamptz | |
 | duration_seconds | integer | calcolato all'uscita |
 
-Vincolo: un solo `host` per stanza (indice unico parziale su `room_id where role = 'host'`).
+Vincolo: un solo `host` presente per stanza (indice unico parziale su `room_id where role = 'host' and left_at is null`, migrazione 0003). L'host che esce rientra con una riga nuova.
 
 ### ai_requests
 Il registro dei costi. Nessun testo.

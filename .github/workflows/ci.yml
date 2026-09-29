@@ -41,6 +41,9 @@ jobs:
           NEXT_PUBLIC_APP_URL: http://localhost:3000
           SUPABASE_SERVICE_ROLE_KEY: dummy
           GUEST_SESSION_SECRET: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+          NEXT_PUBLIC_LIVEKIT_URL: ws://127.0.0.1:7880
+          LIVEKIT_API_KEY: devkey
+          LIVEKIT_API_SECRET: dummy
 
       - name: Nessun segreto nel bundle client
         run: |
@@ -107,6 +110,9 @@ jobs:
       - name: Start Supabase
         run: supabase start
 
+      - name: Start LiveKit
+        run: docker run -d --name livekit --network host livekit/livekit-server:v1.13.7 --dev --bind 0.0.0.0
+
       # Next legge .env.local dalla root (next.config), quindi lo scriviamo qui.
       - name: Write .env.local
         run: |
@@ -117,6 +123,9 @@ jobs:
             echo "NEXT_PUBLIC_APP_URL=http://localhost:3000"
             echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
             echo "GUEST_SESSION_SECRET=$(openssl rand -hex 32)"
+            echo "NEXT_PUBLIC_LIVEKIT_URL=ws://localhost:7880"
+            echo "LIVEKIT_API_KEY=devkey"
+            echo "LIVEKIT_API_SECRET=secret"
           } > .env.local
 
       - name: E2E

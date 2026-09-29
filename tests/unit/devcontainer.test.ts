@@ -29,8 +29,8 @@ describe('devcontainer', () => {
     expect(Object.keys(config.features).some((f) => f.includes('/sshd:'))).toBe(true);
   });
 
-  it('forwards app, Supabase API and Studio ports', () => {
-    expect(config.forwardPorts).toEqual(expect.arrayContaining([3000, 54321, 54323]));
+  it('forwards app, Supabase API, Studio and LiveKit ports', () => {
+    expect(config.forwardPorts).toEqual(expect.arrayContaining([3000, 54321, 54323, 7880]));
   });
 
   it('installs deps and the Playwright browser on create', () => {
@@ -38,16 +38,24 @@ describe('devcontainer', () => {
     expect(config.postCreateCommand).toMatch(/playwright install --with-deps chromium/);
   });
 
-  it('starts Supabase through a script that exists', () => {
+  it('starts local services through a script that exists', () => {
     const script = config.postStartCommand.match(/\.devcontainer\/[\w-]+\.sh/)?.[0];
-    expect(script).toBeDefined();
+    expect(script).toBe('.devcontainer/start-services.sh');
     expect(existsSync(new URL(script!, root))).toBe(true);
   });
 
-  it('writes .env.local without secrets committed to the script', () => {
-    const script = read('.devcontainer/start-supabase.sh');
+  it('starts Supabase and a pinned LiveKit dev server', () => {
+    const script = read('.devcontainer/start-services.sh');
+    expect(script).toContain('npx supabase start');
+    expect(script).toContain('livekit/livekit-server:v1.13.7');
+    expect(script).toContain('--dev');
+  });
+
+  it('completes .env.local without secrets committed to the script', () => {
+    const script = read('.devcontainer/start-services.sh');
     expect(script).toContain('supabase status -o env');
     expect(script).toContain('openssl rand -hex 32');
+    expect(script).toContain('ensure NEXT_PUBLIC_LIVEKIT_URL');
     expect(script).not.toMatch(/eyJhbGciOi/);
   });
 });

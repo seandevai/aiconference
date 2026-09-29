@@ -5,11 +5,14 @@ const clientOk = {
   NEXT_PUBLIC_SUPABASE_URL: 'http://127.0.0.1:54321',
   NEXT_PUBLIC_SUPABASE_ANON_KEY: 'anon',
   NEXT_PUBLIC_APP_URL: 'http://localhost:3000',
+  NEXT_PUBLIC_LIVEKIT_URL: 'ws://localhost:7880',
 };
 
 const serverOk = {
   SUPABASE_SERVICE_ROLE_KEY: 'service',
   GUEST_SESSION_SECRET: 'x'.repeat(32),
+  LIVEKIT_API_KEY: 'devkey',
+  LIVEKIT_API_SECRET: 'secret',
 };
 
 describe('env', () => {
@@ -26,6 +29,24 @@ describe('env', () => {
     expect(() => parseClientEnv({ ...clientOk, NEXT_PUBLIC_SUPABASE_URL: 'not-a-url' })).toThrow(
       /NEXT_PUBLIC_SUPABASE_URL/,
     );
+  });
+
+  it('accepts a wss livekit url', () => {
+    expect(
+      parseClientEnv({ ...clientOk, NEXT_PUBLIC_LIVEKIT_URL: 'wss://demo.livekit.cloud' })
+        .NEXT_PUBLIC_LIVEKIT_URL,
+    ).toBe('wss://demo.livekit.cloud');
+  });
+
+  it('rejects an http livekit url', () => {
+    expect(() =>
+      parseClientEnv({ ...clientOk, NEXT_PUBLIC_LIVEKIT_URL: 'https://demo.livekit.cloud' }),
+    ).toThrow(/NEXT_PUBLIC_LIVEKIT_URL/);
+  });
+
+  it('names a missing livekit secret', () => {
+    const { LIVEKIT_API_SECRET: _omitted, ...incomplete } = serverOk;
+    expect(() => parseServerEnv(incomplete)).toThrow(/LIVEKIT_API_SECRET/);
   });
 
   it('accepts a valid server env', () => {
