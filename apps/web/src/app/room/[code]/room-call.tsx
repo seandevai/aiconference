@@ -15,11 +15,11 @@ import { SpotlightView } from './spotlight-view';
 import { StageArea } from './stage-area';
 import { VideoTile } from './video-tile';
 
-type Props = { joinCode: string; role: 'host' | 'guest' };
+type Props = { joinCode: string; role: 'host' | 'guest'; showSamples: boolean };
 
 const LIVE_PHASES: CallPhase[] = ['connecting', 'connected', 'reconnecting'];
 
-export function RoomCall({ joinCode, role }: Props) {
+export function RoomCall({ joinCode, role, showSamples }: Props) {
   const router = useRouter();
   const {
     state,
@@ -128,6 +128,7 @@ export function RoomCall({ joinCode, role }: Props) {
               session={session}
               cameraOn={local?.camOn ?? false}
               role={role}
+              showSamples={showSamples}
               stage={stageApi.stage}
               ready={stageApi.ready}
               assetUrls={stageApi.assetUrls}

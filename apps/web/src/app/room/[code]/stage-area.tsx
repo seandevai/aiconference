@@ -15,6 +15,7 @@ type Props = {
   session: RealtimeSession | null;
   cameraOn: boolean;
   role: 'host' | 'guest';
+  showSamples: boolean;
   stage: Stage;
   ready: boolean;
   assetUrls: Record<string, string>;
@@ -43,7 +44,16 @@ export function StageArea(props: Props) {
 }
 
 // Ramo dell'host: possiede gli hook di agente e gesture (solo l'host comanda il palco).
-function HostStage({ joinCode, session, cameraOn, stage, assetUrls, dispatch, addImage }: Props) {
+function HostStage({
+  joinCode,
+  session,
+  cameraOn,
+  showSamples,
+  stage,
+  assetUrls,
+  dispatch,
+  addImage,
+}: Props) {
   const areaRef = useRef<HTMLDivElement>(null);
   const [agentOpen, setAgentOpen] = useState(false);
   const gestures = useGestures({
@@ -100,7 +110,7 @@ function HostStage({ joinCode, session, cameraOn, stage, assetUrls, dispatch, ad
         </button>
       </div>
       <StageBoard stage={stage} assetUrls={assetUrls} dispatch={dispatch} />
-      <Tray stage={stage} dispatch={dispatch} addImage={addImage} />
+      <Tray stage={stage} dispatch={dispatch} addImage={addImage} showSamples={showSamples} />
     </div>
   );
 }

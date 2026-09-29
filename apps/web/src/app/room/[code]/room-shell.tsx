@@ -1,10 +1,16 @@
 import { RoomCall } from './room-call';
 
-type Props = { joinCode: string; title: string; role: 'host' | 'guest'; displayName: string };
+type Props = {
+  joinCode: string;
+  title: string;
+  role: 'host' | 'guest';
+  displayName: string;
+  showSamples: boolean;
+};
 
 // Desktop: colonna volti stretta a sinistra, palco al resto (ADR-0009).
 // Mobile: il palco occupa quasi tutto, i volti restano piccoli a lato (spec §2.5).
-export function RoomShell({ joinCode, title, role, displayName }: Props) {
+export function RoomShell({ joinCode, title, role, displayName, showSamples }: Props) {
   return (
     <div className="flex h-dvh flex-col bg-neutral-950 text-neutral-100">
       <header className="flex items-center justify-between gap-3 border-b border-neutral-800 px-4 py-2 phone-landscape:hidden">
@@ -18,7 +24,7 @@ export function RoomShell({ joinCode, title, role, displayName }: Props) {
         </div>
       </header>
 
-      <RoomCall joinCode={joinCode} role={role} />
+      <RoomCall joinCode={joinCode} role={role} showSamples={showSamples} />
     </div>
   );
 }

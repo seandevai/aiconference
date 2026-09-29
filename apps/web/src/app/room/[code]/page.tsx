@@ -4,6 +4,7 @@ import { serverEnv } from '@/env';
 import { guestCookieName, verifyGuestToken } from '@/lib/rooms/guest-token';
 import { isValidJoinCode } from '@/lib/rooms/join-code';
 import { findActiveParticipant, joinRoom } from '@/lib/rooms/join-room';
+import { showSampleContent } from '@/lib/stage/sample-content';
 import { createAdminSupabase } from '@/lib/supabase/admin';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { RoomEnded } from './ended';
@@ -14,6 +15,7 @@ export default async function RoomPage({ params }: { params: Promise<{ code: str
   const { code } = await params;
   if (!isValidJoinCode(code)) notFound();
 
+  const showSamples = showSampleContent(serverEnv().AI_PROVIDER);
   const admin = createAdminSupabase();
   const supabase = await createServerSupabase();
   const { data: auth } = await supabase.auth.getUser();
@@ -42,6 +44,7 @@ export default async function RoomPage({ params }: { params: Promise<{ code: str
         title={result.room.title}
         role={result.role}
         displayName={displayName}
+        showSamples={showSamples}
       />
     );
   }
@@ -69,6 +72,7 @@ export default async function RoomPage({ params }: { params: Promise<{ code: str
         title={room.title}
         role={participant.role}
         displayName={participant.displayName}
+        showSamples={showSamples}
       />
     );
   }
