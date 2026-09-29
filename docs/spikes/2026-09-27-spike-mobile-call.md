@@ -21,3 +21,7 @@ Da fare su un iPhone (Safari) e un Android (Chrome), host da desktop.
 
 Modello, versione del sistema, browser, data, esiti. Ogni controllo fallito diventa una
 voce nel BACKLOG con il sintomo esatto.
+
+**29/09, iPhone, Safari iOS 17+ (Sean).** Controlli 1-7 ok. Controllo 8: il pulsante
+«Riquadro» non compare. Controllo 9: il PiP automatico non parte. Controlli 10-11 non
+verificabili senza PiP. Android non ancora provato.

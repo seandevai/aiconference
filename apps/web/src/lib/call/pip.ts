@@ -18,6 +18,19 @@ export function pipMode(doc: PipDocLike, video: PipVideoLike): PipMode {
   return null;
 }
 
+// WebKit (iPhone) dice se il PiP è possibile solo quando il video ha già un media player:
+// appena entrati in call il video è vuoto e la risposta è «no». Si richiede ai metadati.
+export function watchPipSupport(
+  doc: PipDocLike,
+  video: PipVideoLike,
+  onChange: (supported: boolean) => void,
+): () => void {
+  const check = () => onChange(pipMode(doc, video) !== null);
+  check();
+  video.addEventListener?.('loadedmetadata', check);
+  return () => video.removeEventListener?.('loadedmetadata', check);
+}
+
 const HAVE_METADATA = 1;
 const METADATA_WAIT_MS = 3_000;
 

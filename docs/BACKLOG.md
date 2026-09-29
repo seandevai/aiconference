@@ -148,6 +148,15 @@ Verifica su telefono: `docs/spikes/2026-09-27-spike-mobile-call.md`.
       finestra PiP (valutare `pixelDensity: 'screen'`)
 - [ ] PiP: cambiando persona si stacca e riattacca lo stesso `<video>`; verificare che il
       PiP resti aperto (checklist, controllo 10)
+- [ ] PiP su iPhone (checklist 29/09, Safari iOS 17+): mancava il pulsante «Riquadro».
+      Causa probabile: WebKit risponde al controllo di supporto solo con il video già
+      caricato, e il controllo si faceva prima. Corretto (`watchPipSupport`): da riverificare
+- [ ] PiP automatico su iPhone: andando alla home non parte. Ipotesi: iOS lo concede solo
+      al video «principale», visibile e con una dimensione minima, mentre il nostro è di 1 px
+      e trasparente. Da indagare dopo il PiP manuale
+- [ ] Checklist mobile su Android: ancora da fare (nessun telefono disponibile al 29/09)
+- [ ] UI della call da rifare, desktop e mobile: richiesta di Sean dopo il test del 29/09.
+      Serve una spec prima di iniziare
 - [ ] Esc del tutto schermo scatta anche mentre si scrive nel palco o all'agente
 - [ ] Pulsante della tessera: il nome accessibile perde lo stato del microfono
 - [ ] Dopo una riconnessione completa tessere, spotlight e PiP restano legati alle tracce

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCall } from '@/lib/call/use-call';
 import { cameraButtonLabel, micButtonLabel } from '@/lib/call/labels';
 import { phaseMessage, type CallPhase } from '@/lib/call/phase';
-import { openPip, pipMode } from '@/lib/call/pip';
+import { openPip, watchPipSupport } from '@/lib/call/pip';
 import { nextLastSpeaker, pipTarget, resolveSpotlight } from '@/lib/call/spotlight';
 import { useStage } from '@/lib/stage/use-stage';
 import { leaveRoomAction } from './actions';
@@ -53,7 +53,9 @@ export function RoomCall({ joinCode, role }: Props) {
   const pipRef = useRef<HTMLVideoElement>(null);
   const [pipSupported, setPipSupported] = useState(false);
   useEffect(() => {
-    if (pipRef.current) setPipSupported(pipMode(document, pipRef.current) !== null);
+    const video = pipRef.current;
+    if (!video) return;
+    return watchPipSupport(document, video, setPipSupported);
   }, [live]);
 
   async function handleLeave() {

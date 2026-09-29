@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { openPip, pipMode } from '@/lib/call/pip';
+import { openPip, pipMode, watchPipSupport } from '@/lib/call/pip';
 
 describe('pipMode', () => {
   it('uses the standard API when the document allows it', () => {
@@ -57,5 +57,27 @@ describe('openPip', () => {
 
   it('does nothing without support', async () => {
     await expect(openPip({}, {})).resolves.toBe(false);
+  });
+});
+
+describe('watchPipSupport', () => {
+  it('checks again once the video has media, as WebKit answers only then', () => {
+    const listeners: Record<string, () => void> = {};
+    let hasPlayer = false;
+    const video = {
+      webkitSupportsPresentationMode: (mode: string) => hasPlayer && mode === 'picture-in-picture',
+      addEventListener: (type: string, listener: () => void) => {
+        listeners[type] = listener;
+      },
+      removeEventListener: vi.fn(),
+    };
+    const onChange = vi.fn();
+    const stop = watchPipSupport({}, video, onChange);
+    expect(onChange).toHaveBeenLastCalledWith(false);
+    hasPlayer = true;
+    listeners.loadedmetadata?.();
+    expect(onChange).toHaveBeenLastCalledWith(true);
+    stop();
+    expect(video.removeEventListener).toHaveBeenCalledWith('loadedmetadata', listeners.loadedmetadata);
   });
 });
