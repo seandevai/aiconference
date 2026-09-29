@@ -97,8 +97,9 @@ Sostituire il segnaposto è un cambio di un solo file. Il nome compare solo nell
      barra lime animata e «sta lavorando».
   2. Vassoio: contenuti prodotti, trascinabili sul palco, ciascuno con il menu «Metti in…»
      come click equivalente (ADR-0005).
-  3. Gesture: interruttore e anteprima piccola della camera; bordo lime quando il palmo
-     arma il gesto.
+  3. Gesture: interruttore e messaggio di stato; bordo lime quando il palmo arma il gesto.
+     Nessuna anteprima della camera: il video di MediaPipe resta invisibile (ADR-0010) e
+     l'host si vede già nella barra alta.
 - **Palco** (`stage`): barra sottile con finestra precedente/successiva, «Finestra N di M»
   e «＋ Nuova finestra»; finestre negli slot magnetici come oggi, bordo lime sull'attiva.
 - **Controlli della call**: Microfono, Camera, Riquadro, Gira fotocamera (solo con due
@@ -129,7 +130,7 @@ Sostituire il segnaposto è un cambio di un solo file. Il nome compare solo nell
 | Componente | Cosa fa |
 |---|---|
 | `Logo` | segnaposto SVG finché non arriva quello definitivo |
-| `Button` | varianti `pill`, `accent`, `exit`, `icon`; nome accessibile obbligatorio |
+| `Button` | varianti `pill`, `accent`, `exit`, `quiet`; testo sempre presente (nome accessibile) |
 | `Panel` | superficie del laboratorio e delle barre |
 | `FaceTile` | iniziale o video (via `children`), bordo lime se parla, stato microfono |
 | `StatusBanner` | avvisi sopra il palco, con `role="status"` o `role="alert"` |
