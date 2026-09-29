@@ -1,6 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { parseDisplayName } from '@/lib/auth/display-name';
 import { authErrorMessage } from '@/lib/auth/error-message';
 import { safeNextPath } from '@/lib/auth/next-path';
 import { createServerSupabase } from '@/lib/supabase/server';
@@ -25,7 +26,10 @@ export async function signIn(_prev: AuthState, formData: FormData): Promise<Auth
 
 export async function signUp(_prev: AuthState, formData: FormData): Promise<AuthState> {
   const { email, password, next } = readCredentials(formData);
-  const displayName = String(formData.get('display_name') ?? '').trim();
+  const displayName = parseDisplayName(String(formData.get('display_name') ?? ''));
+  if (!displayName) {
+    return { error: 'Scrivi il tuo nome, al massimo 40 caratteri.', info: null };
+  }
   const supabase = await createServerSupabase();
   const { data, error } = await supabase.auth.signUp({
     email,
