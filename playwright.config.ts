@@ -1,4 +1,8 @@
+import { loadEnvConfig } from '@next/env';
 import { defineConfig, devices } from '@playwright/test';
+
+// Gli e2e concedono crediti con il service role: leggono lo stesso .env.local dell'app.
+loadEnvConfig(process.cwd());
 
 export default defineConfig({
   testDir: 'e2e',

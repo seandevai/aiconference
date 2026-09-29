@@ -82,7 +82,8 @@ Non toccare segreti, billing o policy di sicurezza senza dichiararlo nel piano.
 
 Slice 0 e 1 completate e verificate, in attesa di merge in `main`. Slice 2 (call)
 implementata su `slice/2-call` (PR #3), spike CPU e iOS in attesa di misura. Slice 3
-(palco) implementata su `slice/3-palco` (PR #4).
+(palco) implementata su `slice/3-palco` (PR #4). Slice 4A (agente a comando con richiesta
+scritta, `AIService`, ledger) su `slice/4a-agente` (PR #5).
 
 Spec v3 del 23/09, dopo un secondo brainstorming con Sean. Rispetto alla v2: palco a
 finestre a slot magnetici invece della lista di schede (ADR-0009), agente a comando
@@ -106,7 +107,7 @@ Codespace (`.devcontainer/`) che avvia Supabase e scrive `.env.local`. `gh` è i
 `C:\Program Files\GitHub CLI\gh.exe` (non nel PATH della sessione).
 
 Branch impilati: `slice/0-fondamenta` (PR #1) → `slice/1-auth-stanza` (PR #2) →
-`slice/2-call` (PR #3) → `slice/3-palco` (PR #4). Il merge in `main` lo fa Sean.
+`slice/2-call` (PR #3) → `slice/3-palco` (PR #4) → `slice/4a-agente` (PR #5). Il merge in `main` lo fa Sean.
 
 Nel Codespace, `git` via SSH richiede `set -a; . /workspaces/.codespaces/shared/.env; set +a`
 (il token non è esportato nelle sessioni SSH). LiveKit locale: `ws://localhost:7880`,
@@ -116,10 +117,11 @@ Codespace: `pkill -f "[n]ext-server"` (il processo non si chiama `next dev`).
 
 Il passo successivo, in ordine:
 
-1. Sean: merge delle PR #1-#4; task 0.5 (Supabase Cloud, Vercel, LiveKit Cloud,
-   Upstash); misura degli spike CPU e iOS Safari (`docs/spikes/`).
-2. Slice 4 (agente): servono tre decisioni di Sean (spec §12: vendor STT, nome e modello
-   della parola chiave, provider di immagini) e le chiavi API relative.
+1. Sean: merge delle PR #1-#5; task 0.5 (Supabase Cloud, Vercel, LiveKit Cloud,
+   Upstash, `ANTHROPIC_API_KEY`); misura degli spike CPU e iOS Safari (`docs/spikes/`).
+2. Slice 5 (gesture): non dipende da decisioni aperte.
+3. Slice 4B (parola chiave, STT, immagini, companion): servono le decisioni di Sean
+   (spec §12) e le chiavi dei vendor.
 
 Decisioni prese e non da riaprire senza un ADR nuovo: palco a slot magnetici, solo
 l'host scrive sul palco e attiva l'agente, negoziazione aperta dall'host con tetto e

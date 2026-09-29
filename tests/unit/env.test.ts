@@ -15,6 +15,7 @@ const serverOk = {
   LIVEKIT_API_SECRET: 'secret',
   KV_REST_API_URL: 'http://localhost:8079',
   KV_REST_API_TOKEN: 'local_kv_token',
+  AI_PROVIDER: 'fake',
 };
 
 describe('env', () => {
@@ -60,6 +61,21 @@ describe('env', () => {
     expect(() => parseServerEnv({ ...serverOk, KV_REST_API_URL: 'localhost' })).toThrow(
       /KV_REST_API_URL/,
     );
+  });
+
+  it('requires the anthropic key only when the provider is anthropic', () => {
+    expect(() => parseServerEnv({ ...serverOk, AI_PROVIDER: 'anthropic' })).toThrow(
+      /ANTHROPIC_API_KEY/,
+    );
+    expect(
+      parseServerEnv({ ...serverOk, AI_PROVIDER: 'anthropic', ANTHROPIC_API_KEY: 'sk-ant-x' })
+        .AI_PROVIDER,
+    ).toBe('anthropic');
+    expect(parseServerEnv({ ...serverOk, AI_PROVIDER: 'fake' }).AI_PROVIDER).toBe('fake');
+  });
+
+  it('rejects an unknown ai provider', () => {
+    expect(() => parseServerEnv({ ...serverOk, AI_PROVIDER: 'openai' })).toThrow(/AI_PROVIDER/);
   });
 
   it('accepts a valid server env', () => {

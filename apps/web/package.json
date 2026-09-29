@@ -11,6 +11,7 @@
   "dependencies": {
     "@mediapipe/tasks-vision": "^1.0.1",
     "@next/env": "16.3.6",
+    "@omnicanvas/ai": "^0.0.0",
     "@omnicanvas/canvas": "^0.0.0",
     "@omnicanvas/db": "^0.0.0",
     "@omnicanvas/realtime": "^0.0.0",

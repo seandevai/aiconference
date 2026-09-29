@@ -28,6 +28,127 @@ export type Database = {
   };
   public: {
     Tables: {
+      ai_requests: {
+        Row: {
+          cost_usd_estimated: number;
+          created_at: string;
+          error_code: string | null;
+          id: string;
+          input_tokens: number | null;
+          latency_ms: number;
+          model: string;
+          on_behalf_of_guest: boolean;
+          operation: string;
+          output_tokens: number | null;
+          participant_id: string | null;
+          payer_workspace_id: string;
+          provider: string;
+          room_id: string;
+          success: boolean;
+          units: number | null;
+        };
+        Insert: {
+          cost_usd_estimated?: number;
+          created_at?: string;
+          error_code?: string | null;
+          id?: string;
+          input_tokens?: number | null;
+          latency_ms: number;
+          model: string;
+          on_behalf_of_guest?: boolean;
+          operation: string;
+          output_tokens?: number | null;
+          participant_id?: string | null;
+          payer_workspace_id: string;
+          provider: string;
+          room_id: string;
+          success: boolean;
+          units?: number | null;
+        };
+        Update: {
+          cost_usd_estimated?: number;
+          created_at?: string;
+          error_code?: string | null;
+          id?: string;
+          input_tokens?: number | null;
+          latency_ms?: number;
+          model?: string;
+          on_behalf_of_guest?: boolean;
+          operation?: string;
+          output_tokens?: number | null;
+          participant_id?: string | null;
+          payer_workspace_id?: string;
+          provider?: string;
+          room_id?: string;
+          success?: boolean;
+          units?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'ai_requests_participant_id_fkey';
+            columns: ['participant_id'];
+            isOneToOne: false;
+            referencedRelation: 'room_participants';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'ai_requests_payer_workspace_id_fkey';
+            columns: ['payer_workspace_id'];
+            isOneToOne: false;
+            referencedRelation: 'workspaces';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'ai_requests_room_id_fkey';
+            columns: ['room_id'];
+            isOneToOne: false;
+            referencedRelation: 'rooms';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      credit_ledger: {
+        Row: {
+          ai_request_id: string | null;
+          created_at: string;
+          delta: number;
+          id: string;
+          reason: string;
+          workspace_id: string;
+        };
+        Insert: {
+          ai_request_id?: string | null;
+          created_at?: string;
+          delta: number;
+          id?: string;
+          reason: string;
+          workspace_id: string;
+        };
+        Update: {
+          ai_request_id?: string | null;
+          created_at?: string;
+          delta?: number;
+          id?: string;
+          reason?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'credit_ledger_ai_request_id_fkey';
+            columns: ['ai_request_id'];
+            isOneToOne: false;
+            referencedRelation: 'ai_requests';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'credit_ledger_workspace_id_fkey';
+            columns: ['workspace_id'];
+            isOneToOne: false;
+            referencedRelation: 'workspaces';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       profiles: {
         Row: {
           avatar_url: string | null;
@@ -245,6 +366,33 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      ai_record_request: {
+        Args: {
+          p_charged: number;
+          p_cost_usd: number;
+          p_error_code: string;
+          p_input_tokens: number;
+          p_latency_ms: number;
+          p_model: string;
+          p_operation: string;
+          p_output_tokens: number;
+          p_participant: string;
+          p_provider: string;
+          p_reserved: number;
+          p_room: string;
+          p_success: boolean;
+          p_workspace: string;
+        };
+        Returns: string;
+      };
+      ai_reserve_credits: {
+        Args: { p_credits: number; p_workspace: string };
+        Returns: boolean;
+      };
+      grant_credits: {
+        Args: { p_credits: number; p_reason?: string; p_workspace: string };
+        Returns: number;
+      };
       is_workspace_member: { Args: { ws: string }; Returns: boolean };
     };
     Enums: {

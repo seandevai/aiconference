@@ -16,7 +16,7 @@ loadEnvConfig(
 
 const nextConfig: NextConfig = {
   // Il package espone sorgenti TypeScript: Next deve compilarli.
-  transpilePackages: ["@omnicanvas/realtime", "@omnicanvas/canvas"],
+  transpilePackages: ["@omnicanvas/realtime", "@omnicanvas/canvas", "@omnicanvas/ai"],
 };
 
 export default nextConfig;

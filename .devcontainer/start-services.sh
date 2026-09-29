@@ -35,3 +35,4 @@ ensure LIVEKIT_API_KEY devkey
 ensure LIVEKIT_API_SECRET secret
 ensure KV_REST_API_URL "http://localhost:8079"
 ensure KV_REST_API_TOKEN local_kv_token
+ensure AI_PROVIDER fake

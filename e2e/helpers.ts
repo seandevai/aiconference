@@ -5,6 +5,7 @@ import {
   type BrowserContextOptions,
   type Page,
 } from '@playwright/test';
+import { createClient } from '@supabase/supabase-js';
 
 // Ogni partecipante aperto da un test pubblica video finto: se resta connesso dopo il
 // test, il carico cresce lungo la suite. Gli spec chiamano closeParticipants in afterEach.
@@ -17,7 +18,7 @@ export async function closeParticipants(): Promise<void> {
 export async function signUpHostWithRoom(
   browser: Browser,
   title = 'Kickoff Acme',
-): Promise<{ host: Page; roomUrl: string }> {
+): Promise<{ host: Page; roomUrl: string; email: string }> {
   const context = await browser.newContext();
   opened.push(context);
   const host = await context.newPage();
@@ -34,7 +35,7 @@ export async function signUpHostWithRoom(
   await host.getByPlaceholder('Titolo della riunione').fill(title);
   await host.getByRole('button', { name: 'Crea stanza' }).click();
   await expect(host).toHaveURL(/\/room\/[A-Z2-9]{8}$/, { timeout: 15_000 });
-  return { host, roomUrl: host.url() };
+  return { host, roomUrl: host.url(), email };
 }
 
 export async function joinAsAnonymousGuest(
@@ -52,4 +53,18 @@ export async function joinAsAnonymousGuest(
   await guest.getByRole('button', { name: 'Entra' }).click();
   await expect(guest.getByText('Ospite', { exact: true })).toBeVisible();
   return guest;
+}
+
+export async function grantCreditsTo(email: string, credits: number): Promise<void> {
+  const admin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false, autoRefreshToken: false } },
+  );
+  const { data: users } = await admin.auth.admin.listUsers({ perPage: 1000 });
+  const user = users.users.find((u) => u.email === email);
+  if (!user) throw new Error(`no test user ${email}`);
+  const { data: ws } = await admin.from('workspaces').select('id').eq('owner_id', user.id).single();
+  const { error } = await admin.rpc('grant_credits', { p_workspace: ws!.id, p_credits: credits });
+  if (error) throw error;
 }

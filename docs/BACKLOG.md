@@ -61,18 +61,18 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 
 ## Slice 4 — Agente
 
-- [ ] Migrazione 0004: ai_requests, credit_ledger, con RLS in sola lettura
-- [ ] `AIService` con risoluzione del pagante e quota **prima** del provider
-- [ ] Scrittura ledger a ogni chiamata, anche fallita; rate limit
-- [ ] Crediti caricati a mano (`manual_grant`)
-- [ ] Parola chiave locale in ONNX, nome scelto
-- [ ] Token STT a vita breve, solo all'host
-- [ ] `packages/stt`: VAD, stream a comando, fine richiesta al silenzio
-- [ ] `agent_generate`: grafici, testi, tabelle nel vassoio
-- [ ] Immagini dietro conferma esplicita
-- [ ] Contatore agente visibile all'host
-- [ ] Modalità companion, se il flusso a comando è stabile
-- [ ] Test di accounting: N chiamate, saldo corretto
+- [x] Migrazione 0004: ai_requests, credit_ledger, con RLS in sola lettura (slice 4A)
+- [x] `AIService` con risoluzione del pagante e quota **prima** del provider (pagante: host)
+- [x] Scrittura ledger a ogni chiamata, anche fallita; rate limit
+- [x] Crediti caricati a mano (`manual_grant`, `npm run credits:grant`)
+- [ ] Parola chiave locale in ONNX, nome scelto (slice 4B, serve la decisione di Sean)
+- [ ] Token STT a vita breve, solo all'host (slice 4B, serve il vendor STT)
+- [ ] `packages/stt`: VAD, stream a comando, fine richiesta al silenzio (slice 4B)
+- [x] `agent_generate`: grafici, testi, tabelle nel vassoio (richiesta scritta finché manca lo STT)
+- [ ] Immagini dietro conferma esplicita (slice 4B, serve il provider di immagini)
+- [x] Contatore agente visibile all'host
+- [ ] Modalità companion, se il flusso a comando è stabile (slice 4B)
+- [x] Test di accounting: N chiamate, saldo corretto
 
 ## Slice 5 — Gesture (prima demo)
 
@@ -173,5 +173,9 @@ di GitHub e nel Codespace (`.devcontainer/`), che avvia Supabase e scrive `.env.
 - [ ] Contenuti di prova nel vassoio: nasconderli quando arriva l'agente (slice 4)
 - [ ] Nessun heartbeat di versione: un ospite che perde l'ultimo comando resta indietro
       fino al comando successivo
+- [ ] Richiesta scritta all'agente: tenerla anche dopo lo STT come via senza microfono?
+- [ ] Contenuti di prova nel vassoio: toglierli quando `AI_PROVIDER=anthropic` è attivo
+- [ ] Prezzi in `packages/ai/src/pricing.ts` scritti a mano: aggiornarli se cambia il listino
+- [ ] Preview Vercel: `AI_PROVIDER=anthropic` e `ANTHROPIC_API_KEY` (con il task 0.5)
 - [ ] Preview Vercel: aggiungere `NEXT_PUBLIC_LIVEKIT_URL`, `LIVEKIT_API_KEY`,
       `LIVEKIT_API_SECRET` del progetto LiveKit Cloud (con il task 0.5)

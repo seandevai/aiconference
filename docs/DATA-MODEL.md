@@ -114,7 +114,8 @@ somma di questa tabella.
 | ai_request_id | uuid FK | nullable |
 | created_at | timestamptz | |
 
-Nell'MVP i crediti si caricano a mano (`manual_grant`). I motivi legati ai piani
+Funzioni `ai_reserve_credits`, `ai_record_request`, `grant_credits`: eseguibili solo dal
+service role (migrazione 0004). Nell'MVP i crediti si caricano a mano (`manual_grant`). I motivi legati ai piani
 arrivano con Stripe.
 
 ### bundles
