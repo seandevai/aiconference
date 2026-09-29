@@ -152,8 +152,9 @@ Verifica su telefono: `docs/spikes/2026-09-27-spike-mobile-call.md`.
       Causa trovata con `?debugpip`: Safari supporta il PiP (`mode: standard`), ma l'ospite
       era su un PC senza webcam e senza una camera remota il PiP è nascosto per scelta.
       Da riprovare con un ospite che ha la camera; poi togliere il pannello `?debugpip`
-- [ ] PiP anche quando l'altro ha la camera spenta: riquadro con iniziale e nome, disegnati
-      su un canvas e mandati nel `<video>` con `captureStream()` (come l'audio di WhatsApp)
+- [x] PiP anche quando l'altro ha la camera spenta: riquadro con iniziale e nome, disegnati
+      su un canvas e mandati nel `<video>` con `captureStream()` (come l'audio di WhatsApp).
+      Da verificare su iPhone
 - [ ] PiP automatico su iPhone: andando alla home non parte. Ipotesi: iOS lo concede solo
       al video «principale», visibile e con una dimensione minima, mentre il nostro è di 1 px
       e trasparente. Da indagare dopo il PiP manuale

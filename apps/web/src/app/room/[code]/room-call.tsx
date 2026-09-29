@@ -53,6 +53,7 @@ export function RoomCall({ joinCode, role }: Props) {
     setSpeaker({ roster: state.roster, id: nextLastSpeaker(speaker.id, state.roster) });
   }
   const pipIdentity = pipTarget(state.roster, spotlight, speaker.id);
+  const pipEntry = state.roster.find((entry) => entry.identity === pipIdentity);
   const pipRef = useRef<HTMLVideoElement>(null);
   const [pipSupported, setPipSupported] = useState(false);
   useEffect(() => {
@@ -152,7 +153,15 @@ export function RoomCall({ joinCode, role }: Props) {
         )}
       </div>
 
-      {live && <PipVideo identity={pipIdentity} attachVideo={attachVideo} videoRef={pipRef} />}
+      {live && (
+        <PipVideo
+          identity={pipIdentity}
+          name={pipEntry?.name ?? ''}
+          camOn={pipEntry?.camOn ?? false}
+          attachVideo={attachVideo}
+          videoRef={pipRef}
+        />
+      )}
       {debugPip && (
         <PipDebug
           videoRef={pipRef}
