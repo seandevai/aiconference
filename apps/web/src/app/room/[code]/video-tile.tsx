@@ -44,7 +44,7 @@ export function VideoTile({ entry, attachVideo, onSelect, mirrored = false }: Pr
     <li
       aria-label={tileLabel(entry)}
       title={entry.name}
-      className="h-10 w-14 shrink-0 lg:h-12 lg:w-16 phone-landscape:aspect-video phone-landscape:h-auto phone-landscape:w-full"
+      className="h-11 w-14 shrink-0 lg:h-12 lg:w-16 phone-landscape:aspect-video phone-landscape:h-auto phone-landscape:w-full"
     >
       {onSelect ? (
         <button

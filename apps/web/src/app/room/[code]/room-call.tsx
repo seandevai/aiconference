@@ -71,7 +71,7 @@ export function RoomCall({ joinCode, role, showSamples }: Props) {
     <>
       <aside
         aria-label="Partecipanti"
-        className="flex items-center px-3 py-1.5 [grid-area:faces] phone-landscape:w-24 phone-landscape:items-start phone-landscape:overflow-y-auto phone-landscape:p-2"
+        className="flex min-w-0 max-w-[60vw] items-center overflow-x-auto px-3 py-1.5 [grid-area:faces] phone-landscape:max-w-none phone-landscape:overflow-x-hidden phone-landscape:w-24 phone-landscape:items-start phone-landscape:overflow-y-auto phone-landscape:p-2"
       >
         <ul className="flex gap-2 phone-landscape:w-full phone-landscape:flex-col">
           {state.roster.map((entry) => (

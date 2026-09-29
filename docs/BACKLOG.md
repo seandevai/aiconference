@@ -179,6 +179,12 @@ branch `slice/redesign-call` (PR #9).
 - [ ] Logo definitivo in SVG (serve il file di Sean): sostituire `packages/ui/src/logo.tsx`
 - [ ] Dashboard, login, registrazione nel nuovo stile (sotto-progetto 3, dopo i consulenti)
 - [ ] ADR sulla rinomina del codice in Nod (`@omnicanvas/*`, titoli, domini)
+- [ ] Revisione finale (minori): ✕ dello spotlight resta opaca e piccola (`cx` non unisce le
+      classi: serve una variante o tailwind-merge); `font-medium` rende a 400 con Manrope
+      400/600/800; nomi lunghi escono dalla pillola dello spotlight; host sotto `lg` stringe il
+      palco; test di contrasto senza `danger` e `accent` su `surface`; dashboard a due toni
+- [ ] Gesture: l'area mappata ora comprende laboratorio e palco; decidere con Sean dopo le
+      registrazioni reali se limitarla al palco
 
 ## Post-MVP
 

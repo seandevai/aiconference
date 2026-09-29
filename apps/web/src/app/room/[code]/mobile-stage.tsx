@@ -51,17 +51,13 @@ export function MobileStage({
     >
       {stage.windows.length > 1 && (
         <div className="flex items-center justify-between gap-2 text-xs">
-          <Button size="sm" onClick={() => step(-1)}>
-            Finestra precedente
-          </Button>
+          <Button onClick={() => step(-1)}>Finestra precedente</Button>
           {peekId && (
-            <Button size="sm" variant="accent" onClick={() => setPeek(null)}>
+            <Button variant="accent" onClick={() => setPeek(null)}>
               Torna all&apos;host
             </Button>
           )}
-          <Button size="sm" onClick={() => step(1)}>
-            Finestra successiva
-          </Button>
+          <Button onClick={() => step(1)}>Finestra successiva</Button>
         </div>
       )}
       <Panel tone="stage" className="flex min-h-0 flex-1 flex-col p-2">
