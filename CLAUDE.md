@@ -110,7 +110,7 @@ Codespace (`.devcontainer/`) che avvia Supabase e scrive `.env.local`. `gh` è i
 
 Branch impilati: `slice/0-fondamenta` (PR #1) → `slice/1-auth-stanza` (PR #2) →
 `slice/2-call` (PR #3) → `slice/3-palco` (PR #4) → `slice/4a-agente` (PR #5) → `slice/5-gesture` (PR #6)
-→ `slice/mobile-call` (ancora senza PR). Il merge in `main` lo fa Sean.
+→ `slice/mobile-call` (PR #7). Il merge in `main` lo fa Sean.
 
 Call da telefono (`slice/mobile-call`, 27/09): orizzontale, tocco sul volto a tutto schermo,
 «Gira fotocamera», PiP di chi parla. Worktree e2e nel Codespace: `/workspaces/aiconf-mobile`.
