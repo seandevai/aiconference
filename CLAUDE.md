@@ -80,12 +80,10 @@ Non toccare segreti, billing o policy di sicurezza senza dichiararlo nel piano.
 
 ## Stato attuale
 
-Slice 0 e 1 completate e verificate, in attesa di merge in `main`. Slice 2 (call)
-implementata su `slice/2-call` (PR #3), spike CPU e iOS in attesa di misura. Slice 3
-(palco) implementata su `slice/3-palco` (PR #4). Slice 4A (agente a comando con richiesta
-scritta, `AIService`, ledger) su `slice/4a-agente` (PR #5). Slice 5 (gesture) su
-`slice/5-gesture` (PR #6). Prima demo = slice 0-5: completa lato codice salvo la voce
-(slice 4B), in attesa del test con i consulenti.
+Slice 0, 1, 2 (call), 3 (palco), 4A (agente a comando con richiesta scritta,
+`AIService`, ledger) e 5 (gesture) in `main` dal 29/09 (PR #1-#6). Call da telefono su
+`slice/mobile-call` (PR #7, aperta). Spike CPU e iOS in attesa di misura. Prima demo =
+slice 0-5: completa lato codice salvo la voce (slice 4B), in attesa del test con i consulenti.
 
 Spec v3 del 23/09, dopo un secondo brainstorming con Sean. Rispetto alla v2: palco a
 finestre a slot magnetici invece della lista di schede (ADR-0009), agente a comando
@@ -96,7 +94,7 @@ mobile in visione. Economia rinviata a dopo l'MVP.
 
 Prima demo = slice 0-5 (6-8 settimane), MVP = slice 0-8 (8-12 settimane).
 
-### Ripresa — dove eravamo (25/09/2026)
+### Ripresa — dove eravamo (29/09/2026)
 
 Spec v3 approvata; `ARCHITECTURE.md`, `DATA-MODEL.md` e `BACKLOG.md` allineati.
 
@@ -108,12 +106,15 @@ Slice 0 e 1 implementate e verificate su Supabase reale. Docker locale non gira
 Codespace (`.devcontainer/`) che avvia Supabase e scrive `.env.local`. `gh` è in
 `C:\Program Files\GitHub CLI\gh.exe` (non nel PATH della sessione).
 
-Branch impilati: `slice/0-fondamenta` (PR #1) → `slice/1-auth-stanza` (PR #2) →
-`slice/2-call` (PR #3) → `slice/3-palco` (PR #4) → `slice/4a-agente` (PR #5) → `slice/5-gesture` (PR #6)
-→ `slice/mobile-call` (PR #7). Il merge in `main` lo fa Sean.
+PR #1-#6 unite in `main` il 29/09 (merge commit, branch conservati). Resta aperta la PR #7
+`slice/mobile-call` (base `slice/5-gesture`: spostarla su `main` prima del merge). Il merge
+lo fa Sean: l'auto mode di Claude Code blocca `gh pr merge`. La build di produzione su
+Vercel fallisce perché le variabili sono solo su Preview: voluto, per ora si testa su staging.
 
-Call da telefono (`slice/mobile-call`, 27/09): orizzontale, tocco sul volto a tutto schermo,
-«Gira fotocamera», PiP di chi parla. Worktree e2e nel Codespace: `/workspaces/aiconf-mobile`.
+Call da telefono (`slice/mobile-call`, 27-29/09): orizzontale, tocco sul volto a tutto schermo,
+«Gira fotocamera», PiP di chi parla (con iniziale e nome se ha la camera spenta), proprio
+riquadro specchiato con la fotocamera anteriore. Checklist iPhone fatta il 29/09: PiP solo
+dal pulsante «Riquadro», l'automatico allo swipe su iPhone non è possibile dal web. Worktree e2e nel Codespace: `/workspaces/aiconf-mobile`.
 
 Staging (27/09): progetto Vercel `omnicanvas` (Root Directory `apps/web`, install
 `cd ../.. && npm ci`), alias fisso `https://omnicanvas-staging.vercel.app`, Supabase
@@ -130,12 +131,14 @@ Codespace: `pkill -f "[n]ext-server"` (il processo non si chiama `next dev`).
 
 Il passo successivo, in ordine:
 
-1. Sean: checklist su telefono `docs/spikes/2026-09-27-spike-mobile-call.md`; merge delle
-   PR #1-#6; task 0.5 fatto il 27/09 (staging sopra); misura degli spike CPU e iOS Safari; registrazioni
-   reali delle gesture; test della demo con 5 consulenti (`docs/spikes/`).
-2. Slice 4B (parola chiave, STT, immagini, companion): servono le decisioni di Sean
+1. Sean: specchio su iPhone da verificare, poi merge della PR #7; checklist Android;
+   misura degli spike CPU e iOS Safari; registrazioni reali delle gesture; test della demo
+   con 5 consulenti (`docs/spikes/`).
+2. Redesign della UI della call, desktop e mobile, con «Riquadro» più visibile: da fare
+   partendo da un brainstorming con i mockup e da una spec.
+3. Slice 4B (parola chiave, STT, immagini, companion): servono le decisioni di Sean
    (spec §12) e le chiavi dei vendor.
-3. Dopo il test con i consulenti: slice 6-8 (sottotitoli, negoziazione, pacchetto).
+4. Dopo il test con i consulenti: slice 6-8 (sottotitoli, negoziazione, pacchetto).
 
 Decisioni prese e non da riaprire senza un ADR nuovo: palco a slot magnetici, solo
 l'host scrive sul palco e attiva l'agente, negoziazione aperta dall'host con tetto e
