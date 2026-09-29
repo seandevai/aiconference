@@ -1,3 +1,4 @@
+import { Logo } from '@omnicanvas/ui';
 import { RoomCall } from './room-call';
 
 type Props = {
@@ -8,20 +9,29 @@ type Props = {
   showSamples: boolean;
 };
 
-// Desktop: colonna volti stretta a sinistra, palco al resto (ADR-0009).
-// Mobile: il palco occupa quasi tutto, i volti restano piccoli a lato (spec §2.5).
+// Griglia della stanza: barra alta, volti, palco, controlli (spec redesign §2-3).
 export function RoomShell({ joinCode, title, role, displayName, showSamples }: Props) {
   return (
-    <div className="flex h-dvh flex-col bg-neutral-950 text-neutral-100">
-      <header className="flex items-center justify-between gap-3 border-b border-neutral-800 px-4 py-2 phone-landscape:hidden">
-        <h1 className="truncate text-sm font-medium">{title}</h1>
-        <div className="flex items-center gap-2 text-xs text-neutral-400">
-          <span>{displayName}</span>
-          <span className="rounded bg-neutral-800 px-2 py-0.5">
-            {role === 'host' ? 'Host' : 'Ospite'}
-          </span>
-          <span className="hidden sm:inline">· nessun contenuto viene conservato</span>
-        </div>
+    // Griglia a quattro aree: in orizzontale su telefono la barra sparisce e i volti
+    // diventano la colonna a destra (spec §3).
+    <div
+      className={[
+        'grid h-dvh grid-cols-[minmax(0,1fr)_auto] grid-rows-[auto_minmax(0,1fr)_auto] bg-bg text-fg',
+        "[grid-template-areas:'banner_faces'_'main_main'_'dock_dock']",
+        'phone-landscape:grid-rows-[minmax(0,1fr)_auto]',
+        "phone-landscape:[grid-template-areas:'main_faces'_'dock_faces']",
+      ].join(' ')}
+    >
+      <header className="flex min-w-0 items-center gap-3 px-4 py-2 [grid-area:banner] phone-landscape:hidden">
+        <Logo />
+        <h1 className="hidden truncate text-sm font-semibold sm:block">{title}</h1>
+        <span className="hidden items-center gap-1 rounded-full bg-surface px-2.5 py-1 text-xs text-muted md:inline-flex">
+          <span aria-hidden>🔒</span> Niente viene conservato
+        </span>
+        <span className="hidden truncate text-xs text-muted lg:inline">{displayName}</span>
+        <span className="rounded-full bg-raised px-2 py-0.5 text-xs font-semibold">
+          {role === 'host' ? 'Host' : 'Ospite'}
+        </span>
       </header>
 
       <RoomCall joinCode={joinCode} role={role} showSamples={showSamples} />
