@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import type { Stage } from '@omnicanvas/canvas';
+import { Button, Panel } from '@omnicanvas/ui';
 import { peekNeighbor } from '@/lib/stage/peek';
 import { WindowView } from './window-view';
 
@@ -29,7 +30,7 @@ export function MobileStage({
   };
 
   if (!shown) {
-    return <p className="text-sm text-neutral-500">L&apos;host non ha ancora aperto finestre.</p>;
+    return <p className="text-sm text-muted">L&apos;host non ha ancora aperto finestre.</p>;
   }
 
   return (
@@ -50,23 +51,32 @@ export function MobileStage({
     >
       {stage.windows.length > 1 && (
         <div className="flex items-center justify-between gap-2 text-xs">
-          <button onClick={() => step(-1)} className="rounded bg-neutral-800 px-2 py-1">
+          <Button size="sm" onClick={() => step(-1)}>
             Finestra precedente
-          </button>
+          </Button>
           {peekId && (
-            <button
-              onClick={() => setPeek(null)}
-              className="rounded bg-neutral-100 px-2 py-1 text-neutral-900"
-            >
+            <Button size="sm" variant="accent" onClick={() => setPeek(null)}>
               Torna all&apos;host
-            </button>
+            </Button>
           )}
-          <button onClick={() => step(1)} className="rounded bg-neutral-800 px-2 py-1">
+          <Button size="sm" onClick={() => step(1)}>
             Finestra successiva
-          </button>
+          </Button>
         </div>
       )}
-      <WindowView window={shown} assetUrls={assetUrls} />
+      <Panel tone="stage" className="flex min-h-0 flex-1 flex-col p-2">
+        <WindowView window={shown} assetUrls={assetUrls} />
+      </Panel>
+      {stage.windows.length > 1 && (
+        <div aria-hidden className="flex justify-center gap-1.5">
+          {stage.windows.map((w) => (
+            <span
+              key={w.id}
+              className={`h-1.5 w-1.5 rounded-full ${w.id === shownId ? 'bg-accent' : 'bg-line'}`}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

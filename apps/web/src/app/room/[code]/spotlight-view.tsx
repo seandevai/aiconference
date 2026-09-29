@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import type { RosterEntry } from '@omnicanvas/realtime';
+import { Button, faceInitial } from '@omnicanvas/ui';
 
 type Props = {
   entry: RosterEntry;
@@ -49,16 +50,19 @@ export function SpotlightView({ entry, local, mirrorSelf, attachVideo, onClose }
       // Non modale: i controlli della call, fuori dal dialog, restano usabili.
       role="dialog"
       aria-label={`${entry.name} a tutto schermo`}
-      className="absolute inset-0 z-20 bg-black"
+      className="absolute inset-0 z-20 bg-stage"
     >
       {entry.camOn ? (
         <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-contain" />
       ) : (
-        <span className="flex h-full items-center justify-center text-6xl font-medium" aria-hidden>
-          {entry.name.slice(0, 1).toUpperCase()}
+        <span
+          className="flex h-full items-center justify-center text-6xl font-extrabold"
+          aria-hidden
+        >
+          {faceInitial(entry.name)}
         </span>
       )}
-      <span className="absolute bottom-2 left-2 rounded bg-black/60 px-2 py-0.5 text-sm">
+      <span className="absolute bottom-3 left-3 rounded-full bg-bg/80 px-3 py-1 text-sm font-semibold">
         {entry.name}
       </span>
       {local?.camOn && (
@@ -68,20 +72,19 @@ export function SpotlightView({ entry, local, mirrorSelf, attachVideo, onClose }
           playsInline
           muted
           aria-hidden
-          className={`absolute right-2 top-2 w-24 rounded object-cover phone-landscape:w-32 ${
+          className={`absolute right-3 top-3 w-24 rounded-tile object-cover phone-landscape:w-32 ${
             mirrorSelf ? '-scale-x-100' : ''
           }`}
         />
       )}
-      <button
+      <Button
         ref={closeRef}
-        type="button"
         onClick={onClose}
         aria-label="Chiudi tutto schermo"
-        className="absolute left-2 top-2 rounded-full bg-black/60 px-3 py-1 text-lg"
+        className="absolute left-3 top-3 bg-bg/80 text-lg"
       >
         ✕
-      </button>
+      </Button>
     </div>
   );
 }
