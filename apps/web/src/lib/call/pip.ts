@@ -64,16 +64,3 @@ export async function openPip(doc: PipDocLike, video: PipVideoLike): Promise<boo
   }
   return false;
 }
-
-// Diagnostica temporanea (?debugpip): cosa risponde il browser, senza contenuti della call.
-export function pipDiagnostics(doc: PipDocLike, video: PipVideoLike): Record<string, string> {
-  return {
-    pictureInPictureEnabled: String(doc.pictureInPictureEnabled),
-    requestPictureInPicture: typeof video.requestPictureInPicture,
-    webkitPresentationMode: String(
-      video.webkitSupportsPresentationMode?.('picture-in-picture') ?? 'undefined',
-    ),
-    readyState: String(video.readyState),
-    mode: String(pipMode(doc, video)),
-  };
-}

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { openPip, pipDiagnostics, pipMode, watchPipSupport } from '@/lib/call/pip';
+import { openPip, pipMode, watchPipSupport } from '@/lib/call/pip';
 
 describe('pipMode', () => {
   it('uses the standard API when the document allows it', () => {
@@ -82,22 +82,5 @@ describe('watchPipSupport', () => {
       'loadedmetadata',
       listeners.loadedmetadata,
     );
-  });
-});
-
-describe('pipDiagnostics', () => {
-  it('reports what the browser answers, without any call content', () => {
-    const video = {
-      readyState: 0,
-      webkitSupportsPresentationMode: () => false,
-      webkitSetPresentationMode: vi.fn(),
-    };
-    expect(pipDiagnostics({}, video)).toEqual({
-      pictureInPictureEnabled: 'undefined',
-      requestPictureInPicture: 'undefined',
-      webkitPresentationMode: 'false',
-      readyState: '0',
-      mode: 'null',
-    });
   });
 });

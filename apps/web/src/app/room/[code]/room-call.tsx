@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCall } from '@/lib/call/use-call';
 import { cameraButtonLabel, micButtonLabel } from '@/lib/call/labels';
@@ -10,15 +10,12 @@ import { openPip, watchPipSupport } from '@/lib/call/pip';
 import { nextLastSpeaker, pipTarget, resolveSpotlight } from '@/lib/call/spotlight';
 import { useStage } from '@/lib/stage/use-stage';
 import { leaveRoomAction } from './actions';
-import { PipDebug } from './pip-debug';
 import { PipVideo } from './pip-video';
 import { SpotlightView } from './spotlight-view';
 import { StageArea } from './stage-area';
 import { VideoTile } from './video-tile';
 
 type Props = { joinCode: string; role: 'host' | 'guest' };
-
-const noSubscribe = () => () => {};
 
 const LIVE_PHASES: CallPhase[] = ['connecting', 'connected', 'reconnecting'];
 
@@ -62,11 +59,6 @@ export function RoomCall({ joinCode, role }: Props) {
     if (!video) return;
     return watchPipSupport(document, video, setPipSupported);
   }, [live]);
-  const debugPip = useSyncExternalStore(
-    noSubscribe,
-    () => new URLSearchParams(window.location.search).has('debugpip'),
-    () => false,
-  );
 
   async function handleLeave() {
     await leave();
@@ -163,19 +155,6 @@ export function RoomCall({ joinCode, role }: Props) {
           camOn={pipEntry?.camOn ?? false}
           attachVideo={attachVideo}
           videoRef={pipRef}
-        />
-      )}
-      {debugPip && (
-        <PipDebug
-          videoRef={pipRef}
-          extra={{
-            pipSupported: String(pipSupported),
-            pipTarget: pipIdentity ? 'set' : 'none',
-            remotesWithCamera: String(
-              state.roster.filter((entry) => !entry.isLocal && entry.camOn).length,
-            ),
-            phase: state.phase,
-          }}
         />
       )}
 
