@@ -187,6 +187,10 @@ export async function connectToRoom(url: string, token: string): Promise<Realtim
       await camera.switchCamera();
     },
 
+    cameraFacing() {
+      return camera.facing();
+    },
+
     attachVideo(identity, element) {
       let attached: Track | undefined;
       // La traccia può arrivare dopo il montaggio della tessera: si riprova a ogni sottoscrizione.

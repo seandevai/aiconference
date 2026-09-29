@@ -74,4 +74,16 @@ describe('createCameraController', () => {
     await controller.switchCamera();
     expect(camera.state.facing).toBe('environment');
   });
+
+  it('reports the side actually on camera, not the pending choice', async () => {
+    const camera = fakeCamera();
+    const controller = createCameraController(camera.ops);
+    expect(controller.facing()).toBe('user');
+    await controller.setEnabled(true);
+    await controller.setEnabled(false);
+    await controller.switchCamera();
+    expect(controller.facing()).toBe('user');
+    await controller.setEnabled(true);
+    expect(controller.facing()).toBe('environment');
+  });
 });

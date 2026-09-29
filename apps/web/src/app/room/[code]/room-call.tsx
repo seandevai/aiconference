@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCall } from '@/lib/call/use-call';
 import { cameraButtonLabel, micButtonLabel } from '@/lib/call/labels';
 import { phaseMessage, type CallPhase } from '@/lib/call/phase';
+import { isMirrored } from '@/lib/call/mirror';
 import { openPip, watchPipSupport } from '@/lib/call/pip';
 import { nextLastSpeaker, pipTarget, resolveSpotlight } from '@/lib/call/spotlight';
 import { useStage } from '@/lib/stage/use-stage';
@@ -87,6 +88,7 @@ export function RoomCall({ joinCode, role }: Props) {
                 entry={entry}
                 attachVideo={attachVideo}
                 onSelect={entry.isLocal ? undefined : () => setSelected(entry.identity)}
+                mirrored={isMirrored(entry, state.cameraFacing)}
               />
             ))}
           </ul>
@@ -147,6 +149,7 @@ export function RoomCall({ joinCode, role }: Props) {
           <SpotlightView
             entry={spotlightEntry}
             local={local}
+            mirrorSelf={local ? isMirrored(local, state.cameraFacing) : false}
             attachVideo={attachVideo}
             onClose={closeSpotlight}
           />

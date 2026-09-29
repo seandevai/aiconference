@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   connectToRoom,
   createReconnector,
+  type FacingMode,
   type RealtimeSession,
   type Reconnector,
   type RosterEntry,
@@ -22,6 +23,7 @@ export type CallState = {
   audioBlocked: boolean;
   mediaError: string | null;
   canSwitchCamera: boolean;
+  cameraFacing: FacingMode;
 };
 
 class TokenRefusedError extends Error {
@@ -44,6 +46,7 @@ const initialState: CallState = {
   audioBlocked: false,
   mediaError: null,
   canSwitchCamera: false,
+  cameraFacing: 'user',
 };
 
 export function useCall(joinCode: string) {
@@ -133,14 +136,18 @@ export function useCall(joinCode: string) {
   }, [local?.micOn]);
 
   const toggleCamera = useCallback(() => {
-    sessionRef.current
+    const session = sessionRef.current;
+    session
       ?.setCameraEnabled(!local?.camOn)
+      .then(() => setState((s) => ({ ...s, cameraFacing: session.cameraFacing() })))
       .catch(() => setState((s) => ({ ...s, mediaError: MEDIA_ERROR_MESSAGE })));
   }, [local?.camOn]);
 
   const switchCamera = useCallback(() => {
-    sessionRef.current
+    const session = sessionRef.current;
+    session
       ?.switchCamera()
+      .then(() => setState((s) => ({ ...s, cameraFacing: session.cameraFacing() })))
       .catch(() => setState((s) => ({ ...s, mediaError: MEDIA_ERROR_MESSAGE })));
   }, []);
 

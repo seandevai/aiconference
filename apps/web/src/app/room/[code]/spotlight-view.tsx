@@ -6,12 +6,13 @@ import type { RosterEntry } from '@omnicanvas/realtime';
 type Props = {
   entry: RosterEntry;
   local: RosterEntry | undefined;
+  mirrorSelf: boolean;
   attachVideo: (identity: string, element: HTMLVideoElement) => () => void;
   onClose: () => void;
 };
 
 // Una persona a tutto schermo dentro l'app: i controlli della call restano sotto.
-export function SpotlightView({ entry, local, attachVideo, onClose }: Props) {
+export function SpotlightView({ entry, local, mirrorSelf, attachVideo, onClose }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const selfRef = useRef<HTMLVideoElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -67,7 +68,9 @@ export function SpotlightView({ entry, local, attachVideo, onClose }: Props) {
           playsInline
           muted
           aria-hidden
-          className="absolute right-2 top-2 w-24 rounded object-cover phone-landscape:w-32"
+          className={`absolute right-2 top-2 w-24 rounded object-cover phone-landscape:w-32 ${
+            mirrorSelf ? '-scale-x-100' : ''
+          }`}
         />
       )}
       <button

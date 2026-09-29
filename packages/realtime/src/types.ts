@@ -1,6 +1,10 @@
 // Confine del realtime (ARCHITECTURE §7): niente in questo file nomina LiveKit.
 // Il giorno in cui si cambia vendor si riscrivono server.ts e livekit-session.ts.
 
+import type { FacingMode } from './camera';
+
+export type { FacingMode };
+
 export type ParticipantRole = 'host' | 'guest';
 
 export type ConnectionStatus = 'connecting' | 'connected' | 'reconnecting' | 'disconnected';
@@ -38,6 +42,8 @@ export interface RealtimeSession {
   canSwitchCamera(): Promise<boolean>;
   // Anteriore ↔ posteriore. A camera spenta cambia solo la scelta per la riaccensione.
   switchCamera(): Promise<void>;
+  // Fotocamera in uso: anteriore ('user') anche sui computer, che ne hanno una sola.
+  cameraFacing(): FacingMode;
   attachVideo(identity: string, element: HTMLVideoElement): Unsubscribe;
   // Messaggi piccoli (≤ 15 KB di JSON). Per le immagini c'è sendBytes.
   sendData(channel: string, payload: unknown, to?: string[]): Promise<void>;

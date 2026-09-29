@@ -21,6 +21,8 @@ export function createCameraController(ops: CameraOps) {
   let preferred: FacingMode = 'user';
   let applied: FacingMode = 'user';
   return {
+    // Il lato davvero inquadrato: una scelta fatta a camera spenta vale dalla riaccensione.
+    facing: (): FacingMode => applied,
     async setEnabled(on: boolean) {
       await ops.setEnabled(on, preferred);
       if (!on) return;

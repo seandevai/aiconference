@@ -8,9 +8,10 @@ type Props = {
   entry: RosterEntry;
   attachVideo: (identity: string, element: HTMLVideoElement) => () => void;
   onSelect?: (() => void) | undefined;
+  mirrored?: boolean;
 };
 
-export function VideoTile({ entry, attachVideo, onSelect }: Props) {
+export function VideoTile({ entry, attachVideo, onSelect, mirrored = false }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -20,7 +21,13 @@ export function VideoTile({ entry, attachVideo, onSelect }: Props) {
 
   const face = entry.camOn ? (
     // Sempre muto: l'audio remoto suona dagli elementi gestiti da packages/realtime.
-    <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-cover" />
+    <video
+      ref={videoRef}
+      autoPlay
+      playsInline
+      muted
+      className={`h-full w-full object-cover ${mirrored ? '-scale-x-100' : ''}`}
+    />
   ) : (
     <span className="flex h-full items-center justify-center text-sm font-medium" aria-hidden>
       {entry.name.slice(0, 1).toUpperCase()}
