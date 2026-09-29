@@ -126,7 +126,7 @@ di GitHub e nel Codespace (`.devcontainer/`), che avvia Supabase e scrive `.env.
 - [x] `npm run test:e2e` completo (host e ospite, desktop e mobile): 4/4 nel Codespace
 - [x] prove manuali dei task 1.1, 1.4, 1.7 del piano: 14 controlli automatizzati con
       Playwright e query SQL nel Codespace, screenshot a 390px verificato
-- [ ] task 0.5: Supabase Cloud + Vercel preview
+- [x] task 0.5: Supabase Cloud + Vercel preview (staging del 27/09)
 - [x] CI: `actions/checkout@v7`, `setup-node@v7`, `supabase/setup-cli@v3`
 - [ ] CI: verificare il job `db` quando `ubuntu-latest` passa a Ubuntu 26 (19/10)
 - [x] CI: job `e2e` su Supabase locale nel runner
@@ -197,26 +197,27 @@ Verifica su telefono: `docs/spikes/2026-09-27-spike-mobile-call.md`.
       senza rate limit
 - [x] Cookie ospite con path `/room/<code>`: le route di token della slice 2 vanno
       sotto quel path
-- [ ] Codice stanza case-sensitive: normalizzare maiuscolo/trim quando si digita a
-      mano
+- [x] Codice stanza case-sensitive: normalizzare maiuscolo/trim quando si digita a
+      mano (redirect alla forma canonica, pacchetto pre-demo)
 - [x] Tipi `packages/db` scritti a mano: rigenerare
-- [ ] `profiles.display_name` vuoto alla registrazione resta `''`: usare
-      `nullif(trim(...),'')` e un check di lunghezza
+- [x] `profiles.display_name` vuoto alla registrazione resta `''`: usare
+      `nullif(trim(...),'')` e un check di lunghezza (migrazione 0005)
 - [ ] `rooms.created_by` senza `on delete`: blocca la cancellazione account quando
       arriveranno workspace multi-membro (GDPR)
 - [ ] la pagina stanza scrive `room_participants` su GET: rivedere con la presence
       della slice 2
-- [ ] Token route senza rate limit: gratuita, ma va limitata prima del lancio
+- [x] Token route senza rate limit: 30 al minuto per account o per hash dell'IP (KV)
 - [ ] Chi chiude la scheda senza «Esci» lascia la riga aperta: la chiude la purga (slice 8)
 - [ ] Rimuovere `/dev/spike-cpu` e le sue dipendenze dopo la misura
 - [ ] L'host che ricarica perde i byte delle immagini: recuperarli da un ospite che li ha
 - [ ] Contenuto `file` (documenti caricati) non ancora supportato dal palco
 - [ ] `room:{id}:presence` in KV non serve finché LiveKit dà la presence: rivedere
-- [ ] Contenuti di prova nel vassoio: nasconderli quando arriva l'agente (slice 4)
+- [x] Contenuti di prova nel vassoio: nasconderli quando arriva l'agente (slice 4)
 - [ ] Nessun heartbeat di versione: un ospite che perde l'ultimo comando resta indietro
       fino al comando successivo
 - [ ] Richiesta scritta all'agente: tenerla anche dopo lo STT come via senza microfono?
-- [ ] Contenuti di prova nel vassoio: toglierli quando `AI_PROVIDER=anthropic` è attivo
+- [x] Contenuti di prova nel vassoio: toglierli quando `AI_PROVIDER=anthropic` è attivo
+      (restano con il provider finto, per CI ed e2e)
 - [ ] Prezzi in `packages/ai/src/pricing.ts` scritti a mano: aggiornarli se cambia il listino
 - [x] Preview Vercel: `AI_PROVIDER=anthropic` e `ANTHROPIC_API_KEY` (con il task 0.5)
 - [ ] Registrare gesture reali con `/dev/gesture-recorder` e aggiungerle ai test

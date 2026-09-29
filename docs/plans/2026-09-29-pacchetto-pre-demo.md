@@ -41,10 +41,12 @@ Il form chiede il nome, ma un nome fatto di soli spazi arriva come `''`.
 `POST /room/[code]/token` è gratuita ma senza limite: chiunque può martellarla.
 
 - Finestra fissa su KV: 30 richieste al minuto per chiave. Chiave = utente autenticato,
-  altrimenti cookie ospite, altrimenti hash SHA-256 dell'IP (niente IP in chiaro in KV).
+  altrimenti hash SHA-256 dell'IP (niente IP in chiaro in KV). Il cookie ospite non basta
+  come chiave: per verificarne la firma serve la stanza, e uno falso darebbe un contatore
+  nuovo a ogni richiesta.
 - Oltre il limite: 429 con `Retry-After`. Il client trattava ogni 4xx come «non sei più
   nella riunione»: il 429 diventa passeggero e il riconnettore ritenta con attesa crescente.
-- `KvLike` guadagna `incr` ed `expire`. Test con KV finto in memoria.
+- Nuovo tipo `CounterKv` (`incr`, `expire`) accanto a `KvLike`. Test con contatore in memoria.
 
 ### 5. Pulizia del BACKLOG
 
