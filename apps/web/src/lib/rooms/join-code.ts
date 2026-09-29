@@ -17,7 +17,7 @@ export function isValidJoinCode(value: string): boolean {
 // Un codice digitato a mano arriva in minuscolo, con spazi o trattini: si riporta alla
 // forma canonica prima di validarlo.
 export function normalizeJoinCode(value: string): string {
-  let decoded = value;
+  let decoded: string;
   try {
     decoded = decodeURIComponent(value);
   } catch {
