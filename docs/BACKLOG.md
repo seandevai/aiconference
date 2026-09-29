@@ -167,6 +167,19 @@ Verifica su telefono: `docs/spikes/2026-09-27-spike-mobile-call.md`.
 - [ ] Dopo una riconnessione completa tessere, spotlight e PiP restano legati alle tracce
       della sessione vecchia (da slice 2)
 
+## Redesign (Nod) — 29/09
+
+Spec `docs/specs/2026-09-29-redesign-call-design.md`, piano `docs/plans/2026-09-29-redesign-call.md`,
+branch `slice/redesign-call` (PR #9).
+
+- [x] Token, Manrope, pacchetto `@omnicanvas/ui` (Logo, Button, Panel, FaceTile, StatusBanner)
+- [x] Guscio della stanza: barra alta con volti, avvisi sopra il palco, controlli a pillola
+- [x] Laboratorio dell'host (agente, vassoio, gesture) e barra del palco «Finestra N di M»
+- [x] Telefono: puntini sotto la finestra; spotlight; pagine di ingresso e fine riunione
+- [ ] Logo definitivo in SVG (serve il file di Sean): sostituire `packages/ui/src/logo.tsx`
+- [ ] Dashboard, login, registrazione nel nuovo stile (sotto-progetto 3, dopo i consulenti)
+- [ ] ADR sulla rinomina del codice in Nod (`@omnicanvas/*`, titoli, domini)
+
 ## Post-MVP
 
 - [ ] Piani, prezzi, Stripe
