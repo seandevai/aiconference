@@ -1,8 +1,8 @@
 import { cookies } from 'next/headers';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { serverEnv } from '@/env';
 import { guestCookieName, verifyGuestToken } from '@/lib/rooms/guest-token';
-import { isValidJoinCode } from '@/lib/rooms/join-code';
+import { isValidJoinCode, normalizeJoinCode } from '@/lib/rooms/join-code';
 import { findActiveParticipant, joinRoom } from '@/lib/rooms/join-room';
 import { showSampleContent } from '@/lib/stage/sample-content';
 import { createAdminSupabase } from '@/lib/supabase/admin';
@@ -12,8 +12,11 @@ import { GuestJoinForm } from './guest-join-form';
 import { RoomShell } from './room-shell';
 
 export default async function RoomPage({ params }: { params: Promise<{ code: string }> }) {
-  const { code } = await params;
+  const { code: typed } = await params;
+  const code = normalizeJoinCode(typed);
   if (!isValidJoinCode(code)) notFound();
+  // Un solo indirizzo per stanza: le route del token e del palco ricevono il codice canonico.
+  if (code !== typed) redirect(`/room/${code}`);
 
   const showSamples = showSampleContent(serverEnv().AI_PROVIDER);
   const admin = createAdminSupabase();

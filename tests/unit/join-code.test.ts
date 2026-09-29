@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { generateJoinCode, isValidJoinCode } from '@/lib/rooms/join-code';
+import { generateJoinCode, isValidJoinCode, normalizeJoinCode } from '@/lib/rooms/join-code';
 import { isLanguage } from '@/lib/rooms/languages';
 
 describe('join code', () => {
@@ -19,6 +19,22 @@ describe('join code', () => {
     expect(isValidJoinCode('abc')).toBe(false);
     expect(isValidJoinCode('OIL01234')).toBe(false);
     expect(isValidJoinCode('abcdefgh')).toBe(false);
+  });
+});
+
+describe('normalizeJoinCode', () => {
+  it('accepts a code typed by hand: lower case, spaces, dashes', () => {
+    expect(normalizeJoinCode('abcd-2345')).toBe('ABCD2345');
+    expect(normalizeJoinCode(' abcd 2345 ')).toBe('ABCD2345');
+  });
+  it('decodes what the address bar encodes', () => {
+    expect(normalizeJoinCode('abcd%202345')).toBe('ABCD2345');
+  });
+  it('leaves a canonical code as it is', () => {
+    expect(normalizeJoinCode('ABCD2345')).toBe('ABCD2345');
+  });
+  it('does not crash on a broken escape', () => {
+    expect(normalizeJoinCode('%E0%A4%A')).toBe('%E0%A4%A');
   });
 });
 

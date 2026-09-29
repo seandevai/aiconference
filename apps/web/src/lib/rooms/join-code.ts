@@ -13,3 +13,15 @@ export function generateJoinCode(): string {
 export function isValidJoinCode(value: string): boolean {
   return value.length === LENGTH && [...value].every((char) => ALPHABET.includes(char));
 }
+
+// Un codice digitato a mano arriva in minuscolo, con spazi o trattini: si riporta alla
+// forma canonica prima di validarlo.
+export function normalizeJoinCode(value: string): string {
+  let decoded = value;
+  try {
+    decoded = decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+  return decoded.replace(/[\s-]/g, '').toUpperCase();
+}
