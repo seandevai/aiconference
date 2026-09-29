@@ -8,6 +8,7 @@ type Props = {
   stage: Stage;
   dispatch: (command: StageCommand) => void;
   addImage: (bytes: Uint8Array, mime: 'image/png', title: string, alt: string) => void;
+  showSamples: boolean;
 };
 
 const KIND_LABELS = {
@@ -17,7 +18,7 @@ const KIND_LABELS = {
   image: 'immagine',
 } as const;
 
-export function Tray({ stage, dispatch, addImage }: Props) {
+export function Tray({ stage, dispatch, addImage, showSamples }: Props) {
   const addSample = (kind: 'chart' | 'text' | 'table') =>
     dispatch({ type: 'TRAY_ADD', content: sampleContent(kind, crypto.randomUUID()) });
 
@@ -26,28 +27,30 @@ export function Tray({ stage, dispatch, addImage }: Props) {
       aria-label="Vassoio"
       className="flex flex-col gap-2 rounded border border-neutral-800 p-2"
     >
-      <div className="flex flex-wrap items-center gap-2 text-xs">
-        <span className="text-neutral-400">Contenuti di prova:</span>
-        <button onClick={() => addSample('chart')} className="rounded bg-neutral-800 px-2 py-1">
-          Aggiungi grafico di prova
-        </button>
-        <button onClick={() => addSample('text')} className="rounded bg-neutral-800 px-2 py-1">
-          Aggiungi testo di prova
-        </button>
-        <button onClick={() => addSample('table')} className="rounded bg-neutral-800 px-2 py-1">
-          Aggiungi tabella di prova
-        </button>
-        <button
-          onClick={() =>
-            void sampleImage().then((bytes) =>
-              addImage(bytes, 'image/png', 'Schema di prova', 'Schema di prova'),
-            )
-          }
-          className="rounded bg-neutral-800 px-2 py-1"
-        >
-          Aggiungi immagine di prova
-        </button>
-      </div>
+      {showSamples && (
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <span className="text-neutral-400">Contenuti di prova:</span>
+          <button onClick={() => addSample('chart')} className="rounded bg-neutral-800 px-2 py-1">
+            Aggiungi grafico di prova
+          </button>
+          <button onClick={() => addSample('text')} className="rounded bg-neutral-800 px-2 py-1">
+            Aggiungi testo di prova
+          </button>
+          <button onClick={() => addSample('table')} className="rounded bg-neutral-800 px-2 py-1">
+            Aggiungi tabella di prova
+          </button>
+          <button
+            onClick={() =>
+              void sampleImage().then((bytes) =>
+                addImage(bytes, 'image/png', 'Schema di prova', 'Schema di prova'),
+              )
+            }
+            className="rounded bg-neutral-800 px-2 py-1"
+          >
+            Aggiungi immagine di prova
+          </button>
+        </div>
+      )}
       {stage.tray.length === 0 ? (
         <p className="text-xs text-neutral-500">
           Il vassoio è vuoto: qui arriva ciò che produce l&apos;agente.

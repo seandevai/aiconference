@@ -81,8 +81,9 @@ Non toccare segreti, billing o policy di sicurezza senza dichiararlo nel piano.
 ## Stato attuale
 
 Slice 0, 1, 2 (call), 3 (palco), 4A (agente a comando con richiesta scritta,
-`AIService`, ledger) e 5 (gesture) in `main` dal 29/09 (PR #1-#6). Call da telefono su
-`slice/mobile-call` (PR #7, aperta). Spike CPU e iOS in attesa di misura. Prima demo =
+`AIService`, ledger) e 5 (gesture) in `main` dal 29/09 (PR #1-#6), con la call da
+telefono (PR #7). Nome di prodotto proposto: «Nod» (da verificare il marchio; bozze del
+logo in `design/`, fuori da git). Spike CPU e iOS in attesa di misura. Prima demo =
 slice 0-5: completa lato codice salvo la voce (slice 4B), in attesa del test con i consulenti.
 
 Spec v3 del 23/09, dopo un secondo brainstorming con Sean. Rispetto alla v2: palco a
@@ -106,9 +107,7 @@ Slice 0 e 1 implementate e verificate su Supabase reale. Docker locale non gira
 Codespace (`.devcontainer/`) che avvia Supabase e scrive `.env.local`. `gh` è in
 `C:\Program Files\GitHub CLI\gh.exe` (non nel PATH della sessione).
 
-PR #1-#6 unite in `main` il 29/09 (merge commit, branch conservati). Resta aperta la PR #7
-`slice/mobile-call` (base `slice/5-gesture`: spostarla su `main` prima del merge). Il merge
-lo fa Sean: l'auto mode di Claude Code blocca `gh pr merge`. La build di produzione su
+PR #1-#7 unite in `main` il 29/09 (merge commit, branch conservati). Il merge lo fa Sean: l'auto mode di Claude Code blocca `gh pr merge`. La build di produzione su
 Vercel fallisce perché le variabili sono solo su Preview: voluto, per ora si testa su staging.
 
 Call da telefono (`slice/mobile-call`, 27-29/09): orizzontale, tocco sul volto a tutto schermo,
@@ -131,7 +130,7 @@ Codespace: `pkill -f "[n]ext-server"` (il processo non si chiama `next dev`).
 
 Il passo successivo, in ordine:
 
-1. Sean: specchio su iPhone da verificare, poi merge della PR #7; checklist Android;
+1. Sean: specchio su iPhone da verificare; checklist Android;
    misura degli spike CPU e iOS Safari; registrazioni reali delle gesture; test della demo
    con 5 consulenti (`docs/spikes/`).
 2. Redesign della UI della call, desktop e mobile, con «Riquadro» più visibile: da fare

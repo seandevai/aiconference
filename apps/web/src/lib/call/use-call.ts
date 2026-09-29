@@ -11,6 +11,7 @@ import {
 } from '@omnicanvas/realtime';
 import {
   MEDIA_ERROR_MESSAGE,
+  isTokenRefusal,
   phaseAfterDisconnect,
   phaseFromStatus,
   tokenErrorPhase,
@@ -35,7 +36,7 @@ class TokenRefusedError extends Error {
 async function fetchRoomToken(joinCode: string): Promise<{ url: string; token: string }> {
   const response = await fetch(`/room/${joinCode}/token`, { method: 'POST', cache: 'no-store' });
   // 4xx è una risposta definitiva: non ha senso riprovare. 5xx e rete sì.
-  if (response.status >= 400 && response.status < 500) throw new TokenRefusedError(response.status);
+  if (isTokenRefusal(response.status)) throw new TokenRefusedError(response.status);
   if (!response.ok) throw new Error(`room token failed with status ${response.status}`);
   return (await response.json()) as { url: string; token: string };
 }
