@@ -4,6 +4,7 @@ import {
   phaseAfterDisconnect,
   phaseFromStatus,
   phaseMessage,
+  isTokenRefusal,
   tokenErrorPhase,
   type CallPhase,
 } from '@/lib/call/phase';
@@ -47,5 +48,18 @@ describe('call phase', () => {
     expect(phaseMessage('ended')).toBe('Questa riunione è terminata.');
     expect(phaseMessage('reconnecting')).toBe('Connessione persa, riprovo…');
     expect(MEDIA_ERROR_MESSAGE).toMatch(/permessi/);
+  });
+});
+
+describe('isTokenRefusal', () => {
+  it('treats a client error as a refusal: retrying would not help', () => {
+    expect(isTokenRefusal(403)).toBe(true);
+    expect(isTokenRefusal(410)).toBe(true);
+  });
+  it('treats too many requests as temporary: the reconnector waits and retries', () => {
+    expect(isTokenRefusal(429)).toBe(false);
+  });
+  it('treats server errors as temporary', () => {
+    expect(isTokenRefusal(503)).toBe(false);
   });
 });

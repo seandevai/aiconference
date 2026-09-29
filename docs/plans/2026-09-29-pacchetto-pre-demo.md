@@ -42,7 +42,8 @@ Il form chiede il nome, ma un nome fatto di soli spazi arriva come `''`.
 
 - Finestra fissa su KV: 30 richieste al minuto per chiave. Chiave = utente autenticato,
   altrimenti cookie ospite, altrimenti hash SHA-256 dell'IP (niente IP in chiaro in KV).
-- Oltre il limite: 429 con `Retry-After`. Il client già ritenta con attesa crescente.
+- Oltre il limite: 429 con `Retry-After`. Il client trattava ogni 4xx come «non sei più
+  nella riunione»: il 429 diventa passeggero e il riconnettore ritenta con attesa crescente.
 - `KvLike` guadagna `incr` ed `expire`. Test con KV finto in memoria.
 
 ### 5. Pulizia del BACKLOG

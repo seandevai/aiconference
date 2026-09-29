@@ -33,6 +33,11 @@ export function phaseAfterDisconnect(cause: DisconnectCause): CallPhase {
   }
 }
 
+// 429 e 5xx sono passeggeri: il riconnettore aspetta e riprova. Gli altri 4xx no.
+export function isTokenRefusal(httpStatus: number): boolean {
+  return httpStatus >= 400 && httpStatus < 500 && httpStatus !== 429;
+}
+
 export function tokenErrorPhase(httpStatus: number): CallPhase {
   return httpStatus === 410 ? 'ended' : 'forbidden';
 }
