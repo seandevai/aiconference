@@ -213,6 +213,12 @@ caricato come configurazione.
 
 Solo l'host usa le gesture nell'MVP.
 
+Implementazione: `packages/gesture` ha un nucleo puro (`classifyPose`, `createRecognizer`,
+`createAdaptiveController`) e un runner MediaPipe in `@omnicanvas/gesture/runner`, caricato
+solo quando l'host preme ✋. Le gesture arrivano al palco da `resolveDrop` e
+`gestureAction`, le stesse funzioni del mouse. I test girano su mani sintetiche e sulle
+registrazioni in `tests/fixtures/gestures/`.
+
 ## 9. Il pacchetto
 
 ```

@@ -10,11 +10,15 @@ import { useAgent } from '@/lib/stage/use-agent';
 export function AgentPanel({
   joinCode,
   dispatch,
+  open,
+  onOpenChange,
 }: {
   joinCode: string;
   dispatch: (command: StageCommand) => void;
+  // Controllato dal genitore: anche il gesto «indice alzato» apre il pannello.
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) {
-  const [open, setOpen] = useState(false);
   const [prompt, setPrompt] = useState('');
   const agent = useAgent({
     joinCode,
@@ -28,7 +32,7 @@ export function AgentPanel({
     <div className="flex flex-col gap-2 rounded border border-neutral-800 p-2 text-xs">
       <div className="flex flex-wrap items-center gap-2">
         <button
-          onClick={() => setOpen((v) => !v)}
+          onClick={() => onOpenChange(!open)}
           className="rounded bg-emerald-500 px-2 py-1 font-medium text-neutral-950"
         >
           ✨ Chiedi all&apos;agente
@@ -50,6 +54,7 @@ export function AgentPanel({
           <label className="flex flex-1 flex-col gap-1">
             Cosa ti serve?
             <input
+              autoFocus
               value={prompt}
               onChange={(event) => setPrompt(event.target.value)}
               maxLength={500}

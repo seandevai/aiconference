@@ -1,8 +1,10 @@
 import type { StageCommand, StageWindow } from '@omnicanvas/canvas';
+import type { DragItem } from '@/lib/stage/drop';
 import { ContentView } from './content-view';
 
+export type { DragItem };
+
 export const DRAG_TYPE = 'application/x-omnicanvas';
-export type DragItem = { type: 'content' | 'window'; id: string };
 
 type Props = {
   window: StageWindow;
@@ -23,6 +25,8 @@ export function WindowView({ window, assetUrls, dispatch }: Props) {
       className="flex h-full flex-col gap-2 rounded border border-neutral-700 bg-neutral-900 p-2"
     >
       <header
+        data-drag-type="window"
+        data-drag-id={window.id}
         draggable={editable}
         onDragStart={editable ? startDrag({ type: 'window', id: window.id }) : undefined}
         className={`flex items-center justify-between gap-2 ${editable ? 'cursor-grab' : ''}`}
@@ -54,6 +58,8 @@ export function WindowView({ window, assetUrls, dispatch }: Props) {
           {window.contents.map((content) => (
             <li
               key={content.id}
+              data-drag-type="content"
+              data-drag-id={content.id}
               draggable={editable}
               onDragStart={editable ? startDrag({ type: 'content', id: content.id }) : undefined}
               className="flex flex-col gap-1"

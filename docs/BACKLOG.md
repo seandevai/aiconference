@@ -65,24 +65,26 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 - [x] `AIService` con risoluzione del pagante e quota **prima** del provider (pagante: host)
 - [x] Scrittura ledger a ogni chiamata, anche fallita; rate limit
 - [x] Crediti caricati a mano (`manual_grant`, `npm run credits:grant`)
-- [ ] Parola chiave locale in ONNX, nome scelto (slice 4B, serve la decisione di Sean)
+- [ ] Parola chiave locale in ONNX, nome scelto (slice 4B, ADR-0012)
 - [ ] Token STT a vita breve, solo all'host (slice 4B, serve il vendor STT)
 - [ ] `packages/stt`: VAD, stream a comando, fine richiesta al silenzio (slice 4B)
 - [x] `agent_generate`: grafici, testi, tabelle nel vassoio (richiesta scritta finché manca lo STT)
-- [ ] Immagini dietro conferma esplicita (slice 4B, serve il provider di immagini)
+- [ ] Immagini dietro conferma esplicita (slice 4B, ADR-0013)
 - [x] Contatore agente visibile all'host
 - [ ] Modalità companion, se il flusso a comando è stabile (slice 4B)
 - [x] Test di accounting: N chiamate, saldo corretto
 
 ## Slice 5 — Gesture (prima demo)
 
-- [ ] `packages/gesture`: MediaPipe, classificatore (in parallelo dal giorno 1)
-- [ ] Dizionario ADR-0010 caricato come configurazione
-- [ ] Palmo aperto come interruttore; debounce e cooldown
-- [ ] Pinch-trascina-rilascia dal vassoio alle finestre
-- [ ] Frequenza adattiva e degrado ordinato
-- [ ] Test del classificatore su landmark registrati, senza webcam
-- [ ] **Gate di prodotto:** far provare la demo a 5 consulenti veri
+- [x] `packages/gesture`: MediaPipe, classificatore (in parallelo dal giorno 1)
+- [x] Dizionario ADR-0010 caricato come configurazione
+- [x] Palmo aperto come interruttore; debounce e cooldown
+- [x] Pinch-trascina-rilascia dal vassoio alle finestre
+- [x] Frequenza adattiva e degrado ordinato
+- [x] Test del classificatore su landmark sintetici, senza webcam (registrazioni reali:
+      `/dev/gesture-recorder`, le aggiunge Sean)
+- [ ] **Gate di prodotto:** far provare la demo a 5 consulenti veri (protocollo in
+      `docs/spikes/2026-09-26-test-demo-consulenti.md`, lo conduce Sean)
 
 ## Slice 6 — Sottotitoli
 
@@ -143,10 +145,14 @@ di GitHub e nel Codespace (`.devcontainer/`), che avvia Supabase e scrive `.env.
 
 ## Debito e rischi da sciogliere
 
-- [ ] Scegliere il vendor STT: qualità italiano, prezzo, zero retention
+- [x] Scegliere il vendor STT: Deepgram Nova-3 (ADR-0011)
 - [ ] Scegliere il provider di traduzione: latenza e costo per carattere
-- [ ] Scegliere nome e modello della parola chiave; addestrarlo se serve
-- [ ] Scegliere il provider di immagini su costo e latenza
+- [x] Scegliere il modello della parola chiave: openWakeWord (ADR-0012)
+- [ ] Addestrare il modello openWakeWord su «Ehi Omnia» (provvisorio) con voci Piper
+- [ ] Scegliere un nome definitivo più amichevole per la parola chiave e riaddestrare (ADR-0012)
+- [x] Scegliere il provider di immagini: fal.ai FLUX schnell (ADR-0013)
+- [ ] Togliere `OPENAI_API_KEY` dal contratto env se non serve altrove (ADR-0013)
+- [ ] Verificare retention e DPA di fal.ai prima dei clienti veri (ADR-0013)
 - [ ] Firmare i DPA con vendor STT e LLM, zero retention per iscritto
 - [ ] Misurare i costi reali e decidere l'economia
 - [x] Indice unico host senza filtro `left_at`: l'host non rientra dopo l'uscita
@@ -177,5 +183,9 @@ di GitHub e nel Codespace (`.devcontainer/`), che avvia Supabase e scrive `.env.
 - [ ] Contenuti di prova nel vassoio: toglierli quando `AI_PROVIDER=anthropic` è attivo
 - [ ] Prezzi in `packages/ai/src/pricing.ts` scritti a mano: aggiornarli se cambia il listino
 - [ ] Preview Vercel: `AI_PROVIDER=anthropic` e `ANTHROPIC_API_KEY` (con il task 0.5)
+- [ ] Registrare gesture reali con `/dev/gesture-recorder` e aggiungerle ai test
+- [ ] CONFIRM/REJECT a gesto non fanno ancora nulla: servono le immagini con conferma (4B)
+- [ ] MediaPipe si scarica da jsdelivr e googleapis: valutare l'hosting dei file
+- [ ] Soglie delle gesture tarate su mani sintetiche: ritararle con le registrazioni reali
 - [ ] Preview Vercel: aggiungere `NEXT_PUBLIC_LIVEKIT_URL`, `LIVEKIT_API_KEY`,
       `LIVEKIT_API_SECRET` del progetto LiveKit Cloud (con il task 0.5)

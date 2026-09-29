@@ -83,7 +83,9 @@ Non toccare segreti, billing o policy di sicurezza senza dichiararlo nel piano.
 Slice 0 e 1 completate e verificate, in attesa di merge in `main`. Slice 2 (call)
 implementata su `slice/2-call` (PR #3), spike CPU e iOS in attesa di misura. Slice 3
 (palco) implementata su `slice/3-palco` (PR #4). Slice 4A (agente a comando con richiesta
-scritta, `AIService`, ledger) su `slice/4a-agente` (PR #5).
+scritta, `AIService`, ledger) su `slice/4a-agente` (PR #5). Slice 5 (gesture) su
+`slice/5-gesture` (PR #6). Prima demo = slice 0-5: completa lato codice salvo la voce
+(slice 4B), in attesa del test con i consulenti.
 
 Spec v3 del 23/09, dopo un secondo brainstorming con Sean. Rispetto alla v2: palco a
 finestre a slot magnetici invece della lista di schede (ADR-0009), agente a comando
@@ -107,7 +109,7 @@ Codespace (`.devcontainer/`) che avvia Supabase e scrive `.env.local`. `gh` è i
 `C:\Program Files\GitHub CLI\gh.exe` (non nel PATH della sessione).
 
 Branch impilati: `slice/0-fondamenta` (PR #1) → `slice/1-auth-stanza` (PR #2) →
-`slice/2-call` (PR #3) → `slice/3-palco` (PR #4) → `slice/4a-agente` (PR #5). Il merge in `main` lo fa Sean.
+`slice/2-call` (PR #3) → `slice/3-palco` (PR #4) → `slice/4a-agente` (PR #5) → `slice/5-gesture` (PR #6). Il merge in `main` lo fa Sean.
 
 Nel Codespace, `git` via SSH richiede `set -a; . /workspaces/.codespaces/shared/.env; set +a`
 (il token non è esportato nelle sessioni SSH). LiveKit locale: `ws://localhost:7880`,
@@ -117,11 +119,12 @@ Codespace: `pkill -f "[n]ext-server"` (il processo non si chiama `next dev`).
 
 Il passo successivo, in ordine:
 
-1. Sean: merge delle PR #1-#5; task 0.5 (Supabase Cloud, Vercel, LiveKit Cloud,
-   Upstash, `ANTHROPIC_API_KEY`); misura degli spike CPU e iOS Safari (`docs/spikes/`).
-2. Slice 5 (gesture): non dipende da decisioni aperte.
-3. Slice 4B (parola chiave, STT, immagini, companion): servono le decisioni di Sean
+1. Sean: merge delle PR #1-#6; task 0.5 (Supabase Cloud, Vercel, LiveKit Cloud,
+   Upstash, `ANTHROPIC_API_KEY`); misura degli spike CPU e iOS Safari; registrazioni
+   reali delle gesture; test della demo con 5 consulenti (`docs/spikes/`).
+2. Slice 4B (parola chiave, STT, immagini, companion): servono le decisioni di Sean
    (spec §12) e le chiavi dei vendor.
+3. Dopo il test con i consulenti: slice 6-8 (sottotitoli, negoziazione, pacchetto).
 
 Decisioni prese e non da riaprire senza un ADR nuovo: palco a slot magnetici, solo
 l'host scrive sul palco e attiva l'agente, negoziazione aperta dall'host con tetto e
