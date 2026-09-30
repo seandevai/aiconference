@@ -84,7 +84,9 @@ Slice 0, 1, 2 (call), 3 (palco), 4A (agente a comando con richiesta scritta,
 `AIService`, ledger) e 5 (gesture) in `main` dal 29/09 (PR #1-#6), con la call da
 telefono (PR #7). Nome di prodotto proposto: «Nod» (da verificare il marchio; bozze del
 logo in `design/`, fuori da git). Redesign della call e del palco nella veste Nod (antracite, lime, Manrope,
-laboratorio dell'host) su `slice/redesign-call` (PR #9). Spike CPU e iOS in attesa di misura. Prima demo =
+laboratorio dell'host) su `slice/redesign-call` (PR #9). Accesso «Sobrio» e dashboard «Agenda»
+(riunioni per stato, crediti, profilo) su `slice/accesso-dashboard`, spec
+`docs/specs/2026-09-30-accesso-dashboard-design.md`. Spike CPU e iOS in attesa di misura. Prima demo =
 slice 0-5: completa lato codice salvo la voce (slice 4B), in attesa del test con i consulenti.
 
 Spec v3 del 23/09, dopo un secondo brainstorming con Sean. Rispetto alla v2: palco a

@@ -177,11 +177,16 @@ branch `slice/redesign-call` (PR #9).
 - [x] Laboratorio dell'host (agente, vassoio, gesture) e barra del palco «Finestra N di M»
 - [x] Telefono: puntini sotto la finestra; spotlight; pagine di ingresso e fine riunione
 - [ ] Logo definitivo in SVG (serve il file di Sean): sostituire `packages/ui/src/logo.tsx`
-- [ ] Dashboard, login, registrazione nel nuovo stile (sotto-progetto 3, dopo i consulenti)
+- [x] Dashboard, login, registrazione nel nuovo stile (sotto-progetto 3, anticipato il 30/09:
+      spec `docs/specs/2026-09-30-accesso-dashboard-design.md`, branch `slice/accesso-dashboard`)
+- [ ] Cambio visivo più marcato di call e palco (sotto-progetto separato, dopo l'accesso)
+- [ ] Accesso con link magico o codice monouso (servono le email transazionali)
+- [ ] Numero di partecipanti per riunione in dashboard: policy di lettura su
+      `room_participants` per i membri del workspace, migrazione dedicata con test RLS
+- [ ] Crediti per riunione in dashboard: vista SQL se le righe del ledger crescono
+- [ ] Sito vetrina di Nod (dopo il marchio definitivo)
 - [ ] ADR sulla rinomina del codice in Nod (`@omnicanvas/*`, titoli, domini)
-- [ ] Revisione finale (minori): ✕ dello spotlight resta opaca e piccola (`cx` non unisce le
-      classi: serve una variante o tailwind-merge); `font-medium` rende a 400 con Manrope
-      400/600/800; nomi lunghi escono dalla pillola dello spotlight; host sotto `lg` stringe il
+- [ ] Revisione finale (minori): nomi lunghi escono dalla pillola dello spotlight; host sotto `lg` stringe il
       palco; test di contrasto senza `danger` e `accent` su `surface`; dashboard a due toni
 - [ ] Gesture: l'area mappata ora comprende laboratorio e palco; decidere con Sean dopo le
       registrazioni reali se limitarla al palco

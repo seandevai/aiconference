@@ -15,10 +15,7 @@ export async function closeParticipants(): Promise<void> {
   await Promise.all(opened.splice(0).map((context) => context.close().catch(() => {})));
 }
 
-export async function signUpHostWithRoom(
-  browser: Browser,
-  title = 'Kickoff Acme',
-): Promise<{ host: Page; roomUrl: string; email: string }> {
+export async function signUpHost(browser: Browser): Promise<{ host: Page; email: string }> {
   const context = await browser.newContext();
   opened.push(context);
   const host = await context.newPage();
@@ -31,11 +28,27 @@ export async function signUpHostWithRoom(
   await host.getByRole('button', { name: 'Registrati' }).click();
   // Il server di sviluppo sotto carico (e2e in parallelo con i media) può metterci qualche secondo.
   await expect(host).toHaveURL(/\/dashboard$/, { timeout: 15_000 });
+  return { host, email };
+}
 
-  await host.getByPlaceholder('Titolo della riunione').fill(title);
-  await host.getByRole('button', { name: 'Crea stanza' }).click();
+export async function signUpHostWithRoom(
+  browser: Browser,
+  title = 'Kickoff Acme',
+): Promise<{ host: Page; roomUrl: string; email: string }> {
+  const { host, email } = await signUpHost(browser);
+  await host.getByRole('button', { name: 'Nuova riunione' }).click();
+  await host.getByLabel('Titolo della riunione').fill(title);
+  await host.getByRole('button', { name: 'Crea', exact: true }).click();
   await expect(host).toHaveURL(/\/room\/[A-Z2-9]{8}$/, { timeout: 15_000 });
   return { host, roomUrl: host.url(), email };
+}
+
+// La stanza diventa «active» solo quando il client chiede il token della call: prima di
+// lasciare la stanza bisogna aspettare di esserci davvero (la propria tessera nei volti).
+export async function waitUntilInCall(page: Page): Promise<void> {
+  await expect(
+    page.getByRole('complementary', { name: 'Partecipanti' }).getByRole('listitem'),
+  ).toHaveCount(1, { timeout: 30_000 });
 }
 
 export async function joinAsAnonymousGuest(

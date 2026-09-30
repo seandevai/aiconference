@@ -1,5 +1,11 @@
 import { test } from '@playwright/test';
-import { closeParticipants, joinAsAnonymousGuest, signUpHostWithRoom } from './helpers';
+import {
+  closeParticipants,
+  joinAsAnonymousGuest,
+  signUpHost,
+  signUpHostWithRoom,
+  waitUntilInCall,
+} from './helpers';
 
 // Solo con SCREENSHOTS=1: immagini per la revisione della PR, non confronti di pixel.
 test.skip(!process.env.SCREENSHOTS, 'screenshots only on request');
@@ -23,5 +29,28 @@ test('redesign screenshots', async ({ browser }, testInfo) => {
     await page.setViewportSize(size);
     await page.waitForTimeout(500);
     await page.screenshot({ path: `test-results/screenshots/${name}.png` });
+  }
+});
+
+test('access and dashboard screenshots', async ({ browser, page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'one run is enough');
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/login');
+  await page.screenshot({ path: 'test-results/screenshots/login-desktop.png' });
+
+  const { host: fresh } = await signUpHost(browser);
+  await fresh.setViewportSize({ width: 1280, height: 800 });
+  await fresh.screenshot({ path: 'test-results/screenshots/dashboard-empty.png' });
+
+  const { host } = await signUpHostWithRoom(browser, 'Kickoff Ferretti Arredi');
+  await waitUntilInCall(host);
+  await host.goto('/dashboard');
+  for (const [name, size] of [
+    ['dashboard-desktop', { width: 1440, height: 900 }],
+    ['dashboard-phone', { width: 390, height: 844 }],
+  ] as const) {
+    await host.setViewportSize(size);
+    await host.waitForTimeout(300);
+    await host.screenshot({ path: `test-results/screenshots/${name}.png`, fullPage: true });
   }
 });
