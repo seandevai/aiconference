@@ -1,5 +1,11 @@
 import { test } from '@playwright/test';
-import { closeParticipants, joinAsAnonymousGuest, signUpHost, signUpHostWithRoom } from './helpers';
+import {
+  closeParticipants,
+  joinAsAnonymousGuest,
+  signUpHost,
+  signUpHostWithRoom,
+  waitUntilInCall,
+} from './helpers';
 
 // Solo con SCREENSHOTS=1: immagini per la revisione della PR, non confronti di pixel.
 test.skip(!process.env.SCREENSHOTS, 'screenshots only on request');
@@ -37,6 +43,7 @@ test('access and dashboard screenshots', async ({ browser, page }, testInfo) => 
   await fresh.screenshot({ path: 'test-results/screenshots/dashboard-empty.png' });
 
   const { host } = await signUpHostWithRoom(browser, 'Kickoff Ferretti Arredi');
+  await waitUntilInCall(host);
   await host.goto('/dashboard');
   for (const [name, size] of [
     ['dashboard-desktop', { width: 1440, height: 900 }],

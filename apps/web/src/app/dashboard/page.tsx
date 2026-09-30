@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation';
 import { Logo, StatusBanner } from '@omnicanvas/ui';
-import { clientEnv } from '@/env';
 import { loadDashboard } from '@/lib/dashboard/load-dashboard';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { CreditsCard } from './credits-card';
@@ -31,12 +30,7 @@ export default async function DashboardPage() {
           <NewMeeting defaultOpen={data.rooms?.length === 0} />
           <section aria-label="Riunioni" className="rounded-panel bg-surface p-4">
             {data.rooms ? (
-              <MeetingList
-                rooms={data.rooms}
-                creditsByRoom={data.creditsByRoom}
-                appUrl={clientEnv.NEXT_PUBLIC_APP_URL}
-                now={now}
-              />
+              <MeetingList rooms={data.rooms} creditsByRoom={data.creditsByRoom} now={now} />
             ) : (
               <StatusBanner tone="error" live="alert">
                 Non riesco a caricare le riunioni. Ricarica la pagina.

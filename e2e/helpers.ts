@@ -43,6 +43,14 @@ export async function signUpHostWithRoom(
   return { host, roomUrl: host.url(), email };
 }
 
+// La stanza diventa «active» solo quando il client chiede il token della call: prima di
+// lasciare la stanza bisogna aspettare di esserci davvero (la propria tessera nei volti).
+export async function waitUntilInCall(page: Page): Promise<void> {
+  await expect(
+    page.getByRole('complementary', { name: 'Partecipanti' }).getByRole('listitem'),
+  ).toHaveCount(1, { timeout: 30_000 });
+}
+
 export async function joinAsAnonymousGuest(
   browser: Browser,
   roomUrl: string,

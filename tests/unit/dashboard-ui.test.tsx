@@ -37,7 +37,6 @@ describe('MeetingList', () => {
     render(
       <MeetingList
         now={now}
-        appUrl="https://nod.test"
         creditsByRoom={{ past: 36 }}
         rooms={[
           room({
@@ -67,14 +66,7 @@ describe('MeetingList', () => {
   });
 
   it('keeps long titles inside the row', () => {
-    render(
-      <MeetingList
-        now={now}
-        appUrl="https://nod.test"
-        creditsByRoom={{}}
-        rooms={[room({ title: 'x'.repeat(120) })]}
-      />,
-    );
+    render(<MeetingList now={now} creditsByRoom={{}} rooms={[room({ title: 'x'.repeat(120) })]} />);
     // Il titolo torna anche nel testo nascosto del link «Apri»: qui serve la riga.
     const title = screen.getByText('x'.repeat(120), { ignore: 'a *' });
     expect(title.className).toContain('truncate');
@@ -82,20 +74,25 @@ describe('MeetingList', () => {
   });
 
   it('shows the first-meeting steps when there are no meetings', () => {
-    render(<MeetingList now={now} appUrl="https://nod.test" creditsByRoom={{}} rooms={[]} />);
+    render(<MeetingList now={now} creditsByRoom={{}} rooms={[]} />);
     expect(screen.getByRole('heading', { name: 'Prima riunione' })).toBeTruthy();
     expect(screen.getAllByRole('listitem')).toHaveLength(3);
   });
 });
 
 describe('CopyLinkButton', () => {
-  it('confirms after copying', async () => {
+  // Il link nasce dall'indirizzo della pagina, non da una variabile d'ambiente che nel
+  // Codespace o in CI vale localhost.
+  const origin = () => window.location.origin;
+
+  it('confirms after copying, and says so to screen readers', async () => {
     const writeText = vi.fn(async () => {});
     vi.stubGlobal('navigator', { clipboard: { writeText } });
-    render(<CopyLinkButton url="https://nod.test/room/ABCD2345" />);
+    render(<CopyLinkButton path="/room/ABCD2345" />);
     fireEvent.click(screen.getByRole('button', { name: 'Copia link' }));
     await waitFor(() => expect(screen.getByRole('button', { name: 'Link copiato' })).toBeTruthy());
-    expect(writeText).toHaveBeenCalledWith('https://nod.test/room/ABCD2345');
+    expect(writeText).toHaveBeenCalledWith(`${origin()}/room/ABCD2345`);
+    expect(document.querySelector('[aria-live="polite"]')?.textContent).toBe('Link copiato');
   });
 
   it('shows the link to copy by hand when the clipboard refuses', async () => {
@@ -106,16 +103,18 @@ describe('CopyLinkButton', () => {
         }),
       },
     });
-    render(<CopyLinkButton url="https://nod.test/room/ABCD2345" />);
+    render(<CopyLinkButton path="/room/ABCD2345" />);
     fireEvent.click(screen.getByRole('button', { name: 'Copia link' }));
     const field = await screen.findByRole('textbox', { name: 'Link della riunione' });
-    expect((field as HTMLInputElement).value).toBe('https://nod.test/room/ABCD2345');
+    expect((field as HTMLInputElement).value).toBe(`${origin()}/room/ABCD2345`);
     expect(field.hasAttribute('readonly')).toBe(true);
+    // Il pulsante sparisce: il focus passa al campo, non cade su <body>.
+    await waitFor(() => expect(document.activeElement).toBe(field));
   });
 
   it('falls back also when there is no clipboard at all', async () => {
     vi.stubGlobal('navigator', {});
-    render(<CopyLinkButton url="https://nod.test/room/ABCD2345" />);
+    render(<CopyLinkButton path="/room/ABCD2345" />);
     fireEvent.click(screen.getByRole('button', { name: 'Copia link' }));
     expect(await screen.findByRole('textbox', { name: 'Link della riunione' })).toBeTruthy();
   });

@@ -6,14 +6,13 @@ import { CopyLinkButton } from './copy-link-button';
 type Props = {
   rooms: DashboardRoom[];
   creditsByRoom: Record<string, number>;
-  appUrl: string;
   now: Date;
 };
 
 const linkButton =
   'inline-flex min-h-11 items-center rounded-full px-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent';
 
-export function MeetingList({ rooms, creditsByRoom, appUrl, now }: Props) {
+export function MeetingList({ rooms, creditsByRoom, now }: Props) {
   if (rooms.length === 0) return <FirstMeeting />;
   const groups = groupRooms(rooms, now);
 
@@ -23,7 +22,7 @@ export function MeetingList({ rooms, creditsByRoom, appUrl, now }: Props) {
         <Group title="In corso">
           {groups.live.map((room) => (
             <Row key={room.id} room={room} live>
-              <CopyLinkButton url={`${appUrl}/room/${room.joinCode}`} />
+              <CopyLinkButton path={`/room/${room.joinCode}`} />
               <Link
                 href={`/room/${room.joinCode}`}
                 className={`${linkButton} bg-accent text-on-accent`}
@@ -38,7 +37,7 @@ export function MeetingList({ rooms, creditsByRoom, appUrl, now }: Props) {
         <Group title="Pronte">
           {groups.ready.map((room) => (
             <Row key={room.id} room={room}>
-              <CopyLinkButton url={`${appUrl}/room/${room.joinCode}`} />
+              <CopyLinkButton path={`/room/${room.joinCode}`} />
               <Link
                 href={`/room/${room.joinCode}`}
                 className={`${linkButton} bg-raised text-fg hover:bg-line`}

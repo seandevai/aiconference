@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { closeParticipants, signUpHost, signUpHostWithRoom } from './helpers';
+import { closeParticipants, signUpHost, signUpHostWithRoom, waitUntilInCall } from './helpers';
 
 test.afterEach(closeParticipants);
 
@@ -18,6 +18,7 @@ test('the root page sends visitors to login and hosts to their meetings', async 
 
 test('a started meeting is live on the dashboard with its link', async ({ browser }) => {
   const { host } = await signUpHostWithRoom(browser, 'Kickoff Ferretti');
+  await waitUntilInCall(host);
   await host.goto('/dashboard');
   await expect(host.getByRole('heading', { name: 'In corso' })).toBeVisible();
   await expect(host.getByText('Kickoff Ferretti', { exact: true })).toBeVisible();
@@ -45,5 +46,6 @@ test('the host signs out from the profile menu', async ({ browser }) => {
   await host.getByRole('button', { name: 'Esci' }).click();
   await expect(host).toHaveURL(/\/login$/);
   await host.goto('/dashboard');
-  await expect(host).toHaveURL(/\/login\?next=%2Fdashboard$/);
+  // Next scrive il `next` così com'è: la barra non viene codificata.
+  await expect(host).toHaveURL(/\/login\?next=(%2F|\/)dashboard$/);
 });
