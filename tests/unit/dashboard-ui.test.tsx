@@ -11,6 +11,9 @@ vi.mock('@/app/dashboard/actions', () => ({
 const { MeetingList } = await import('@/app/dashboard/meeting-list');
 const { CopyLinkButton } = await import('@/app/dashboard/copy-link-button');
 const { NewMeeting } = await import('@/app/dashboard/new-meeting');
+const { CreditsCard } = await import('@/app/dashboard/credits-card');
+const { ProfileCard } = await import('@/app/dashboard/profile-card');
+const actions = await import('@/app/dashboard/actions');
 
 afterEach(() => {
   cleanup();
@@ -133,5 +136,33 @@ describe('NewMeeting', () => {
   it('starts open for a new user', () => {
     render(<NewMeeting defaultOpen />);
     expect(screen.getByLabelText('Titolo della riunione')).toBeTruthy();
+  });
+});
+
+describe('CreditsCard', () => {
+  it('shows the balance and this month use', () => {
+    render(<CreditsCard now={now} credits={{ balance: 1240, usedThisMonth: 129 }} />);
+    expect(screen.getByText('1.240')).toBeTruthy();
+    expect(screen.getByText('129 usati a settembre')).toBeTruthy();
+  });
+  it('shows a dash when credits could not be read', () => {
+    render(<CreditsCard now={now} credits={null} />);
+    expect(screen.getByText('—')).toBeTruthy();
+  });
+});
+
+describe('ProfileCard', () => {
+  it('edits the name in place and keeps what was typed when the server refuses it', async () => {
+    vi.mocked(actions.updateDisplayName).mockResolvedValueOnce({
+      error: 'Scrivi il tuo nome, al massimo 40 caratteri.',
+      saved: false,
+    });
+    render(<ProfileCard displayName="Giulia Rinaldi" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
+    const field = screen.getByLabelText('Nome') as HTMLInputElement;
+    fireEvent.change(field, { target: { value: '   ' } });
+    fireEvent.submit(field.form!);
+    expect(await screen.findByText('Scrivi il tuo nome, al massimo 40 caratteri.')).toBeTruthy();
+    expect((screen.getByLabelText('Nome') as HTMLInputElement).value).toBe('   ');
   });
 });

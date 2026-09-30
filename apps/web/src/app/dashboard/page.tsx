@@ -1,51 +1,54 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { signOut } from '@/app/(auth)/actions';
+import { Logo, StatusBanner } from '@omnicanvas/ui';
+import { clientEnv } from '@/env';
+import { loadDashboard } from '@/lib/dashboard/load-dashboard';
 import { createServerSupabase } from '@/lib/supabase/server';
-import { CreateRoomForm } from './create-room-form';
+import { CreditsCard } from './credits-card';
+import { MeetingList } from './meeting-list';
+import { NewMeeting } from './new-meeting';
+import { ProfileCard } from './profile-card';
+import { ProfileMenu } from './profile-menu';
 
-const STATUS_LABELS: Record<string, string> = {
-  created: 'pronta',
-  active: 'in corso',
-  closing: 'in chiusura',
-  closed: 'terminata',
-  purged: 'terminata',
-};
-
+// Impianto «Agenda» (spec accesso-dashboard §3).
 export default async function DashboardPage() {
   const supabase = await createServerSupabase();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) redirect('/login?next=/dashboard');
 
-  // La RLS filtra già per workspace: nessun filtro a mano.
-  const { data: rooms } = await supabase
-    .from('rooms')
-    .select('id, title, join_code, status, created_at')
-    .order('created_at', { ascending: false })
-    .limit(50);
+  const now = new Date();
+  const data = await loadDashboard(supabase, auth.user.id, now);
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-2xl flex-col gap-6 bg-neutral-950 p-6 text-neutral-100">
-      <header className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Le tue stanze</h1>
-        <form action={signOut}>
-          <button className="text-sm text-neutral-400 underline">Esci</button>
-        </form>
+    <div className="flex min-h-dvh flex-col bg-bg text-fg">
+      <header className="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-3 sm:px-6">
+        <Logo />
+        <span className="flex-1" />
+        <ProfileMenu displayName={data.displayName} />
       </header>
-      <CreateRoomForm />
-      <ul className="flex flex-col divide-y divide-neutral-800">
-        {(rooms ?? []).map((room) => (
-          <li key={room.id} className="flex items-center justify-between py-3">
-            <Link href={`/room/${room.join_code}`} className="font-medium underline">
-              {room.title}
-            </Link>
-            <span className="text-sm text-neutral-400">
-              {room.join_code} · {STATUS_LABELS[room.status] ?? room.status}
-            </span>
-          </li>
-        ))}
-        {rooms?.length === 0 && <li className="py-3 text-neutral-500">Nessuna stanza ancora.</li>}
-      </ul>
-    </main>
+      <main className="mx-auto grid w-full max-w-6xl flex-1 gap-6 px-4 pb-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
+        <div className="flex min-w-0 flex-col gap-4">
+          <h1 className="text-2xl font-extrabold tracking-tight">Le tue riunioni</h1>
+          <NewMeeting defaultOpen={data.rooms?.length === 0} />
+          <section aria-label="Riunioni" className="rounded-panel bg-surface p-4">
+            {data.rooms ? (
+              <MeetingList
+                rooms={data.rooms}
+                creditsByRoom={data.creditsByRoom}
+                appUrl={clientEnv.NEXT_PUBLIC_APP_URL}
+                now={now}
+              />
+            ) : (
+              <StatusBanner tone="error" live="alert">
+                Non riesco a caricare le riunioni. Ricarica la pagina.
+              </StatusBanner>
+            )}
+          </section>
+        </div>
+        <aside className="flex flex-col gap-4">
+          <CreditsCard credits={data.credits} now={now} />
+          <ProfileCard displayName={data.displayName} />
+        </aside>
+      </main>
+    </div>
   );
 }
