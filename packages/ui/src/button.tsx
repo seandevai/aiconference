@@ -2,8 +2,8 @@ import type { ComponentPropsWithRef } from 'react';
 import { cx } from './cx';
 
 export type ButtonProps = ComponentPropsWithRef<'button'> & {
-  variant?: 'pill' | 'accent' | 'exit' | 'quiet';
-  size?: 'sm' | 'md';
+  variant?: 'pill' | 'accent' | 'exit' | 'quiet' | 'overlay';
+  size?: 'sm' | 'md' | 'icon';
 };
 
 const VARIANTS = {
@@ -11,12 +11,16 @@ const VARIANTS = {
   accent: 'bg-accent text-on-accent hover:brightness-95',
   exit: 'bg-fg text-bg hover:brightness-90',
   quiet: 'bg-transparent text-muted hover:text-fg',
+  // Sopra un video: il fondo lascia intravedere l'immagine.
+  overlay: 'bg-bg/80 text-fg hover:bg-bg',
 } as const;
 
 const SIZES = {
   sm: 'px-2.5 py-1 text-xs',
   // 44px di altezza minima: il pollice su telefono (spec §3).
   md: 'min-h-11 px-4 py-2 text-sm',
+  // Tondo, senza testo visibile: il nome va in aria-label o in uno span sr-only.
+  icon: 'h-11 w-11 p-0',
 } as const;
 
 export function Button({

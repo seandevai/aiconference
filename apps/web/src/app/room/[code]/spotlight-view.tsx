@@ -81,7 +81,9 @@ export function SpotlightView({ entry, local, mirrorSelf, attachVideo, onClose }
         ref={closeRef}
         onClick={onClose}
         aria-label="Chiudi tutto schermo"
-        className="absolute left-3 top-3 w-11 bg-bg/80 px-0"
+        size="icon"
+        variant="overlay"
+        className="absolute left-3 top-3"
       >
         <Icon name="close" className="h-5 w-5" />
       </Button>
