@@ -30,7 +30,9 @@ describe('stage while loading', () => {
         addImage={vi.fn()}
       />,
     );
-    const skeleton = screen.getByRole('region', { name: 'Palco in caricamento' });
+    // Sta dentro la regione «Palco»: una seconda regione col nome simile la duplicherebbe.
+    expect(screen.queryByRole('region')).toBeNull();
+    const skeleton = screen.getByTestId('stage-skeleton');
     expect(skeleton.getAttribute('aria-busy')).toBe('true');
     expect(skeleton.textContent).toContain('Caricamento del palco…');
     expect(skeleton.querySelectorAll('[data-skeleton]').length).toBeGreaterThanOrEqual(2);

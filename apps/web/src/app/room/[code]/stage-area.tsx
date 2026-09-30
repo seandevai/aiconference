@@ -51,10 +51,10 @@ export function StageArea(props: Props) {
 // non salta quando compaiono le finestre.
 function StageSkeleton() {
   return (
+    // Niente regione propria: sta già dentro la sezione «Palco».
     <Panel
-      as="section"
       tone="stage"
-      aria-label="Palco in caricamento"
+      data-testid="stage-skeleton"
       aria-busy="true"
       className="grid h-full min-h-48 gap-2 p-2 lg:grid-cols-[3fr_1fr]"
     >
