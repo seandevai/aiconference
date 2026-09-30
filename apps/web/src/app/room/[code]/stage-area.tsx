@@ -6,6 +6,7 @@ import type { RealtimeSession } from '@omnicanvas/realtime';
 import { Button, Icon, Panel } from '@omnicanvas/ui';
 import { slotRectsFromDom } from '@/lib/stage/drop';
 import { stageCounter } from '@/lib/stage/stage-counter';
+import { useStageTilt } from '@/lib/stage/tilt';
 import { useGestures } from '@/lib/stage/use-gestures';
 import { AgentPanel } from './agent-panel';
 import { GestureControl } from './gesture-control';
@@ -37,7 +38,7 @@ export function StageArea(props: Props) {
       <>
         <Panel tone="stage" className="hidden h-full flex-col gap-2 p-2 lg:flex">
           {counter && <span className="tabular text-xs text-muted">{counter}</span>}
-          <StageBoard stage={stage} assetUrls={assetUrls} born={born} />
+          <GuestBoard stage={stage} assetUrls={assetUrls} born={born} />
         </Panel>
         <div className="h-full lg:hidden">
           <MobileStage stage={stage} assetUrls={assetUrls} born={born} />
@@ -47,6 +48,12 @@ export function StageArea(props: Props) {
   }
 
   return <HostStage {...props} />;
+}
+
+// Palco dell'ospite su desktop: gli hook non possono stare dopo il return condizionale.
+function GuestBoard({ stage, assetUrls, born }: Pick<Props, 'stage' | 'assetUrls' | 'born'>) {
+  const tilt = useStageTilt();
+  return <StageBoard stage={stage} assetUrls={assetUrls} born={born} boardRef={tilt.ref} />;
 }
 
 // La forma del palco (primo piano e tre laterali) mentre arriva lo stato: la pagina
@@ -89,6 +96,7 @@ function HostStage({
 }: Props) {
   const areaRef = useRef<HTMLDivElement>(null);
   const [agentFocus, setAgentFocus] = useState(0);
+  const tilt = useStageTilt();
   const gestures = useGestures({
     session,
     cameraOn,
@@ -96,6 +104,7 @@ function HostStage({
     dispatch,
     onAgent: () => setAgentFocus((n) => n + 1),
     areaRef,
+    onPointer: tilt.pointAt,
   });
   const counter = stageCounter(stage);
   const cursor = gestures.cursor;
@@ -165,6 +174,7 @@ function HostStage({
           dispatch={dispatch}
           born={born}
           hotSlot={handSlot}
+          boardRef={tilt.ref}
         />
       </Panel>
     </div>

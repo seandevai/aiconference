@@ -17,9 +17,19 @@ type Options = {
   dispatch: (command: StageCommand) => void;
   onAgent: () => void;
   areaRef: React.RefObject<HTMLElement | null>;
+  // Posizione della mano sullo schermo durante un pizzico (null al rilascio): inclina il palco.
+  onPointer?: ((point: { x: number; y: number } | null) => void) | undefined;
 };
 
-export function useGestures({ session, cameraOn, stage, dispatch, onAgent, areaRef }: Options) {
+export function useGestures({
+  session,
+  cameraOn,
+  stage,
+  dispatch,
+  onAgent,
+  areaRef,
+  onPointer,
+}: Options) {
   const [status, setStatus] = useState<GestureStatus>('off');
   const [armed, setArmed] = useState(false);
   const [cursor, setCursor] = useState<Cursor | null>(null);
@@ -27,13 +37,13 @@ export function useGestures({ session, cameraOn, stage, dispatch, onAgent, areaR
   const runnerRef = useRef<GestureRunner | null>(null);
   const detachRef = useRef<(() => void) | null>(null);
   const stageRef = useRef(stage);
-  const handlersRef = useRef({ dispatch, onAgent });
+  const handlersRef = useRef({ dispatch, onAgent, onPointer });
   const draggingRef = useRef<DragItem | null>(null);
 
   useEffect(() => {
     stageRef.current = stage;
-    handlersRef.current = { dispatch, onAgent };
-  }, [stage, dispatch, onAgent]);
+    handlersRef.current = { dispatch, onAgent, onPointer };
+  }, [stage, dispatch, onAgent, onPointer]);
 
   // Punto normalizzato (vista specchio) → coordinate dello schermo sull'area del palco.
   const toScreen = useCallback(
@@ -58,12 +68,14 @@ export function useGestures({ session, cameraOn, stage, dispatch, onAgent, areaR
         if (event.type === 'DROP') {
           const item = draggingRef.current;
           draggingRef.current = null;
+          handlersRef.current.onPointer?.(null);
           setCursor(null);
           const slot = nearestSlot(point, slotRectsFromDom());
           const command = item && slot ? resolveDrop(stageRef.current, item, slot) : null;
           if (command) send(command);
           return;
         }
+        handlersRef.current.onPointer?.(point);
         setCursor({ ...point, grabbing: draggingRef.current !== null });
         return;
       }

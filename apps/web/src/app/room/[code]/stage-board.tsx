@@ -19,6 +19,8 @@ type Props = {
   born?: string[] | undefined;
   // Slot sotto la mano durante un pizzico: ha la precedenza sul mouse.
   hotSlot?: Slot | null | undefined;
+  // Riceve --tilt-x/--tilt-y: le finestre dentro si inclinano verso il puntatore.
+  boardRef?: React.Ref<HTMLDivElement> | undefined;
 };
 
 function readDragItem(event: React.DragEvent): DragItem | null {
@@ -32,7 +34,7 @@ function readDragItem(event: React.DragEvent): DragItem | null {
   }
 }
 
-export function StageBoard({ stage, assetUrls, dispatch, born = [], hotSlot }: Props) {
+export function StageBoard({ stage, assetUrls, dispatch, born = [], hotSlot, boardRef }: Props) {
   const [dragSlot, setDragSlot] = useState<Slot | null>(null);
   const hot = hotSlot ?? dragSlot;
 
@@ -77,6 +79,7 @@ export function StageBoard({ stage, assetUrls, dispatch, born = [], hotSlot }: P
 
   return (
     <div
+      ref={boardRef}
       onDragOver={(event) => {
         if (!dispatch) return;
         event.preventDefault();
