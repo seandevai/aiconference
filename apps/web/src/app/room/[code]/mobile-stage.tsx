@@ -11,9 +11,11 @@ const SWIPE_PX = 50;
 export function MobileStage({
   stage,
   assetUrls,
+  born = [],
 }: {
   stage: Stage;
   assetUrls: Record<string, string>;
+  born?: string[];
 }) {
   // Lo sbirciare vale finché l'host non cambia finestra: poi si torna a seguirlo.
   const [peek, setPeek] = useState<{ id: string; focus: string | null } | null>(null);
@@ -65,7 +67,7 @@ export function MobileStage({
         </div>
       )}
       <Panel tone="stage" className="flex min-h-0 flex-1 flex-col p-2">
-        <WindowView window={shown} assetUrls={assetUrls} />
+        <WindowView window={shown} assetUrls={assetUrls} born={born.includes(shown.id)} />
       </Panel>
       {stage.windows.length > 1 && (
         <div aria-hidden className="flex justify-center gap-1.5">

@@ -137,6 +137,7 @@ export function RoomCall({ joinCode, role, showSamples }: Props) {
               stage={stageApi.stage}
               ready={stageApi.ready}
               assetUrls={stageApi.assetUrls}
+              born={stageApi.born}
               dispatch={stageApi.dispatch}
               addImage={stageApi.addImage}
             />

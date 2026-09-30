@@ -15,6 +15,7 @@ type Props = {
   stage: Stage;
   assetUrls: Record<string, string>;
   dispatch?: ((command: StageCommand) => void) | undefined;
+  born?: string[] | undefined;
 };
 
 function readDragItem(event: React.DragEvent): DragItem | null {
@@ -28,7 +29,7 @@ function readDragItem(event: React.DragEvent): DragItem | null {
   }
 }
 
-export function StageBoard({ stage, assetUrls, dispatch }: Props) {
+export function StageBoard({ stage, assetUrls, dispatch, born = [] }: Props) {
   function handleDrop(event: React.DragEvent) {
     if (!dispatch) return;
     event.preventDefault();
@@ -50,7 +51,13 @@ export function StageBoard({ stage, assetUrls, dispatch }: Props) {
         className={className}
       >
         {window ? (
-          <WindowView window={window} assetUrls={assetUrls} dispatch={dispatch} />
+          <WindowView
+            window={window}
+            assetUrls={assetUrls}
+            dispatch={dispatch}
+            born={born.includes(window.id)}
+            transitionName
+          />
         ) : (
           <div className="flex h-full items-center justify-center rounded-tile border border-dashed border-line text-xs text-muted">
             {slot === 'main' ? 'Nessuna finestra' : 'Slot libero'}

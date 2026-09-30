@@ -21,12 +21,13 @@ type Props = {
   stage: Stage;
   ready: boolean;
   assetUrls: Record<string, string>;
+  born: string[];
   dispatch: (command: StageCommand) => void;
   addImage: (bytes: Uint8Array, mime: ImageMime, title: string, alt: string) => void;
 };
 
 export function StageArea(props: Props) {
-  const { role, stage, ready, assetUrls } = props;
+  const { role, stage, ready, assetUrls, born } = props;
   if (!ready) return <StageSkeleton />;
 
   if (role === 'guest') {
@@ -35,10 +36,10 @@ export function StageArea(props: Props) {
       <>
         <Panel tone="stage" className="hidden h-full flex-col gap-2 p-2 lg:flex">
           {counter && <span className="tabular text-xs text-muted">{counter}</span>}
-          <StageBoard stage={stage} assetUrls={assetUrls} />
+          <StageBoard stage={stage} assetUrls={assetUrls} born={born} />
         </Panel>
         <div className="h-full lg:hidden">
-          <MobileStage stage={stage} assetUrls={assetUrls} />
+          <MobileStage stage={stage} assetUrls={assetUrls} born={born} />
         </div>
       </>
     );
@@ -81,6 +82,7 @@ function HostStage({
   showSamples,
   stage,
   assetUrls,
+  born,
   dispatch,
   addImage,
 }: Props) {
@@ -154,7 +156,7 @@ function HostStage({
             <Icon name="plus" /> Nuova finestra
           </Button>
         </div>
-        <StageBoard stage={stage} assetUrls={assetUrls} dispatch={dispatch} />
+        <StageBoard stage={stage} assetUrls={assetUrls} dispatch={dispatch} born={born} />
       </Panel>
     </div>
   );

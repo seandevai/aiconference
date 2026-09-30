@@ -15,12 +15,14 @@ import {
   type Stage,
   type StageCommand,
 } from '@omnicanvas/canvas';
+import { commitStage } from './motion';
 import { isFromHost } from './peek';
 
 const PERSIST_DELAY_MS = 1_000;
 const SYNC_THROTTLE_MS = 1_000;
 const SYNC_RETRY_MS = 2_000;
 const ASSET_RETRY_MS = 3_000;
+const BORN_MS = 600;
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
@@ -48,10 +50,39 @@ export function useStage({ joinCode, role, session, roster }: Options) {
     rosterRef.current = roster;
   }, [roster]);
 
-  const commit = useCallback((next: Stage) => {
-    stageRef.current = next;
-    setStage(next);
+  const [born, setBorn] = useState<string[]>([]);
+  const bornTimersRef = useRef(new Set<ReturnType<typeof setTimeout>>());
+
+  const markBorn = useCallback((ids: string[]) => {
+    setBorn((current) => [...new Set([...current, ...ids])]);
+    const timer = setTimeout(() => {
+      bornTimersRef.current.delete(timer);
+      setBorn((current) => current.filter((id) => !ids.includes(id)));
+    }, BORN_MS);
+    bornTimersRef.current.add(timer);
   }, []);
+
+  useEffect(() => {
+    const timers = bornTimersRef.current;
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
+  const commit = useCallback(
+    (next: Stage) => {
+      const prev = stageRef.current;
+      stageRef.current = next;
+      commitStage({
+        prev,
+        next,
+        doc: document,
+        win: window,
+        // Sempre l'ultimo stato: una View Transition può partire dopo un aggiornamento nuovo.
+        render: () => setStage(stageRef.current),
+        onBorn: markBorn,
+      });
+    },
+    [markBorn],
+  );
 
   const storeAsset = useCallback((assetId: string, mime: ImageMime, bytes: Uint8Array) => {
     if (assetsRef.current.has(assetId)) return;
@@ -220,5 +251,5 @@ export function useStage({ joinCode, role, session, roster }: Options) {
     [session, storeAsset, dispatch],
   );
 
-  return { stage, ready, assetUrls, dispatch, addImage };
+  return { stage, ready, assetUrls, born, dispatch, addImage };
 }

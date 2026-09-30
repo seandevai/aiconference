@@ -11,6 +11,11 @@ type Props = {
   window: StageWindow;
   assetUrls: Record<string, string>;
   dispatch?: ((command: StageCommand) => void) | undefined;
+  // Contenuto appena arrivato: la finestra sale dal fondo con un lampo (spec 30/09, §2).
+  born?: boolean;
+  // Solo il palco a slot dà il nome alla finestra: due nomi uguali nel DOM annullano
+  // la View Transition (l'ospite su desktop ha anche MobileStage, nascosta).
+  transitionName?: boolean;
 };
 
 // Negli slot laterali stretti resta solo l'icona; il testo passa ai lettori di schermo
@@ -32,7 +37,13 @@ function WindowAction({
   );
 }
 
-export function WindowView({ window, assetUrls, dispatch }: Props) {
+export function WindowView({
+  window,
+  assetUrls,
+  dispatch,
+  born = false,
+  transitionName = false,
+}: Props) {
   const editable = Boolean(dispatch);
   const startDrag = (item: DragItem) => (event: React.DragEvent) => {
     event.dataTransfer.setData(DRAG_TYPE, JSON.stringify(item));
@@ -42,8 +53,10 @@ export function WindowView({ window, assetUrls, dispatch }: Props) {
   return (
     <article
       aria-label={window.title}
-      className={`@container flex h-full flex-col gap-2 rounded-tile border bg-raised p-3 motion-safe:transition-colors ${
-        window.slot === 'main' ? 'border-accent' : 'border-line'
+      data-born={born ? '' : undefined}
+      style={transitionName ? { viewTransitionName: `win-${window.id}` } : undefined}
+      className={`@container window-tilt flex h-full flex-col gap-2 rounded-tile border bg-raised p-3 motion-safe:transition-colors motion-safe:data-born:animate-birth ${
+        window.slot === 'main' ? 'border-accent shadow-window-active' : 'border-line shadow-window'
       }`}
     >
       <header
