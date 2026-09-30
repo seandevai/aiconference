@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Button, Icon } from '@omnicanvas/ui';
 import type { StageCommand } from '@omnicanvas/canvas';
 import { toStageContent } from '@/lib/stage/agent-messages';
 import { useAgent } from '@/lib/stage/use-agent';
@@ -10,16 +11,15 @@ import { useAgent } from '@/lib/stage/use-agent';
 export function AgentPanel({
   joinCode,
   dispatch,
-  open,
-  onOpenChange,
+  focusRequest,
 }: {
   joinCode: string;
   dispatch: (command: StageCommand) => void;
-  // Controllato dal genitore: anche il gesto «indice alzato» apre il pannello.
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  // Cresce a ogni richiesta di attenzione (pulsante o gesto «indice alzato»).
+  focusRequest: number;
 }) {
   const [prompt, setPrompt] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
   const agent = useAgent({
     joinCode,
     onContent: (content) => {
@@ -28,51 +28,52 @@ export function AgentPanel({
     },
   });
 
+  useEffect(() => {
+    if (focusRequest > 0) inputRef.current?.focus();
+  }, [focusRequest]);
+
   return (
-    <div className="flex flex-col gap-2 rounded border border-neutral-800 p-2 text-xs">
-      <div className="flex flex-wrap items-center gap-2">
-        <button
-          onClick={() => onOpenChange(!open)}
-          className="rounded bg-emerald-500 px-2 py-1 font-medium text-neutral-950"
-        >
-          ✨ Chiedi all&apos;agente
-        </button>
-        {agent.usage && (
-          <span className="text-neutral-400">
-            Crediti: {agent.usage.balance} · agente in questa stanza: {agent.usage.roomCredits}
+    <div className="flex flex-col gap-2">
+      <Button variant="accent" size="sm" onClick={() => inputRef.current?.focus()}>
+        <Icon name="spark" /> Chiedi all&apos;agente
+      </Button>
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (prompt.trim()) void agent.ask(prompt);
+        }}
+        className="flex flex-col gap-2"
+      >
+        <label className="flex flex-col gap-1 text-xs text-muted">
+          Cosa ti serve?
+          <input
+            ref={inputRef}
+            value={prompt}
+            onChange={(event) => setPrompt(event.target.value)}
+            maxLength={500}
+            placeholder="Es. un grafico delle vendite per trimestre"
+            className="rounded-tile border border-line bg-stage px-3 py-2 text-sm text-fg placeholder:text-muted motion-safe:transition-colors hover:border-muted focus-visible:border-accent focus-visible:outline-none"
+          />
+        </label>
+        <Button type="submit" size="sm" disabled={agent.busy || !prompt.trim()}>
+          Invia
+        </Button>
+      </form>
+      {agent.busy && (
+        // Niente role="status": quello è della connessione (un solo status per pagina).
+        <div className="flex flex-col gap-1 text-xs text-accent">
+          <span>L&apos;agente sta lavorando…</span>
+          <span aria-hidden className="h-1 overflow-hidden rounded-full bg-raised">
+            <span className="block h-full w-1/2 rounded-full bg-accent motion-safe:animate-pulse" />
           </span>
-        )}
-      </div>
-      {open && (
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            if (prompt.trim()) void agent.ask(prompt);
-          }}
-          className="flex flex-col gap-2 sm:flex-row"
-        >
-          <label className="flex flex-1 flex-col gap-1">
-            Cosa ti serve?
-            <input
-              autoFocus
-              value={prompt}
-              onChange={(event) => setPrompt(event.target.value)}
-              maxLength={500}
-              placeholder="Es. un grafico delle vendite per trimestre"
-              className="rounded bg-neutral-900 px-2 py-1"
-            />
-          </label>
-          <button
-            type="submit"
-            disabled={agent.busy || !prompt.trim()}
-            className="self-end rounded bg-neutral-100 px-3 py-1 text-neutral-900 disabled:opacity-40"
-          >
-            Invia
-          </button>
-        </form>
+        </div>
       )}
-      {agent.busy && <p className="text-neutral-300">L&apos;agente sta lavorando…</p>}
-      {agent.error && <p className="text-amber-300">{agent.error}</p>}
+      {agent.error && <p className="text-xs text-danger">{agent.error}</p>}
+      {agent.usage && (
+        <p className="tabular text-xs text-muted">
+          Crediti: {agent.usage.balance} · agente in questa stanza: {agent.usage.roomCredits}
+        </p>
+      )}
     </div>
   );
 }

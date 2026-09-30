@@ -1,5 +1,6 @@
 import type { StageCommand, StageWindow } from '@omnicanvas/canvas';
 import type { DragItem } from '@/lib/stage/drop';
+import { Button, Icon, type IconName } from '@omnicanvas/ui';
 import { ContentView } from './content-view';
 
 export type { DragItem };
@@ -12,6 +13,25 @@ type Props = {
   dispatch?: ((command: StageCommand) => void) | undefined;
 };
 
+// Negli slot laterali stretti resta solo l'icona; il testo passa ai lettori di schermo
+// e torna visibile quando la finestra è larga almeno 20rem (container query).
+function WindowAction({
+  icon,
+  label,
+  onClick,
+}: {
+  icon: IconName;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <Button size="sm" title={label} onClick={onClick} className="min-w-7">
+      <Icon name={icon} className="h-3.5 w-3.5" />
+      <span className="sr-only @xs:not-sr-only">{label}</span>
+    </Button>
+  );
+}
+
 export function WindowView({ window, assetUrls, dispatch }: Props) {
   const editable = Boolean(dispatch);
   const startDrag = (item: DragItem) => (event: React.DragEvent) => {
@@ -22,7 +42,9 @@ export function WindowView({ window, assetUrls, dispatch }: Props) {
   return (
     <article
       aria-label={window.title}
-      className="flex h-full flex-col gap-2 rounded border border-neutral-700 bg-neutral-900 p-2"
+      className={`@container flex h-full flex-col gap-2 rounded-tile border bg-raised p-3 motion-safe:transition-colors ${
+        window.slot === 'main' ? 'border-accent' : 'border-line'
+      }`}
     >
       <header
         data-drag-type="window"
@@ -31,28 +53,28 @@ export function WindowView({ window, assetUrls, dispatch }: Props) {
         onDragStart={editable ? startDrag({ type: 'window', id: window.id }) : undefined}
         className={`flex items-center justify-between gap-2 ${editable ? 'cursor-grab' : ''}`}
       >
-        <h2 className="truncate text-sm font-medium">{window.title}</h2>
+        <h2 className="min-w-0 truncate text-sm font-semibold">{window.title}</h2>
         {dispatch && (
-          <div className="flex gap-1">
+          <div className="flex shrink-0 gap-1">
             {window.slot !== 'main' && (
-              <button
+              <WindowAction
+                icon="focus"
+                label="Metti in primo piano"
                 onClick={() => dispatch({ type: 'FOCUS', windowId: window.id })}
-                className="rounded bg-neutral-800 px-2 py-0.5 text-xs"
-              >
-                Metti in primo piano
-              </button>
+              />
             )}
-            <button
+            <WindowAction
+              icon="archive"
+              label="Archivia finestra"
               onClick={() => dispatch({ type: 'WINDOW_ARCHIVE', windowId: window.id })}
-              className="rounded bg-neutral-800 px-2 py-0.5 text-xs"
-            >
-              Archivia finestra
-            </button>
+            />
           </div>
         )}
       </header>
       {window.contents.length === 0 ? (
-        <p className="text-xs text-neutral-500">Finestra vuota</p>
+        <p className="flex flex-1 items-center justify-center rounded-tile border border-dashed border-line text-xs text-muted">
+          {editable ? 'Finestra vuota: trascina qui un contenuto dal vassoio' : 'Finestra vuota'}
+        </p>
       ) : (
         <ul className="flex min-h-0 flex-col gap-3 overflow-auto">
           {window.contents.map((content) => (
@@ -71,12 +93,13 @@ export function WindowView({ window, assetUrls, dispatch }: Props) {
                 }
               />
               {dispatch && (
-                <button
-                  onClick={() => dispatch({ type: 'CONTENT_REMOVE', contentId: content.id })}
-                  className="w-fit rounded bg-neutral-800 px-2 py-0.5 text-xs"
-                >
-                  Rimetti nel vassoio
-                </button>
+                <div className="w-fit">
+                  <WindowAction
+                    icon="to-tray"
+                    label="Rimetti nel vassoio"
+                    onClick={() => dispatch({ type: 'CONTENT_REMOVE', contentId: content.id })}
+                  />
+                </div>
               )}
             </li>
           ))}

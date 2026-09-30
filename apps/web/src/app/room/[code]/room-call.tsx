@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Button, StatusBanner } from '@omnicanvas/ui';
 import { useCall } from '@/lib/call/use-call';
 import { cameraButtonLabel, micButtonLabel } from '@/lib/call/labels';
 import { phaseMessage, type CallPhase } from '@/lib/call/phase';
@@ -68,59 +69,63 @@ export function RoomCall({ joinCode, role, showSamples }: Props) {
 
   return (
     <>
-      <div className="relative flex min-h-0 flex-1">
-        <aside
-          aria-label="Partecipanti"
-          className="absolute right-2 top-2 z-10 w-16 phone-landscape:bottom-2 phone-landscape:w-24 phone-landscape:overflow-y-auto lg:static lg:w-48 lg:border-r lg:border-neutral-800 lg:p-3"
-        >
-          <ul className="flex flex-col gap-2">
-            {state.roster.map((entry) => (
-              <VideoTile
-                key={entry.identity}
-                entry={entry}
-                attachVideo={attachVideo}
-                onSelect={entry.isLocal ? undefined : () => setSelected(entry.identity)}
-                mirrored={isMirrored(entry, state.cameraFacing)}
-              />
-            ))}
-          </ul>
-        </aside>
+      <aside
+        aria-label="Partecipanti"
+        className="flex min-w-0 max-w-[60vw] items-center overflow-x-auto px-3 py-1.5 [grid-area:faces] phone-landscape:max-w-none phone-landscape:overflow-x-hidden phone-landscape:w-24 phone-landscape:items-start phone-landscape:overflow-y-auto phone-landscape:p-2"
+      >
+        <ul className="flex gap-2 phone-landscape:w-full phone-landscape:flex-col">
+          {state.roster.map((entry) => (
+            <VideoTile
+              key={entry.identity}
+              entry={entry}
+              attachVideo={attachVideo}
+              onSelect={entry.isLocal ? undefined : () => setSelected(entry.identity)}
+              mirrored={isMirrored(entry, state.cameraFacing)}
+            />
+          ))}
+        </ul>
+      </aside>
 
+      <div className="relative flex min-h-0 [grid-area:main]">
         <section
           aria-label="Palco"
-          className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto p-2 pr-20 phone-landscape:pr-28 lg:p-4"
+          className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto px-3 pb-2 lg:px-4"
         >
           {message && (
-            <div
-              role="status"
-              className="flex flex-wrap items-center gap-3 text-sm text-neutral-300"
+            <StatusBanner
+              tone={state.phase === 'failed' ? 'error' : 'info'}
+              action={
+                state.phase === 'failed' ? (
+                  <Button size="sm" onClick={retry}>
+                    Riprova
+                  </Button>
+                ) : state.phase === 'left' || state.phase === 'forbidden' ? (
+                  <a href={`/room/${joinCode}`} className="text-sm underline">
+                    Rientra
+                  </a>
+                ) : undefined
+              }
             >
-              <span>{message}</span>
-              {state.phase === 'failed' && (
-                <button
-                  onClick={retry}
-                  className="rounded bg-neutral-100 px-3 py-1 text-neutral-900"
-                >
-                  Riprova
-                </button>
-              )}
-              {(state.phase === 'left' || state.phase === 'forbidden') && (
-                <a href={`/room/${joinCode}`} className="underline">
-                  Rientra
-                </a>
-              )}
-            </div>
+              {message}
+            </StatusBanner>
           )}
           {state.mediaError && live && (
-            <p className="mt-2 text-sm text-amber-300">{state.mediaError}</p>
+            <StatusBanner tone="error" live="alert">
+              {state.mediaError}
+            </StatusBanner>
           )}
           {state.audioBlocked && live && (
-            <button
-              onClick={startAudio}
-              className="mt-2 rounded bg-neutral-100 px-3 py-1 text-sm text-neutral-900"
+            <StatusBanner
+              tone="warning"
+              live="none"
+              action={
+                <Button size="sm" variant="accent" onClick={startAudio}>
+                  Attiva l&apos;audio
+                </Button>
+              }
             >
-              Attiva l&apos;audio
-            </button>
+              Il browser ha fermato l&apos;audio della call.
+            </StatusBanner>
           )}
           {live && (
             <StageArea
@@ -159,44 +164,33 @@ export function RoomCall({ joinCode, role, showSamples }: Props) {
         />
       )}
 
-      {live && (
+      {live ? (
         <nav
           aria-label="Controlli della chiamata"
-          className="flex items-center justify-center gap-2 border-t border-neutral-800 px-4 py-2 phone-landscape:py-1"
+          className="flex flex-wrap items-center justify-center gap-2 px-4 py-2 [grid-area:dock] phone-landscape:py-1"
         >
-          <button
-            onClick={toggleMic}
-            aria-pressed={!local?.micOn}
-            className="rounded bg-neutral-800 px-3 py-2 text-sm"
-          >
+          <Button onClick={toggleMic} aria-pressed={!local?.micOn}>
             {micButtonLabel(local?.micOn ?? false)}
-          </button>
-          <button
-            onClick={toggleCamera}
-            aria-pressed={!local?.camOn}
-            className="rounded bg-neutral-800 px-3 py-2 text-sm"
-          >
+          </Button>
+          <Button onClick={toggleCamera} aria-pressed={!local?.camOn}>
             {cameraButtonLabel(local?.camOn ?? false)}
-          </button>
-          {state.canSwitchCamera && (
-            <button onClick={switchCamera} className="rounded bg-neutral-800 px-3 py-2 text-sm">
-              Gira fotocamera
-            </button>
-          )}
+          </Button>
+          {state.canSwitchCamera && <Button onClick={switchCamera}>Gira fotocamera</Button>}
           {pipSupported && pipIdentity && (
-            <button
+            <Button
               onClick={() => {
                 if (pipRef.current) void openPip(document, pipRef.current).catch(() => {});
               }}
-              className="rounded bg-neutral-800 px-3 py-2 text-sm"
             >
               Riquadro
-            </button>
+            </Button>
           )}
-          <button onClick={handleLeave} className="rounded bg-red-600 px-3 py-2 text-sm">
+          <Button variant="exit" onClick={handleLeave}>
             Esci
-          </button>
+          </Button>
         </nav>
+      ) : (
+        <div className="[grid-area:dock]" />
       )}
     </>
   );

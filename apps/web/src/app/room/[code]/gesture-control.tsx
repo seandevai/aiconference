@@ -1,5 +1,6 @@
 'use client';
 
+import { Button, Icon } from '@omnicanvas/ui';
 import { gestureStatusMessage, type GestureStatus } from '@/lib/stage/gesture-actions';
 
 type Props = {
@@ -10,16 +11,21 @@ type Props = {
   onToggle: () => void;
 };
 
-// ✋ è il click equivalente del palmo aperto (ADR-0010). Il video resta invisibile:
+// Il pulsante con la mano è il click equivalente del palmo aperto (ADR-0010). Il video resta invisibile:
 // serve solo a MediaPipe, nel browser.
 export function GestureControl({ status, armed, cursor, videoRef, onToggle }: Props) {
   const message = gestureStatusMessage(status, armed);
   return (
-    <div className="flex flex-wrap items-center gap-2 text-xs">
-      <button onClick={onToggle} aria-pressed={armed} className="rounded bg-neutral-800 px-2 py-1">
-        {armed ? '✋ Metti in pausa le gesture' : '✋ Attiva le gesture'}
-      </button>
-      {message && <span className="text-neutral-400">{message}</span>}
+    <div
+      className={`flex flex-col gap-1.5 rounded-tile border p-2 text-xs motion-safe:transition-colors ${
+        armed ? 'border-accent' : 'border-line'
+      }`}
+    >
+      <Button size="sm" onClick={onToggle} aria-pressed={armed} variant={armed ? 'accent' : 'pill'}>
+        <Icon name="hand" />
+        {armed ? 'Metti in pausa le gesture' : 'Attiva le gesture'}
+      </Button>
+      {message && <span className="text-muted">{message}</span>}
       <video
         ref={videoRef}
         muted
@@ -32,9 +38,7 @@ export function GestureControl({ status, armed, cursor, videoRef, onToggle }: Pr
           aria-hidden
           style={{ left: cursor.x, top: cursor.y }}
           className={`pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 ${
-            cursor.grabbing
-              ? 'h-8 w-8 border-emerald-400 bg-emerald-400/30'
-              : 'h-5 w-5 border-neutral-100'
+            cursor.grabbing ? 'h-8 w-8 border-accent bg-accent/30' : 'h-5 w-5 border-fg'
           }`}
         />
       )}

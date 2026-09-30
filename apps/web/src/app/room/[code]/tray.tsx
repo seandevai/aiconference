@@ -1,6 +1,7 @@
 'use client';
 
 import { sampleContent, type Stage, type StageCommand } from '@omnicanvas/canvas';
+import { Button } from '@omnicanvas/ui';
 import { sampleImage } from '@/lib/stage/sample-image';
 import { DRAG_TYPE, type DragItem } from './window-view';
 
@@ -23,40 +24,38 @@ export function Tray({ stage, dispatch, addImage, showSamples }: Props) {
     dispatch({ type: 'TRAY_ADD', content: sampleContent(kind, crypto.randomUUID()) });
 
   return (
-    <section
-      aria-label="Vassoio"
-      className="flex flex-col gap-2 rounded border border-neutral-800 p-2"
-    >
+    <section aria-label="Vassoio" className="flex min-h-0 flex-col gap-2">
       {showSamples && (
         <div className="flex flex-wrap items-center gap-2 text-xs">
-          <span className="text-neutral-400">Contenuti di prova:</span>
-          <button onClick={() => addSample('chart')} className="rounded bg-neutral-800 px-2 py-1">
+          <span className="text-muted">Contenuti di prova:</span>
+          <Button size="sm" onClick={() => addSample('chart')}>
             Aggiungi grafico di prova
-          </button>
-          <button onClick={() => addSample('text')} className="rounded bg-neutral-800 px-2 py-1">
+          </Button>
+          <Button size="sm" onClick={() => addSample('text')}>
             Aggiungi testo di prova
-          </button>
-          <button onClick={() => addSample('table')} className="rounded bg-neutral-800 px-2 py-1">
+          </Button>
+          <Button size="sm" onClick={() => addSample('table')}>
             Aggiungi tabella di prova
-          </button>
-          <button
+          </Button>
+          <Button
+            size="sm"
             onClick={() =>
               void sampleImage().then((bytes) =>
                 addImage(bytes, 'image/png', 'Schema di prova', 'Schema di prova'),
               )
             }
-            className="rounded bg-neutral-800 px-2 py-1"
           >
             Aggiungi immagine di prova
-          </button>
+          </Button>
         </div>
       )}
+      <h2 className="text-sm font-semibold">Vassoio</h2>
       {stage.tray.length === 0 ? (
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-muted">
           Il vassoio è vuoto: qui arriva ciò che produce l&apos;agente.
         </p>
       ) : (
-        <ul className="flex flex-wrap gap-2">
+        <ul className="flex flex-col gap-2 overflow-auto">
           {stage.tray.map((content) => (
             <li
               key={content.id}
@@ -67,10 +66,10 @@ export function Tray({ stage, dispatch, addImage, showSamples }: Props) {
                 const item: DragItem = { type: 'content', id: content.id };
                 event.dataTransfer.setData(DRAG_TYPE, JSON.stringify(item));
               }}
-              className="flex cursor-grab flex-col gap-1 rounded bg-neutral-900 p-2 text-xs"
+              className="flex cursor-grab flex-col gap-1 rounded-tile bg-raised p-2 text-xs"
             >
-              <span className="font-medium">{content.data.title}</span>
-              <span className="text-neutral-500">
+              <span className="font-semibold">{content.data.title}</span>
+              <span className="text-muted">
                 {KIND_LABELS[content.kind]}
                 {content.archived ? ' · archiviato' : ''}
               </span>
@@ -87,7 +86,7 @@ export function Tray({ stage, dispatch, addImage, showSamples }: Props) {
                     });
                   }
                 }}
-                className="rounded bg-neutral-800 px-1 py-0.5"
+                className="rounded-full bg-bg px-2 py-1 text-xs text-fg focus-visible:outline-2 focus-visible:outline-accent disabled:opacity-40"
               >
                 <option value="">Metti in…</option>
                 {stage.windows.map((window) => (

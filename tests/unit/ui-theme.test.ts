@@ -1,0 +1,47 @@
+import { readFileSync } from 'node:fs';
+import { describe, expect, it } from 'vitest';
+
+const css = readFileSync(new URL('../../packages/ui/src/theme.css', import.meta.url), 'utf8');
+
+function token(name: string): string {
+  const match = css.match(new RegExp(`--color-${name}:\\s*(#[0-9a-fA-F]{6})`));
+  if (!match?.[1]) throw new Error(`token --color-${name} missing`);
+  return match[1];
+}
+
+// Rapporto di contrasto WCAG 2.x fra due colori esadecimali.
+function luminance(hex: string): number {
+  const [r, g, b] = [1, 3, 5].map((i) => {
+    const c = parseInt(hex.slice(i, i + 2), 16) / 255;
+    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  }) as [number, number, number];
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+function contrast(a: string, b: string): number {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x) as [number, number];
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+describe('theme tokens', () => {
+  it('defines every color of the spec', () => {
+    expect(token('bg')).toBe('#282828');
+    expect(token('surface')).toBe('#303030');
+    expect(token('stage')).toBe('#202020');
+    expect(token('raised')).toBe('#3a3a3a');
+    expect(token('line')).toBe('#3d3d3d');
+    expect(token('fg')).toBe('#ededed');
+    expect(token('muted')).toBe('#a6a6a6');
+    expect(token('accent')).toBe('#c8f25a');
+    expect(token('on-accent')).toBe('#202020');
+    expect(token('danger')).toBe('#ff6b6b');
+  });
+
+  it('keeps text readable on every surface (WCAG AA, 4.5:1)', () => {
+    for (const surface of ['bg', 'surface', 'stage', 'raised']) {
+      expect(contrast(token('fg'), token(surface))).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(token('muted'), token(surface))).toBeGreaterThanOrEqual(4.5);
+    }
+    expect(contrast(token('on-accent'), token('accent'))).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(token('danger'), token('bg'))).toBeGreaterThanOrEqual(4.5);
+  });
+});

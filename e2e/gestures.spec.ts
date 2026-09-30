@@ -9,7 +9,7 @@ test('the palm button arms and pauses hand tracking', async ({ browser }) => {
     timeout: 20_000,
   });
 
-  await host.getByRole('button', { name: '✋ Attiva le gesture' }).click();
+  await host.getByRole('button', { name: 'Attiva le gesture' }).click();
   // MediaPipe si scarica e si avvia: sulla CPU della CI servono alcuni secondi.
   await expect(
     host.getByText('Gesture attive: palmo aperto per un secondo per metterle in pausa.'),
@@ -17,7 +17,7 @@ test('the palm button arms and pauses hand tracking', async ({ browser }) => {
     timeout: 60_000,
   });
 
-  await host.getByRole('button', { name: '✋ Metti in pausa le gesture' }).click();
+  await host.getByRole('button', { name: 'Metti in pausa le gesture' }).click();
   await expect(
     host.getByText('Gesture in pausa: palmo aperto per un secondo per riattivarle.'),
   ).toBeVisible();
@@ -28,7 +28,7 @@ test('without a camera the gestures explain themselves and the mouse keeps worki
 }) => {
   const { host } = await signUpHostWithRoom(browser);
   await host.getByRole('button', { name: 'Disattiva camera' }).click({ timeout: 20_000 });
-  await host.getByRole('button', { name: '✋ Attiva le gesture' }).click();
+  await host.getByRole('button', { name: 'Attiva le gesture' }).click();
   await expect(
     host.getByText(
       /Accendi la camera per usare le gesture: ogni comando resta disponibile col mouse/,
