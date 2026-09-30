@@ -22,6 +22,20 @@ describe('Panel', () => {
     );
     expect(screen.getByTestId('p').className).toContain('bg-stage');
   });
+  it('lights the stage from above and gives it grain', () => {
+    render(
+      <Panel tone="stage" data-testid="p">
+        x
+      </Panel>,
+    );
+    const cls = screen.getByTestId('p').className;
+    expect(cls).toContain('stage-light');
+    expect(cls).toContain('grain');
+  });
+  it('gives surfaces a thin edge of light', () => {
+    render(<Panel data-testid="s">x</Panel>);
+    expect(screen.getByTestId('s').className).toContain('shadow-edge');
+  });
 });
 
 describe('FaceTile', () => {
