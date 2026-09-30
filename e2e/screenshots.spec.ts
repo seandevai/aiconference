@@ -16,9 +16,11 @@ test('redesign screenshots', async ({ browser }, testInfo) => {
   const { host, roomUrl } = await signUpHostWithRoom(browser, 'Kickoff Acme');
   await host.getByRole('button', { name: 'Nuova finestra' }).click();
   await host.getByRole('button', { name: 'Aggiungi grafico di prova' }).click();
+  await host.getByRole('button', { name: 'Nuova finestra' }).click();
   const guest = await joinAsAnonymousGuest(browser, roomUrl, 'Cliente');
 
   const shots: Array<[string, typeof host, { width: number; height: number }]> = [
+    ['depth-host-1440', host, { width: 1440, height: 900 }],
     ['host-desktop-1440', host, { width: 1440, height: 900 }],
     ['host-laptop-1280', host, { width: 1280, height: 720 }],
     ['guest-desktop', guest, { width: 1440, height: 900 }],
