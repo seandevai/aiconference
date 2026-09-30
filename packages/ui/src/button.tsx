@@ -31,7 +31,9 @@ export function Button({
       type={type}
       className={cx(
         'inline-flex items-center justify-center gap-1.5 rounded-full font-semibold',
-        'motion-safe:transition-colors motion-safe:duration-150',
+        // Cede appena sotto il dito: il clic si sente anche senza suono.
+        'motion-safe:transition-[color,background-color,filter,transform] motion-safe:duration-150',
+        'motion-safe:active:scale-[0.97] disabled:active:scale-100',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
         'disabled:cursor-not-allowed disabled:opacity-40',
         VARIANTS[variant],

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import type { RosterEntry } from '@omnicanvas/realtime';
-import { Button, faceInitial } from '@omnicanvas/ui';
+import { Button, Icon, faceInitial } from '@omnicanvas/ui';
 
 type Props = {
   entry: RosterEntry;
@@ -81,9 +81,9 @@ export function SpotlightView({ entry, local, mirrorSelf, attachVideo, onClose }
         ref={closeRef}
         onClick={onClose}
         aria-label="Chiudi tutto schermo"
-        className="absolute left-3 top-3 bg-bg/80 text-lg"
+        className="absolute left-3 top-3 w-11 bg-bg/80 px-0"
       >
-        ✕
+        <Icon name="close" className="h-5 w-5" />
       </Button>
     </div>
   );

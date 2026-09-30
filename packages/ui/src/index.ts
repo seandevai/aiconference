@@ -5,3 +5,4 @@ export { Button, type ButtonProps } from './button';
 export { Panel } from './panel';
 export { FaceTile, faceInitial } from './face-tile';
 export { StatusBanner } from './status-banner';
+export { Icon, ICON_NAMES, type IconName } from './icon';

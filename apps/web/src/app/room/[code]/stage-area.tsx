@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import { MAX_WINDOWS, type ImageMime, type Stage, type StageCommand } from '@omnicanvas/canvas';
 import type { RealtimeSession } from '@omnicanvas/realtime';
-import { Button, Panel } from '@omnicanvas/ui';
+import { Button, Icon, Panel } from '@omnicanvas/ui';
 import { stageCounter } from '@/lib/stage/stage-counter';
 import { useGestures } from '@/lib/stage/use-gestures';
 import { AgentPanel } from './agent-panel';
@@ -27,7 +27,7 @@ type Props = {
 
 export function StageArea(props: Props) {
   const { role, stage, ready, assetUrls } = props;
-  if (!ready) return <p className="text-sm text-muted">Caricamento del palco…</p>;
+  if (!ready) return <StageSkeleton />;
 
   if (role === 'guest') {
     const counter = stageCounter(stage);
@@ -45,6 +45,32 @@ export function StageArea(props: Props) {
   }
 
   return <HostStage {...props} />;
+}
+
+// La forma del palco (primo piano e tre laterali) mentre arriva lo stato: la pagina
+// non salta quando compaiono le finestre.
+function StageSkeleton() {
+  return (
+    <Panel
+      as="section"
+      tone="stage"
+      aria-label="Palco in caricamento"
+      aria-busy="true"
+      className="grid h-full min-h-48 gap-2 p-2 lg:grid-cols-[3fr_1fr]"
+    >
+      <span className="sr-only">Caricamento del palco…</span>
+      <div data-skeleton className="rounded-tile bg-raised/60 motion-safe:animate-pulse" />
+      <div className="hidden gap-2 lg:grid lg:grid-rows-3">
+        {[0, 1, 2].map((i) => (
+          <div
+            key={i}
+            data-skeleton
+            className="rounded-tile bg-raised/40 motion-safe:animate-pulse"
+          />
+        ))}
+      </div>
+    </Panel>
+  );
 }
 
 // Ramo dell'host: possiede gli hook di agente e gesture (solo l'host comanda il palco).
@@ -94,17 +120,23 @@ function HostStage({
         <div className="flex items-center gap-2 text-xs">
           <Button
             size="sm"
+            title="Finestra precedente"
+            className="px-1.5"
             onClick={() => dispatch({ type: 'FOCUS_PREV' })}
             disabled={stage.windows.length < 2}
           >
-            Finestra precedente
+            <Icon name="chevron-left" />
+            <span className="sr-only">Finestra precedente</span>
           </Button>
           <Button
             size="sm"
+            title="Finestra successiva"
+            className="px-1.5"
             onClick={() => dispatch({ type: 'FOCUS_NEXT' })}
             disabled={stage.windows.length < 2}
           >
-            Finestra successiva
+            <Icon name="chevron-right" />
+            <span className="sr-only">Finestra successiva</span>
           </Button>
           {counter && <span className="tabular text-muted">{counter}</span>}
           <Button
@@ -119,7 +151,7 @@ function HostStage({
             }
             disabled={stage.windows.length >= MAX_WINDOWS}
           >
-            <span aria-hidden>＋</span> Nuova finestra
+            <Icon name="plus" /> Nuova finestra
           </Button>
         </div>
         <StageBoard stage={stage} assetUrls={assetUrls} dispatch={dispatch} />

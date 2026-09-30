@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@omnicanvas/ui';
+import { Button, Icon } from '@omnicanvas/ui';
 import { gestureStatusMessage, type GestureStatus } from '@/lib/stage/gesture-actions';
 
 type Props = {
@@ -11,7 +11,7 @@ type Props = {
   onToggle: () => void;
 };
 
-// ✋ è il click equivalente del palmo aperto (ADR-0010). Il video resta invisibile:
+// Il pulsante con la mano è il click equivalente del palmo aperto (ADR-0010). Il video resta invisibile:
 // serve solo a MediaPipe, nel browser.
 export function GestureControl({ status, armed, cursor, videoRef, onToggle }: Props) {
   const message = gestureStatusMessage(status, armed);
@@ -22,7 +22,8 @@ export function GestureControl({ status, armed, cursor, videoRef, onToggle }: Pr
       }`}
     >
       <Button size="sm" onClick={onToggle} aria-pressed={armed} variant={armed ? 'accent' : 'pill'}>
-        {armed ? '✋ Metti in pausa le gesture' : '✋ Attiva le gesture'}
+        <Icon name="hand" />
+        {armed ? 'Metti in pausa le gesture' : 'Attiva le gesture'}
       </Button>
       {message && <span className="text-muted">{message}</span>}
       <video

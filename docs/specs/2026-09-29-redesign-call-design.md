@@ -134,6 +134,7 @@ Sostituire il segnaposto è un cambio di un solo file. Il nome compare solo nell
 | `Panel` | superficie del laboratorio e delle barre |
 | `FaceTile` | iniziale o video (via `children`), bordo lime se parla, stato microfono |
 | `StatusBanner` | avvisi sopra il palco, con `role="status"` o `role="alert"` |
+| `Icon` | icone SVG a tratto unico al posto delle emoji, sempre decorative (aggiunta il 30/09 dopo l'audit visivo) |
 
 I token stanno in `packages/ui/src/theme.css`, importato da `apps/web/src/app/globals.css`
 dentro `@theme` di Tailwind: una sola fonte, nessun colore esadecimale nelle schermate.

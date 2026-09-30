@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Button } from '@omnicanvas/ui';
+import { Button, Icon } from '@omnicanvas/ui';
 import type { StageCommand } from '@omnicanvas/canvas';
 import { toStageContent } from '@/lib/stage/agent-messages';
 import { useAgent } from '@/lib/stage/use-agent';
@@ -35,7 +35,7 @@ export function AgentPanel({
   return (
     <div className="flex flex-col gap-2">
       <Button variant="accent" size="sm" onClick={() => inputRef.current?.focus()}>
-        <span aria-hidden>✦</span> Chiedi all&apos;agente
+        <Icon name="spark" /> Chiedi all&apos;agente
       </Button>
       <form
         onSubmit={(event) => {
@@ -52,7 +52,7 @@ export function AgentPanel({
             onChange={(event) => setPrompt(event.target.value)}
             maxLength={500}
             placeholder="Es. un grafico delle vendite per trimestre"
-            className="rounded-tile border border-line bg-stage px-3 py-2 text-sm text-fg placeholder:text-muted focus-visible:outline-2 focus-visible:outline-accent"
+            className="rounded-tile border border-line bg-stage px-3 py-2 text-sm text-fg placeholder:text-muted motion-safe:transition-colors hover:border-muted focus-visible:border-accent focus-visible:outline-none"
           />
         </label>
         <Button type="submit" size="sm" disabled={agent.busy || !prompt.trim()}>

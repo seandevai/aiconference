@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { cx } from './cx';
+import { Icon } from './icon';
 
 export function faceInitial(name: string): string {
   return name.trim().slice(0, 1).toUpperCase() || '?';
@@ -34,9 +35,9 @@ export function FaceTile({ name, speaking, micOn, className, children }: Props) 
         <span
           data-muted
           aria-hidden="true"
-          className="absolute bottom-1 right-1 rounded-full bg-bg/80 px-1 text-[10px] leading-4 text-muted"
+          className="absolute bottom-1 right-1 rounded-full bg-bg/80 p-0.5 text-muted"
         >
-          🔇
+          <Icon name="mic-off" className="h-3 w-3" />
         </span>
       )}
     </div>

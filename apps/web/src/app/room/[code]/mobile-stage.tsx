@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import type { Stage } from '@omnicanvas/canvas';
-import { Button, Panel } from '@omnicanvas/ui';
+import { Button, Icon, Panel } from '@omnicanvas/ui';
 import { peekNeighbor } from '@/lib/stage/peek';
 import { WindowView } from './window-view';
 
@@ -51,13 +51,17 @@ export function MobileStage({
     >
       {stage.windows.length > 1 && (
         <div className="flex items-center justify-between gap-2 text-xs">
-          <Button onClick={() => step(-1)}>Finestra precedente</Button>
+          <Button onClick={() => step(-1)}>
+            <Icon name="chevron-left" /> Finestra precedente
+          </Button>
           {peekId && (
             <Button variant="accent" onClick={() => setPeek(null)}>
               Torna all&apos;host
             </Button>
           )}
-          <Button onClick={() => step(1)}>Finestra successiva</Button>
+          <Button onClick={() => step(1)}>
+            Finestra successiva <Icon name="chevron-right" />
+          </Button>
         </div>
       )}
       <Panel tone="stage" className="flex min-h-0 flex-1 flex-col p-2">

@@ -49,7 +49,7 @@ export function Tray({ stage, dispatch, addImage, showSamples }: Props) {
           </Button>
         </div>
       )}
-      <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">Vassoio</h2>
+      <h2 className="text-sm font-semibold">Vassoio</h2>
       {stage.tray.length === 0 ? (
         <p className="text-xs text-muted">
           Il vassoio è vuoto: qui arriva ciò che produce l&apos;agente.
@@ -68,7 +68,7 @@ export function Tray({ stage, dispatch, addImage, showSamples }: Props) {
               }}
               className="flex cursor-grab flex-col gap-1 rounded-tile bg-raised p-2 text-xs"
             >
-              <span className="font-medium">{content.data.title}</span>
+              <span className="font-semibold">{content.data.title}</span>
               <span className="text-muted">
                 {KIND_LABELS[content.kind]}
                 {content.archived ? ' · archiviato' : ''}
@@ -86,7 +86,7 @@ export function Tray({ stage, dispatch, addImage, showSamples }: Props) {
                     });
                   }
                 }}
-                className="rounded-full bg-bg px-2 py-1 text-xs text-fg"
+                className="rounded-full bg-bg px-2 py-1 text-xs text-fg focus-visible:outline-2 focus-visible:outline-accent disabled:opacity-40"
               >
                 <option value="">Metti in…</option>
                 {stage.windows.map((window) => (

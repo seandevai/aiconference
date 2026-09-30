@@ -1,4 +1,4 @@
-import { Logo } from '@omnicanvas/ui';
+import { Icon, Logo } from '@omnicanvas/ui';
 import { RoomCall } from './room-call';
 
 type Props = {
@@ -26,7 +26,7 @@ export function RoomShell({ joinCode, title, role, displayName, showSamples }: P
         <Logo />
         <h1 className="hidden truncate text-sm font-semibold sm:block">{title}</h1>
         <span className="hidden items-center gap-1 rounded-full bg-surface px-2.5 py-1 text-xs text-muted md:inline-flex">
-          <span aria-hidden>🔒</span> Niente viene conservato
+          <Icon name="lock" className="h-3.5 w-3.5" /> Niente viene conservato
         </span>
         <span className="hidden truncate text-xs text-muted lg:inline">{displayName}</span>
         <span className="rounded-full bg-raised px-2 py-0.5 text-xs font-semibold">

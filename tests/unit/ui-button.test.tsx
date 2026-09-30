@@ -22,7 +22,7 @@ describe('Button', () => {
   });
 
   it('passes aria-pressed through for toggles', () => {
-    render(<Button aria-pressed>✋ Metti in pausa le gesture</Button>);
+    render(<Button aria-pressed>Metti in pausa le gesture</Button>);
     expect(screen.getByRole('button').getAttribute('aria-pressed')).toBe('true');
   });
 
