@@ -57,6 +57,19 @@ describe('theme tokens', () => {
     expect(css).toContain('@keyframes birth');
   });
 
+  it('eases the tilt and the border in one transition list', () => {
+    const tilt = css.slice(css.indexOf('@utility window-tilt'), css.indexOf('@utility voice-glow'));
+    expect(tilt).toMatch(/transition:[^;]*transform[^;]*box-shadow[^;]*border-color/);
+  });
+
+  it('keeps clicks working while a window glides to its slot', () => {
+    const globals = readFileSync(
+      new URL('../../apps/web/src/app/globals.css', import.meta.url),
+      'utf8',
+    );
+    expect(globals).toMatch(/::view-transition\s*\{\s*pointer-events:\s*none;/);
+  });
+
   it('moves the windows only for a fine pointer and when motion is welcome', () => {
     const tilt = css.slice(css.indexOf('@utility window-tilt'));
     expect(tilt).toMatch(

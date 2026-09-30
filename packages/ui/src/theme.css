@@ -90,9 +90,11 @@
   @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
     transform: perspective(900px) rotateX(calc(var(--tilt-y, 0) * -4deg))
       rotateY(calc(var(--tilt-x, 0) * 5deg));
+    /* Una sola lista: un transition-property successivo annullerebbe l'inclinazione. */
     transition:
       transform 250ms ease-out,
-      box-shadow 250ms ease-out;
+      box-shadow 250ms ease-out,
+      border-color 200ms ease-out;
     &::before {
       content: '';
       position: absolute;

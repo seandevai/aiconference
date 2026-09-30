@@ -36,7 +36,7 @@ export function StageArea(props: Props) {
     const counter = stageCounter(stage);
     return (
       <>
-        <Panel tone="stage" className="hidden h-full flex-col gap-2 p-2 lg:flex">
+        <Panel tone="stage" lit className="hidden h-full flex-col gap-2 p-2 lg:flex">
           {counter && <span className="tabular text-xs text-muted">{counter}</span>}
           <GuestBoard stage={stage} assetUrls={assetUrls} born={born} />
         </Panel>
@@ -63,6 +63,7 @@ function StageSkeleton() {
     // Niente regione propria: sta già dentro la sezione «Palco».
     <Panel
       tone="stage"
+      lit
       data-testid="stage-skeleton"
       aria-busy="true"
       className="grid h-full min-h-48 gap-2 p-2 lg:grid-cols-[3fr_1fr]"
@@ -130,7 +131,7 @@ function HostStage({
         </div>
       </Panel>
 
-      <Panel tone="stage" className="flex min-w-0 flex-1 flex-col gap-2 p-2">
+      <Panel tone="stage" lit className="flex min-w-0 flex-1 flex-col gap-2 p-2">
         <div className="flex items-center gap-2 text-xs">
           <Button
             size="sm"

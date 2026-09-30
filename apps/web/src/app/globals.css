@@ -24,6 +24,10 @@ body {
   animation-duration: 400ms;
   animation-timing-function: cubic-bezier(0.34, 1.45, 0.64, 1);
 }
+/* L'animazione dura 400 ms: i click passano sotto, alle finestre vere. */
+::view-transition {
+  pointer-events: none;
+}
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;

@@ -55,7 +55,7 @@ export function WindowView({
       aria-label={window.title}
       data-born={born ? '' : undefined}
       style={transitionName ? { viewTransitionName: `win-${window.id}` } : undefined}
-      className={`@container window-tilt flex h-full flex-col gap-2 rounded-tile border bg-raised p-3 motion-safe:transition-colors motion-safe:data-born:animate-birth ${
+      className={`@container window-tilt flex h-full flex-col gap-2 rounded-tile border bg-raised p-3 motion-safe:data-born:animate-birth ${
         window.slot === 'main' ? 'border-accent shadow-window-active' : 'border-line shadow-window'
       }`}
     >

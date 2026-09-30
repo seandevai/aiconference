@@ -99,6 +99,8 @@ export function useGestures({
       return;
     }
     setStatus('loading');
+    // Un cursore rimasto da un pizzico interrotto non deve ricomparire alla riaccensione.
+    setCursor(null);
     try {
       detachRef.current = session.attachVideo(session.localIdentity, video);
       const { startGestures } = await import('@omnicanvas/gesture/runner');
@@ -112,13 +114,16 @@ export function useGestures({
     }
   }, [armed, cameraOn, onEvent, session]);
 
-  // Camera spenta o sessione finita: il riconoscimento si ferma, il mouse resta.
+  // Camera spenta o sessione finita: il riconoscimento si ferma, il mouse resta. Un pizzico
+  // in corso non riceverà mai il DROP: la mano si considera lasciata.
   useEffect(() => {
     if (cameraOn && session) return;
     runnerRef.current?.stop();
     runnerRef.current = null;
     detachRef.current?.();
     detachRef.current = null;
+    draggingRef.current = null;
+    handlersRef.current.onPointer?.(null);
   }, [cameraOn, session]);
 
   useEffect(
@@ -134,7 +139,8 @@ export function useGestures({
   return {
     status: effectiveStatus,
     armed: effectiveStatus === 'on' && armed,
-    cursor,
+    // Senza camera la mano non c'è: niente cursore né slot illuminato.
+    cursor: cameraOn && session ? cursor : null,
     videoRef,
     toggle,
   };

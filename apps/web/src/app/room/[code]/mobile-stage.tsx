@@ -66,7 +66,7 @@ export function MobileStage({
           </Button>
         </div>
       )}
-      <Panel tone="stage" className="flex min-h-0 flex-1 flex-col p-2">
+      <Panel tone="stage" lit className="flex min-h-0 flex-1 flex-col p-2">
         <WindowView window={shown} assetUrls={assetUrls} born={born.includes(shown.id)} />
       </Panel>
       {stage.windows.length > 1 && (

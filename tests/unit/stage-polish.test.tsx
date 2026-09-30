@@ -94,6 +94,8 @@ describe('window birth and move animations', () => {
     render(<WindowView window={window!} assetUrls={{}} />);
     const cls = screen.getByRole('article').className;
     expect(cls).toContain('window-tilt');
+    // Un transition-property successivo cancellerebbe la transizione dell'inclinazione.
+    expect(cls).not.toContain('transition-colors');
     expect(cls).toContain(window!.slot === 'main' ? 'shadow-window-active' : 'shadow-window');
   });
 });
