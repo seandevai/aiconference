@@ -1,9 +1,10 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { MAX_WINDOWS, type ImageMime, type Stage, type StageCommand } from '@omnicanvas/canvas';
+import { MAX_WINDOWS, nearestSlot, type ImageMime, type Stage, type StageCommand } from '@omnicanvas/canvas';
 import type { RealtimeSession } from '@omnicanvas/realtime';
 import { Button, Icon, Panel } from '@omnicanvas/ui';
+import { slotRectsFromDom } from '@/lib/stage/drop';
 import { stageCounter } from '@/lib/stage/stage-counter';
 import { useGestures } from '@/lib/stage/use-gestures';
 import { AgentPanel } from './agent-panel';
@@ -97,6 +98,8 @@ function HostStage({
     areaRef,
   });
   const counter = stageCounter(stage);
+  const cursor = gestures.cursor;
+  const handSlot = cursor?.grabbing ? nearestSlot(cursor, slotRectsFromDom()) : null;
 
   return (
     <div ref={areaRef} className="flex h-full min-h-0 gap-3">
@@ -156,7 +159,13 @@ function HostStage({
             <Icon name="plus" /> Nuova finestra
           </Button>
         </div>
-        <StageBoard stage={stage} assetUrls={assetUrls} dispatch={dispatch} born={born} />
+        <StageBoard
+          stage={stage}
+          assetUrls={assetUrls}
+          dispatch={dispatch}
+          born={born}
+          hotSlot={handSlot}
+        />
       </Panel>
     </div>
   );

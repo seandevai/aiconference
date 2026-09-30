@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { applyCommand, emptyStage } from '@omnicanvas/canvas';
 import { StageArea } from '@/app/room/[code]/stage-area';
@@ -95,5 +95,49 @@ describe('window birth and move animations', () => {
     const cls = screen.getByRole('article').className;
     expect(cls).toContain('window-tilt');
     expect(cls).toContain(window!.slot === 'main' ? 'shadow-window-active' : 'shadow-window');
+  });
+});
+
+describe('slot under the dragged item', () => {
+  const slotOf = (name: string) => screen.getByRole('region', { name });
+
+  it('lights the slot the hand is over', () => {
+    render(<StageBoard stage={withWindow()} assetUrls={{}} dispatch={vi.fn()} hotSlot="side-1" />);
+    expect(slotOf('Finestra laterale 1').hasAttribute('data-hot')).toBe(true);
+    expect(slotOf('Finestra in primo piano').hasAttribute('data-hot')).toBe(false);
+  });
+
+  it('lights a slot while dragging with the mouse and clears it on drop, leave and end', () => {
+    const { container } = render(
+      <StageBoard stage={withWindow()} assetUrls={{}} dispatch={vi.fn()} />,
+    );
+    const board = container.firstElementChild as HTMLElement;
+    const hot = () => container.querySelectorAll('[data-hot]').length;
+    // happy-dom non ha DragEvent: un MouseEvent porta le coordinate che il browser darebbe.
+    const drag = (type: string, init: MouseEventInit = {}) =>
+      fireEvent(board, new MouseEvent(type, { bubbles: true, cancelable: true, ...init }));
+    const at = { clientX: 10, clientY: 10 };
+
+    drag('dragover', at);
+    expect(hot()).toBe(1);
+    drag('drop', at);
+    expect(hot()).toBe(0);
+
+    drag('dragover', at);
+    drag('dragleave', { relatedTarget: document.body });
+    expect(hot()).toBe(0);
+
+    drag('dragover', at);
+    drag('dragend');
+    expect(hot()).toBe(0);
+  });
+
+  it('never lights a slot for a guest, who cannot drop', () => {
+    const { container } = render(<StageBoard stage={withWindow()} assetUrls={{}} />);
+    fireEvent(
+      container.firstElementChild as HTMLElement,
+      new MouseEvent('dragover', { bubbles: true, cancelable: true, clientX: 10, clientY: 10 }),
+    );
+    expect(container.querySelectorAll('[data-hot]').length).toBe(0);
   });
 });
