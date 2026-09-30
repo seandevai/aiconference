@@ -1,19 +1,28 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import type { RosterEntry } from '@omnicanvas/realtime';
+import type { RealtimeSession, RosterEntry } from '@omnicanvas/realtime';
 import { FaceTile } from '@omnicanvas/ui';
 import { tileLabel } from '@/lib/call/labels';
+import { useAudioLevel } from '@/lib/call/use-audio-level';
 
 type Props = {
   entry: RosterEntry;
   attachVideo: (identity: string, element: HTMLVideoElement) => () => void;
   onSelect?: (() => void) | undefined;
   mirrored?: boolean;
+  onAudioLevels?: RealtimeSession['onAudioLevels'] | undefined;
 };
 
-export function VideoTile({ entry, attachVideo, onSelect, mirrored = false }: Props) {
+export function VideoTile({
+  entry,
+  attachVideo,
+  onSelect,
+  mirrored = false,
+  onAudioLevels,
+}: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const level = useAudioLevel(onAudioLevels, entry.identity);
 
   useEffect(() => {
     if (!entry.camOn || !videoRef.current) return;
@@ -25,6 +34,7 @@ export function VideoTile({ entry, attachVideo, onSelect, mirrored = false }: Pr
       name={entry.name}
       speaking={entry.speaking}
       micOn={entry.micOn}
+      level={level}
       className="h-full w-full"
     >
       {entry.camOn ? (

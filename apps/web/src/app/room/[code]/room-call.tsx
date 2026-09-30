@@ -81,6 +81,7 @@ export function RoomCall({ joinCode, role, showSamples }: Props) {
               attachVideo={attachVideo}
               onSelect={entry.isLocal ? undefined : () => setSelected(entry.identity)}
               mirrored={isMirrored(entry, state.cameraFacing)}
+              onAudioLevels={session?.onAudioLevels}
             />
           ))}
         </ul>

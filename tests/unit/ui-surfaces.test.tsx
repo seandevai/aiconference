@@ -62,6 +62,19 @@ describe('FaceTile', () => {
     expect(screen.getByTestId('v')).toBeTruthy();
     expect(screen.queryByText('A')).toBeNull();
   });
+  it('lets the glow follow the voice while speaking, only when motion is welcome', () => {
+    const { container } = render(<FaceTile name="Anna" speaking micOn level={0.6} />);
+    const tile = container.firstElementChild as HTMLElement;
+    expect(tile.style.getPropertyValue('--level')).toBe('0.6');
+    expect(tile.className).toContain('motion-safe:voice-glow');
+    expect(tile.className).toContain('ring-accent');
+  });
+  it('has no voice glow when silent', () => {
+    const { container } = render(<FaceTile name="Anna" speaking={false} micOn level={0.6} />);
+    const tile = container.firstElementChild as HTMLElement;
+    expect(tile.style.getPropertyValue('--level')).toBe('');
+    expect(tile.className).not.toContain('voice-glow');
+  });
   it('marks a muted microphone without adding an accessible name', () => {
     const { container } = render(<FaceTile name="Anna" speaking={false} micOn={false} />);
     expect(container.querySelector('[data-muted]')?.getAttribute('aria-hidden')).toBe('true');
