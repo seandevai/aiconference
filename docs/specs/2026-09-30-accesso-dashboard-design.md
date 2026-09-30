@@ -25,6 +25,7 @@ registrazione e dashboard hanno la veste Nod su desktop e telefono.
 | Contenuti | nuova riunione, riunioni per stato, crediti, profilo (solo nome) |
 | Partecipanti per riunione | non mostrati: servirebbe una policy RLS nuova |
 | Pagina `/` | reindirizzamento, nessuna vetrina |
+| Riunioni mai chiuse | «In corso» solo se iniziate da meno di 12 ore, poi fra le passate |
 
 ## 1. Percorsi
 
@@ -95,8 +96,12 @@ mai la service role.
 
 Funzioni pure in `apps/web/src/lib/dashboard/`:
 
-- `groupRooms(rooms)`: `active` e `closing` → In corso; `created` → Pronte; `closed` e
-  `purged` → Passate; ordine per `created_at` decrescente dentro ogni gruppo.
+- `groupRooms(rooms, now)`: `created` → Pronte; `active` e `closing` iniziate da meno di
+  12 ore (`started_at`) → In corso; `active` e `closing` più vecchie o senza `started_at`,
+  `closed`, `purged` e stati sconosciuti → Passate; ordine per `created_at` decrescente
+  dentro ogni gruppo. La soglia esiste perché oggi nessuno chiude una stanza: «Termina» e la
+  purga arrivano con la slice 8 (`room-token.ts` porta la stanza ad `active`, niente la porta
+  a `closed`). Dopo la slice 8 resta come rete per chi chiude la scheda senza terminare.
 - `formatDuration(startedAt, endedAt)`: «48 min», «1 h 12»; `null` se manca un estremo o la
   durata è negativa.
 - `creditsByRoom(rows)`: somma dei consumi per stanza, in positivo.
