@@ -44,4 +44,13 @@ describe('theme tokens', () => {
     expect(contrast(token('on-accent'), token('accent'))).toBeGreaterThanOrEqual(4.5);
     expect(contrast(token('danger'), token('bg'))).toBeGreaterThanOrEqual(4.5);
   });
+
+  it('keeps danger and accent readable as text on the panels (WCAG AA, 4.5:1)', () => {
+    for (const surface of ['surface', 'stage']) {
+      expect(contrast(token('danger'), token(surface))).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(token('accent'), token(surface))).toBeGreaterThanOrEqual(4.5);
+    }
+    // Su raised danger scende a 4.1: niente testo di errore sulle tessere.
+    expect(contrast(token('accent'), token('raised'))).toBeGreaterThanOrEqual(4.5);
+  });
 });
