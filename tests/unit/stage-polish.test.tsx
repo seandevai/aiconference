@@ -84,6 +84,8 @@ describe('host layout below lg', () => {
     expect(lab.className).toContain('order-last');
     expect(lab.className).toContain('lg:w-60');
     expect(lab.className).toContain('lg:order-none');
+    // Con l'altezza limitata scorre tutto il laboratorio: i blocchi non si schiacciano uno sull'altro.
+    expect(lab.className).toContain('max-lg:*:shrink-0');
     const area = lab.parentElement!;
     expect(area.className).toContain('flex-col');
     expect(area.className).toContain('lg:flex-row');
