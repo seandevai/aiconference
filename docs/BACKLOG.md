@@ -217,7 +217,7 @@ branch `slice/redesign-call` (PR #9).
 - [ ] Addestrare il modello openWakeWord su «Ehi Omnia» (provvisorio) con voci Piper
 - [ ] Scegliere un nome definitivo più amichevole per la parola chiave e riaddestrare (ADR-0012)
 - [x] Scegliere il provider di immagini: fal.ai FLUX schnell (ADR-0013)
-- [ ] Togliere `OPENAI_API_KEY` dal contratto env se non serve altrove (ADR-0013)
+- [x] Togliere `OPENAI_API_KEY` dal contratto env se non serve altrove (ADR-0013)
 - [ ] Verificare retention e DPA di fal.ai prima dei clienti veri (ADR-0013)
 - [ ] Firmare i DPA con vendor STT e LLM, zero retention per iscritto
 - [ ] Misurare i costi reali e decidere l'economia

@@ -27,8 +27,7 @@ attive**. Se una tabella non ha RLS, quella chiave la espone a Internet.
 | `DEEPGRAM_API_KEY` | emissione dei token STT a vita breve. Mai esposta al client (ADR-0006) |
 | `ANTHROPIC_API_KEY` | agente, riassunti, classificazione intento |
 | `AI_PROVIDER` | `anthropic` o `fake`; con `fake` l'agente risponde senza modello e senza costi (sviluppo, CI, e2e) |
-| `OPENAI_API_KEY` | generazione immagini |
-| `FAL_KEY` | generazione immagini alternativa |
+| `FAL_KEY` | generazione immagini (ADR-0013) |
 | `R2_ACCOUNT_ID` | Cloudflare R2 |
 | `R2_ACCESS_KEY_ID` | Cloudflare R2 |
 | `R2_SECRET_ACCESS_KEY` | Cloudflare R2 |
