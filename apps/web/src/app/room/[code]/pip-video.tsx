@@ -38,7 +38,8 @@ export function PipVideo({ identity, name, camOn, attachVideo, videoRef }: Props
     const action = 'enterpictureinpicture' as MediaSessionAction;
     try {
       navigator.mediaSession?.setActionHandler(action, () => {
-        void openPip(document, video);
+        // Il browser può rifiutare (gesto mancante, permessi): resta il pulsante.
+        void openPip(document, video).catch(() => {});
       });
     } catch {
       // Azione non supportata: resta il pulsante «Riquadro».

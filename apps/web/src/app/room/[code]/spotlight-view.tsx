@@ -39,7 +39,8 @@ export function SpotlightView({ entry, local, mirrorSelf, attachVideo, onClose }
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
+      // Esc mentre si scrive appartiene al campo, non al tutto schermo.
+      if (event.key === 'Escape' && !isTyping(event.target)) onClose();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -62,7 +63,10 @@ export function SpotlightView({ entry, local, mirrorSelf, attachVideo, onClose }
           {faceInitial(entry.name)}
         </span>
       )}
-      <span className="absolute bottom-3 left-3 rounded-full bg-bg/80 px-3 py-1 text-sm font-semibold">
+      <span
+        title={entry.name}
+        className="absolute bottom-3 left-3 max-w-[calc(100%-1.5rem)] truncate rounded-full bg-bg/80 px-3 py-1 text-sm font-semibold"
+      >
         {entry.name}
       </span>
       {local?.camOn && (
@@ -89,4 +93,9 @@ export function SpotlightView({ entry, local, mirrorSelf, attachVideo, onClose }
       </Button>
     </div>
   );
+}
+
+function isTyping(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  return target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName);
 }

@@ -60,3 +60,33 @@ describe('window actions in a narrow slot', () => {
     expect(label?.className).toContain('@xs:not-sr-only');
   });
 });
+
+describe('host layout below lg', () => {
+  it('puts the lab under the stage instead of squeezing it', () => {
+    // Il pannello dell'agente chiede il contatore al server: qui basta una risposta vuota.
+    vi.stubGlobal('fetch', vi.fn(() => new Promise(() => {})));
+    render(
+      <StageArea
+        joinCode="ABCD2345"
+        session={null}
+        cameraOn={false}
+        role="host"
+        showSamples={false}
+        stage={withWindow()}
+        ready
+        assetUrls={{}}
+        dispatch={vi.fn()}
+        addImage={vi.fn()}
+      />,
+    );
+    const lab = screen.getByRole('region', { name: 'Laboratorio' });
+    expect(lab.className).toContain('w-full');
+    expect(lab.className).toContain('order-last');
+    expect(lab.className).toContain('lg:w-60');
+    expect(lab.className).toContain('lg:order-none');
+    const area = lab.parentElement!;
+    expect(area.className).toContain('flex-col');
+    expect(area.className).toContain('lg:flex-row');
+    vi.unstubAllGlobals();
+  });
+});

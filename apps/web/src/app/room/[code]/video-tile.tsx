@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import type { RosterEntry } from '@omnicanvas/realtime';
 import { FaceTile } from '@omnicanvas/ui';
-import { tileLabel } from '@/lib/call/labels';
+import { spotlightButtonLabel, tileLabel } from '@/lib/call/labels';
 
 type Props = {
   entry: RosterEntry;
@@ -50,7 +50,7 @@ export function VideoTile({ entry, attachVideo, onSelect, mirrored = false }: Pr
         <button
           type="button"
           onClick={onSelect}
-          aria-label={`Mostra ${entry.name} a tutto schermo`}
+          aria-label={spotlightButtonLabel(entry)}
           className="block h-full w-full rounded-tile focus-visible:outline-2 focus-visible:outline-accent"
         >
           {face}

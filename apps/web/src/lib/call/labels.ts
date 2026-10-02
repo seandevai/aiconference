@@ -6,6 +6,11 @@ export function tileLabel(entry: RosterEntry): string {
   return `${who}, ${role}, microfono ${entry.micOn ? 'acceso' : 'spento'}`;
 }
 
+// Il pulsante copre la tessera: il suo nome deve portare anche lo stato del microfono.
+export function spotlightButtonLabel(entry: RosterEntry): string {
+  return `Mostra ${entry.name} a tutto schermo, microfono ${entry.micOn ? 'acceso' : 'spento'}`;
+}
+
 export function micButtonLabel(on: boolean): string {
   return on ? 'Disattiva microfono' : 'Attiva microfono';
 }

@@ -143,7 +143,7 @@ Verifica su telefono: `docs/spikes/2026-09-27-spike-mobile-call.md`.
 - [x] Picture-in-Picture quando l'app va in background, come WhatsApp e FaceTime.
       Limite del browser: in background iOS ferma la fotocamera locale; si vede
       solo il video remoto
-- [ ] PiP: `openPip` nel gestore Media Session senza `.catch` (rifiuto non gestito)
+- [x] PiP: `openPip` nel gestore Media Session senza `.catch` (rifiuto non gestito)
 - [ ] PiP in bassa qualità: adaptiveStream dimensiona sul riquadro più grande, non sulla
       finestra PiP (valutare `pixelDensity: 'screen'`)
 - [ ] PiP: cambiando persona si stacca e riattacca lo stesso `<video>`; verificare che il
@@ -162,8 +162,8 @@ Verifica su telefono: `docs/spikes/2026-09-27-spike-mobile-call.md`.
 - [ ] Checklist mobile su Android: ancora da fare (nessun telefono disponibile al 29/09)
 - [ ] UI della call da rifare, desktop e mobile: richiesta di Sean dopo il test del 29/09.
       Serve una spec prima di iniziare
-- [ ] Esc del tutto schermo scatta anche mentre si scrive nel palco o all'agente
-- [ ] Pulsante della tessera: il nome accessibile perde lo stato del microfono
+- [x] Esc del tutto schermo scatta anche mentre si scrive nel palco o all'agente
+- [x] Pulsante della tessera: il nome accessibile perde lo stato del microfono
 - [ ] Dopo una riconnessione completa tessere, spotlight e PiP restano legati alle tracce
       della sessione vecchia (da slice 2)
 
@@ -186,8 +186,10 @@ branch `slice/redesign-call` (PR #9).
 - [ ] Crediti per riunione in dashboard: vista SQL se le righe del ledger crescono
 - [ ] Sito vetrina di Nod (dopo il marchio definitivo)
 - [ ] ADR sulla rinomina del codice in Nod (`@omnicanvas/*`, titoli, domini)
-- [ ] Revisione finale (minori): nomi lunghi escono dalla pillola dello spotlight; host sotto `lg` stringe il
-      palco; test di contrasto senza `danger` e `accent` su `surface`; dashboard a due toni
+- [x] Revisione finale (minori): nomi lunghi nella pillola dello spotlight; sotto `lg` il
+      laboratorio dell'host scende sotto il palco; contrasto di `danger` e `accent` su
+      `surface` e `stage` (su `raised` `danger` è 4.1:1, niente testo di errore sulle tessere)
+- [ ] Dashboard a due toni (dalla revisione finale)
 - [ ] Gesture: l'area mappata ora comprende laboratorio e palco; decidere con Sean dopo le
       registrazioni reali se limitarla al palco
 
