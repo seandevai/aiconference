@@ -242,6 +242,8 @@ branch `slice/redesign-call` (PR #9).
 - [ ] L'host che ricarica perde i byte delle immagini: recuperarli da un ospite che li ha
 - [ ] Contenuto `file` (documenti caricati) non ancora supportato dal palco
 - [ ] `room:{id}:presence` in KV non serve finché LiveKit dà la presence: rivedere
+      (02/10: nessun codice lo usa; decidere nel piano della slice 8 se il job di purga legge la
+      presence da LiveKit)
 - [x] Contenuti di prova nel vassoio: nasconderli quando arriva l'agente (slice 4)
 - [x] Nessun heartbeat di versione: un ospite che perde l'ultimo comando resta indietro
       fino al comando successivo (battito dell'host ogni 5 secondi sul canale `stage`)
