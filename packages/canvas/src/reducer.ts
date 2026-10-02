@@ -63,7 +63,26 @@ function rotate(stage: Stage, shift: 1 | -1): Stage {
   );
 }
 
+// Durante una negoziazione il contenuto negoziato ha un altro scrittore: l'host non lo
+// sposta, non lo toglie e non archivia la finestra che lo contiene.
+function touchesNegotiated(stage: Stage, command: StageCommand): boolean {
+  const contentId = stage.negotiation?.contentId;
+  if (!contentId) return false;
+  switch (command.type) {
+    case 'CONTENT_PLACE':
+    case 'CONTENT_REMOVE':
+      return command.contentId === contentId;
+    case 'WINDOW_ARCHIVE':
+      return stage.windows.some(
+        (w) => w.id === command.windowId && w.contents.some((c) => c.id === contentId),
+      );
+    default:
+      return false;
+  }
+}
+
 export function applyCommand(stage: Stage, command: StageCommand): Stage {
+  if (touchesNegotiated(stage, command)) return stage;
   switch (command.type) {
     case 'TRAY_ADD': {
       if (stage.tray.length >= MAX_TRAY || containsContent(stage, command.content.id)) return stage;

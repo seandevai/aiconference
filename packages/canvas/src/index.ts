@@ -1,6 +1,13 @@
 export * from './types';
 export { applyCommand, emptyStage, orderedWindows } from './reducer';
 export {
+  closeNegotiation,
+  finishAgentEdit,
+  negotiatedEdit,
+  openNegotiation,
+  startAgentEdit,
+} from './negotiation';
+export {
   LIMITS,
   commandSchema,
   contentSchema,
