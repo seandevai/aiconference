@@ -96,8 +96,10 @@ al pacchetto cifrato.
 
 Il formato del pacchetto è `packAsset`: 4 byte di lunghezza, header JSON
 `{ assetId, mime }`, byte. L'ospite richiede le immagini mancanti ogni 3 secondi.
-Se l'host ricarica la pagina perde i byte delle immagini: il riferimento resta nel
-palco e mostra «Immagine in arrivo…».
+Se l'host ricarica la pagina perde i byte delle immagini: li chiede a tutti gli ospiti
+ogni 3 secondi e accetta solo quelli la cui impronta SHA-256 coincide con quella scritta
+nel riferimento (`ImageRef.sha256`). Finché nessuno li ha, il palco mostra «Immagine in
+arrivo…».
 
 ## 4. Flusso dell'agente
 

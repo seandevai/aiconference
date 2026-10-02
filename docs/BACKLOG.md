@@ -239,7 +239,8 @@ branch `slice/redesign-call` (PR #9).
 - [x] Token route senza rate limit: 30 al minuto per account o per hash dell'IP (KV)
 - [ ] Chi chiude la scheda senza «Esci» lascia la riga aperta: la chiude la purga (slice 8)
 - [ ] Rimuovere `/dev/spike-cpu` e le sue dipendenze dopo la misura
-- [ ] L'host che ricarica perde i byte delle immagini: recuperarli da un ospite che li ha
+- [x] L'host che ricarica perde i byte delle immagini: recuperarli da un ospite che li ha
+      (verificati con l'impronta SHA-256 nel riferimento)
 - [ ] Contenuto `file` (documenti caricati) non ancora supportato dal palco
 - [ ] `room:{id}:presence` in KV non serve finché LiveKit dà la presence: rivedere
 - [x] Contenuti di prova nel vassoio: nasconderli quando arriva l'agente (slice 4)

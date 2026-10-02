@@ -15,7 +15,14 @@ export type ChartData = { title: string; labels: string[]; values: number[] };
 export type TextData = { title: string; body: string };
 export type TableData = { title: string; columns: string[]; rows: string[][] };
 // Solo il riferimento: i byte viaggiano peer to peer e restano in memoria.
-export type ImageRef = { title: string; assetId: string; mime: ImageMime; alt: string };
+// sha256: impronta dei byte, così chi li riceve da un altro ospite può verificarli.
+export type ImageRef = {
+  title: string;
+  assetId: string;
+  mime: ImageMime;
+  alt: string;
+  sha256?: string;
+};
 
 // forkOf: la proposta dell'ospite affiancata all'originale punta all'originale (spec §2.6).
 type ContentBase = { id: string; archived?: boolean; forkOf?: string };
