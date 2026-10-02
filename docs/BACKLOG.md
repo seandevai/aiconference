@@ -105,7 +105,8 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 ## Slice 8 — Pacchetto
 
 - [ ] Migrazione 0005: bundles, con RLS
-- [ ] `packages/bundle`: raccolta, ZIP, cifratura AES-GCM nel browser
+- [x] `packages/bundle`: raccolta, ZIP, cifratura AES-GCM nel browser (parte pura, senza
+      rete né storage; upload e pagina `/p/<id>` restano da fare)
 - [ ] Upload firmato su R2 con lifecycle 7 giorni
 - [ ] Pagina `/p/<id>` che decifra nel browser, senza script di terze parti
 - [ ] PDF riassuntivo a quota
