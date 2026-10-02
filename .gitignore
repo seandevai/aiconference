@@ -43,6 +43,7 @@ yarn-error.log*
 
 # artefatti locali degli agenti
 .claude/settings.local.json
+.claude/settings.json
 scratch/
 *.stackdump
 .superpowers/
