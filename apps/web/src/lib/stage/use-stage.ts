@@ -23,6 +23,7 @@ const SYNC_THROTTLE_MS = 1_000;
 const SYNC_RETRY_MS = 2_000;
 const ASSET_RETRY_MS = 3_000;
 const BORN_MS = 600;
+const HEARTBEAT_MS = 5_000;
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
@@ -143,7 +144,14 @@ export function useStage({ joinCode, role, session, roster }: Options) {
         .sendBytes('asset', packAsset({ assetId, mime: asset.mime }, asset.bytes), [from])
         .catch(() => {});
     });
+    // Battito di versione: un ospite che ha perso l'ultimo comando chiede lo snapshot.
+    const heartbeat = setInterval(() => {
+      void session
+        .sendData('stage', { type: 'heartbeat', version: stageRef.current.version })
+        .catch(() => {});
+    }, HEARTBEAT_MS);
     return () => {
+      clearInterval(heartbeat);
       offSync();
       offAsset();
     };

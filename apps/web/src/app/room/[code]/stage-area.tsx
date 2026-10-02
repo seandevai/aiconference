@@ -112,11 +112,12 @@ function HostStage({
   const handSlot = cursor?.grabbing ? nearestSlot(cursor, slotRectsFromDom()) : null;
 
   return (
-    <div ref={areaRef} className="flex h-full min-h-0 gap-3">
+    // Sotto lg il laboratorio scende sotto il palco: affiancato lo stringerebbe troppo.
+    <div ref={areaRef} className="flex h-full min-h-0 flex-col gap-3 lg:flex-row">
       <Panel
         as="section"
         aria-label="Laboratorio"
-        className="flex w-60 shrink-0 flex-col gap-4 overflow-auto p-3 xl:w-70"
+        className="order-last flex max-h-[45%] w-full shrink-0 flex-col gap-4 overflow-auto p-3 max-lg:*:shrink-0 lg:order-none lg:max-h-none lg:w-60 xl:w-70"
       >
         <AgentPanel joinCode={joinCode} dispatch={dispatch} focusRequest={agentFocus} />
         <Tray stage={stage} dispatch={dispatch} addImage={addImage} showSamples={showSamples} />

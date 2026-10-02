@@ -19,6 +19,8 @@ export function followMessage(
 ): { stage: Stage; outOfSync: boolean } {
   // Lo snapshot dello scrittore vince sempre: dopo una sua ripartenza la versione può calare.
   if (message.type === 'snapshot') return { stage: message.stage, outOfSync: false };
+  // Versione diversa in qualunque verso: lo snapshot dello scrittore rimette tutto in ordine.
+  if (message.type === 'heartbeat') return { stage, outOfSync: message.version !== stage.version };
   if (message.version <= stage.version) return { stage, outOfSync: false };
   if (message.version !== stage.version + 1) return { stage, outOfSync: true };
   return {

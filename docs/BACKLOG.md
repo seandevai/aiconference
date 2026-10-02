@@ -96,16 +96,20 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 
 ## Slice 7 — Negoziazione
 
-- [ ] Apertura dall'host con tetto modifiche e snapshot dell'originale
-- [ ] Turno di scrittura all'ospite, agente in coda
+- [x] Modello e riduttori in `packages/canvas/src/negotiation.ts` (apertura con tetto e
+      snapshot, turno all'ospite, agente in coda, tre esiti, massimo due versioni, host che non
+      tocca il contenuto negoziato). Mancano comandi sul DataChannel, UI e tetto lato server
+- [ ] Apertura dall'host con tetto modifiche e snapshot dell'originale (UI e comandi)
+- [ ] Turno di scrittura all'ospite, agente in coda (scrittore secondo sul DataChannel)
 - [ ] «Offro io» con `guest_credit_cap`, applicato lato server
-- [ ] Tre esiti: tieni, torna, affianca; massimo due versioni
+- [ ] Tre esiti: tieni, torna, affianca; massimo due versioni (UI; il modello c'è)
 - [ ] Bottone ✨ ospite su mobile solo in negoziazione
 
 ## Slice 8 — Pacchetto
 
 - [ ] Migrazione 0005: bundles, con RLS
-- [ ] `packages/bundle`: raccolta, ZIP, cifratura AES-GCM nel browser
+- [x] `packages/bundle`: raccolta, ZIP, cifratura AES-GCM nel browser (parte pura, senza
+      rete né storage; upload e pagina `/p/<id>` restano da fare)
 - [ ] Upload firmato su R2 con lifecycle 7 giorni
 - [ ] Pagina `/p/<id>` che decifra nel browser, senza script di terze parti
 - [ ] PDF riassuntivo a quota
@@ -143,7 +147,7 @@ Verifica su telefono: `docs/spikes/2026-09-27-spike-mobile-call.md`.
 - [x] Picture-in-Picture quando l'app va in background, come WhatsApp e FaceTime.
       Limite del browser: in background iOS ferma la fotocamera locale; si vede
       solo il video remoto
-- [ ] PiP: `openPip` nel gestore Media Session senza `.catch` (rifiuto non gestito)
+- [x] PiP: `openPip` nel gestore Media Session senza `.catch` (rifiuto non gestito)
 - [ ] PiP in bassa qualità: adaptiveStream dimensiona sul riquadro più grande, non sulla
       finestra PiP (valutare `pixelDensity: 'screen'`)
 - [ ] PiP: cambiando persona si stacca e riattacca lo stesso `<video>`; verificare che il
@@ -162,9 +166,9 @@ Verifica su telefono: `docs/spikes/2026-09-27-spike-mobile-call.md`.
 - [ ] Checklist mobile su Android: ancora da fare (nessun telefono disponibile al 29/09)
 - [ ] UI della call da rifare, desktop e mobile: richiesta di Sean dopo il test del 29/09.
       Serve una spec prima di iniziare
-- [ ] Esc del tutto schermo scatta anche mentre si scrive nel palco o all'agente
-- [ ] Pulsante della tessera: il nome accessibile perde lo stato del microfono
-- [ ] Dopo una riconnessione completa tessere, spotlight e PiP restano legati alle tracce
+- [x] Esc del tutto schermo scatta anche mentre si scrive nel palco o all'agente
+- [x] Pulsante della tessera: il nome accessibile perde lo stato del microfono
+- [x] Dopo una riconnessione completa tessere, spotlight e PiP restano legati alle tracce
       della sessione vecchia (da slice 2)
 
 ## Redesign (Nod) — 29/09
@@ -191,8 +195,10 @@ branch `slice/redesign-call` (PR #9).
 - [ ] Crediti per riunione in dashboard: vista SQL se le righe del ledger crescono
 - [ ] Sito vetrina di Nod (dopo il marchio definitivo)
 - [ ] ADR sulla rinomina del codice in Nod (`@omnicanvas/*`, titoli, domini)
-- [ ] Revisione finale (minori): nomi lunghi escono dalla pillola dello spotlight; host sotto `lg` stringe il
-      palco; test di contrasto senza `danger` e `accent` su `surface`; dashboard a due toni
+- [x] Revisione finale (minori): nomi lunghi nella pillola dello spotlight; sotto `lg` il
+      laboratorio dell'host scende sotto il palco; contrasto di `danger` e `accent` su
+      `surface` e `stage` (su `raised` `danger` è 4.1:1, niente testo di errore sulle tessere)
+- [ ] Dashboard a due toni (dalla revisione finale)
 - [ ] Gesture: l'area mappata ora comprende laboratorio e palco; decidere con Sean dopo le
       registrazioni reali se limitarla al palco
 
@@ -216,14 +222,14 @@ branch `slice/redesign-call` (PR #9).
 - [ ] Addestrare il modello openWakeWord su «Ehi Omnia» (provvisorio) con voci Piper
 - [ ] Scegliere un nome definitivo più amichevole per la parola chiave e riaddestrare (ADR-0012)
 - [x] Scegliere il provider di immagini: fal.ai FLUX schnell (ADR-0013)
-- [ ] Togliere `OPENAI_API_KEY` dal contratto env se non serve altrove (ADR-0013)
+- [x] Togliere `OPENAI_API_KEY` dal contratto env se non serve altrove (ADR-0013)
 - [ ] Verificare retention e DPA di fal.ai prima dei clienti veri (ADR-0013)
 - [ ] Firmare i DPA con vendor STT e LLM, zero retention per iscritto
 - [ ] Misurare i costi reali e decidere l'economia
 - [x] Indice unico host senza filtro `left_at`: l'host non rientra dopo l'uscita
       (slice 2)
-- [ ] Ospite anonimo che reinvia il form crea righe aperte orfane; action pubblica
-      senza rate limit
+- [x] Ospite anonimo che reinvia il form crea righe aperte orfane; action pubblica
+      senza rate limit (riusa la riga del suo cookie; 10 invii al minuto per hash dell'IP)
 - [x] Cookie ospite con path `/room/<code>`: le route di token della slice 2 vanno
       sotto quel path
 - [x] Codice stanza case-sensitive: normalizzare maiuscolo/trim quando si digita a
@@ -242,8 +248,8 @@ branch `slice/redesign-call` (PR #9).
 - [ ] Contenuto `file` (documenti caricati) non ancora supportato dal palco
 - [ ] `room:{id}:presence` in KV non serve finché LiveKit dà la presence: rivedere
 - [x] Contenuti di prova nel vassoio: nasconderli quando arriva l'agente (slice 4)
-- [ ] Nessun heartbeat di versione: un ospite che perde l'ultimo comando resta indietro
-      fino al comando successivo
+- [x] Nessun heartbeat di versione: un ospite che perde l'ultimo comando resta indietro
+      fino al comando successivo (battito dell'host ogni 5 secondi sul canale `stage`)
 - [ ] Richiesta scritta all'agente: tenerla anche dopo lo STT come via senza microfono?
 - [x] Contenuti di prova nel vassoio: toglierli quando `AI_PROVIDER=anthropic` è attivo
       (restano con il provider finto, per CI ed e2e)

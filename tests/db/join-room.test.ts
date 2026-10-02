@@ -61,6 +61,53 @@ describe('joinRoom', () => {
     );
   });
 
+  it('an anonymous guest who sends the form again keeps one row, with the new name', async () => {
+    const first = await joinRoom(admin, { ...base, joinCode, userId: null });
+    if (first.kind !== 'joined') throw new Error('setup failed');
+    const again = await joinRoom(admin, {
+      joinCode,
+      userId: null,
+      displayName: 'Marco Rossi',
+      language: 'it',
+      guestParticipantId: () => first.participantId,
+    });
+    expect(again).toMatchObject({ kind: 'joined', role: 'guest', participantId: first.participantId });
+
+    const { data } = await admin
+      .from('room_participants')
+      .select('display_name, language')
+      .eq('id', first.participantId)
+      .single();
+    expect(data).toEqual({ display_name: 'Marco Rossi', language: 'it' });
+  });
+
+  it('does not reuse a guest row from another room or one already closed', async () => {
+    const other = await createRoomForUser(await signedInClient(host), host.id, { title: 'Altra' });
+    if (!other.ok) throw new Error('setup failed');
+    const elsewhere = await joinRoom(admin, { ...base, joinCode: other.joinCode, userId: null });
+    if (elsewhere.kind !== 'joined') throw new Error('setup failed');
+    const here = await joinRoom(admin, {
+      ...base,
+      joinCode,
+      userId: null,
+      guestParticipantId: () => elsewhere.participantId,
+    });
+    expect(here.kind === 'joined' && here.participantId).not.toBe(elsewhere.participantId);
+
+    if (here.kind !== 'joined') throw new Error('setup failed');
+    await admin
+      .from('room_participants')
+      .update({ left_at: new Date().toISOString() })
+      .eq('id', here.participantId);
+    const back = await joinRoom(admin, {
+      ...base,
+      joinCode,
+      userId: null,
+      guestParticipantId: () => here.participantId,
+    });
+    expect(back.kind === 'joined' && back.participantId).not.toBe(here.participantId);
+  });
+
   it('rejects an empty name and an unsupported language', async () => {
     expect(
       await joinRoom(admin, { joinCode, userId: null, displayName: ' ', language: 'it' }),

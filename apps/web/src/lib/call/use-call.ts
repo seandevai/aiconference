@@ -167,10 +167,12 @@ export function useCall(joinCode: string) {
     setState((s) => ({ ...s, phase: 'left', roster: [] }));
   }, []);
 
+  // Legata alla sessione: dopo una riconnessione completa cambia, e tessere, spotlight e
+  // PiP rifanno l'aggancio sulle tracce nuove.
   const attachVideo = useCallback(
     (identity: string, element: HTMLVideoElement) =>
-      sessionRef.current?.attachVideo(identity, element) ?? (() => {}),
-    [],
+      session?.attachVideo(identity, element) ?? (() => {}),
+    [session],
   );
 
   return {

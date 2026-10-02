@@ -6,6 +6,8 @@ export type Slot = (typeof SLOTS)[number];
 export const MAX_WINDOWS = 4;
 export const MAX_TRAY = 50;
 export const MAX_CONTENTS_PER_WINDOW = 12;
+// Tetto massimo che l'host può fissare per una negoziazione.
+export const MAX_NEGOTIATION_EDITS = 20;
 
 export type ImageMime = 'image/png' | 'image/jpeg' | 'image/webp';
 
@@ -15,11 +17,34 @@ export type TableData = { title: string; columns: string[]; rows: string[][] };
 // Solo il riferimento: i byte viaggiano peer to peer e restano in memoria.
 export type ImageRef = { title: string; assetId: string; mime: ImageMime; alt: string };
 
+// forkOf: la proposta dell'ospite affiancata all'originale punta all'originale (spec §2.6).
+type ContentBase = { id: string; archived?: boolean; forkOf?: string };
+
 export type Content =
-  | { id: string; kind: 'chart'; data: ChartData; archived?: boolean }
-  | { id: string; kind: 'text'; data: TextData; archived?: boolean }
-  | { id: string; kind: 'table'; data: TableData; archived?: boolean }
-  | { id: string; kind: 'image'; data: ImageRef; archived?: boolean };
+  | (ContentBase & { kind: 'chart'; data: ChartData })
+  | (ContentBase & { kind: 'text'; data: TextData })
+  | (ContentBase & { kind: 'table'; data: TableData })
+  | (ContentBase & { kind: 'image'; data: ImageRef });
+
+// Una modifica sostituisce i dati del contenuto, mai il tipo.
+export type ContentEdit = {
+  [K in Content['kind']]: Pick<Extract<Content, { kind: K }>, 'kind' | 'data'>;
+}[Content['kind']];
+
+// Negoziazione (spec §2.6): l'host la apre su un contenuto, l'ospite ha il turno di
+// scrittura su quel contenuto finché l'host non la chiude. Il tetto lo rispetta anche
+// il server; qui serve a non applicare modifiche oltre il tetto.
+export type Negotiation = {
+  contentId: string;
+  snapshot: Content;
+  guestId: string;
+  editsLeft: number;
+  hostPays: boolean;
+  // Agente in coda: mentre lavora, niente modifiche a mano né altre richieste.
+  agentBusy: boolean;
+};
+
+export type NegotiationOutcome = 'keep' | 'revert' | 'side';
 
 export type StageWindow = { id: string; title: string; slot: Slot; contents: Content[] };
 
@@ -28,7 +53,7 @@ export type Stage = {
   // Sempre la finestra nello slot 'main', o null se il palco è vuoto.
   focusedId: string | null;
   tray: Content[];
-  negotiation: null;
+  negotiation: Negotiation | null;
   version: number;
 };
 
