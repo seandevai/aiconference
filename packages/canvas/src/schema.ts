@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import {
   MAX_CONTENTS_PER_WINDOW,
+  MAX_NEGOTIATION_EDITS,
   MAX_WINDOWS,
   SLOTS,
   type Stage,
@@ -26,12 +27,14 @@ const id = z.uuid();
 const title = z.string().min(1).max(LIMITS.title);
 const slot = z.enum(SLOTS);
 const archived = z.boolean().optional();
+const forkOf = id.optional();
 
 export const contentSchema = z.discriminatedUnion('kind', [
   z.object({
     id,
     kind: z.literal('chart'),
     archived,
+    forkOf,
     data: z
       .object({
         title,
@@ -44,12 +47,14 @@ export const contentSchema = z.discriminatedUnion('kind', [
     id,
     kind: z.literal('text'),
     archived,
+    forkOf,
     data: z.object({ title, body: z.string().max(LIMITS.body) }),
   }),
   z.object({
     id,
     kind: z.literal('table'),
     archived,
+    forkOf,
     data: z.object({
       title,
       columns: z.array(z.string().max(LIMITS.cell)).min(1).max(LIMITS.columns),
@@ -60,6 +65,7 @@ export const contentSchema = z.discriminatedUnion('kind', [
     id,
     kind: z.literal('image'),
     archived,
+    forkOf,
     data: z.object({
       title,
       assetId: id,
@@ -95,7 +101,16 @@ export const stageSchema = z
       .max(MAX_WINDOWS),
     focusedId: id.nullable(),
     tray: z.array(contentSchema).max(MAX_TRAY_IN_SNAPSHOT),
-    negotiation: z.null(),
+    negotiation: z
+      .object({
+        contentId: id,
+        snapshot: contentSchema,
+        guestId: z.string().min(1).max(128),
+        editsLeft: z.number().int().min(0).max(MAX_NEGOTIATION_EDITS),
+        hostPays: z.boolean(),
+        agentBusy: z.boolean(),
+      })
+      .nullable(),
     version: z.number().int().min(0),
   })
   .refine((s) => new Set(s.windows.map((w) => w.slot)).size === s.windows.length, 'slot clash');

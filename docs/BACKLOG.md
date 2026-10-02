@@ -96,10 +96,13 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 
 ## Slice 7 — Negoziazione
 
-- [ ] Apertura dall'host con tetto modifiche e snapshot dell'originale
-- [ ] Turno di scrittura all'ospite, agente in coda
+- [x] Modello e riduttori in `packages/canvas/src/negotiation.ts` (apertura con tetto e
+      snapshot, turno all'ospite, agente in coda, tre esiti, massimo due versioni, host che non
+      tocca il contenuto negoziato). Mancano comandi sul DataChannel, UI e tetto lato server
+- [ ] Apertura dall'host con tetto modifiche e snapshot dell'originale (UI e comandi)
+- [ ] Turno di scrittura all'ospite, agente in coda (scrittore secondo sul DataChannel)
 - [ ] «Offro io» con `guest_credit_cap`, applicato lato server
-- [ ] Tre esiti: tieni, torna, affianca; massimo due versioni
+- [ ] Tre esiti: tieni, torna, affianca; massimo due versioni (UI; il modello c'è)
 - [ ] Bottone ✨ ospite su mobile solo in negoziazione
 
 ## Slice 8 — Pacchetto
