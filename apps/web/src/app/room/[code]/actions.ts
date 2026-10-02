@@ -1,6 +1,6 @@
 'use server';
 
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { serverEnv } from '@/env';
 import { GUEST_TOKEN_TTL_SECONDS, guestCookieName, signGuestToken } from '@/lib/rooms/guest-token';
@@ -8,6 +8,8 @@ import { readGuestParticipantId } from '@/lib/rooms/guest-cookie';
 import { joinRoom } from '@/lib/rooms/join-room';
 import { leaveRoom } from '@/lib/rooms/leave-room';
 import { resolveParticipant } from '@/lib/rooms/resolve-participant';
+import { allowGuestJoin, tokenRateSubject } from '@/lib/rooms/rate-limit';
+import { createKv } from '@/lib/kv/kv';
 import { createAdminSupabase } from '@/lib/supabase/admin';
 import { createServerSupabase } from '@/lib/supabase/server';
 
@@ -18,11 +20,20 @@ export async function joinAsGuestAction(
   _prev: GuestJoinState,
   formData: FormData,
 ): Promise<GuestJoinState> {
+  // Action pubblica che scrive una riga: limitata per hash dell'indirizzo, come il token.
+  const ip = (await headers()).get('x-forwarded-for')?.split(',')[0]?.trim() || null;
+  const rate = await allowGuestJoin(createKv(), tokenRateSubject(null, ip));
+  if (!rate.ok) {
+    return { error: `Troppi tentativi. Riprova fra ${rate.retryAfterSeconds} secondi.` };
+  }
+
+  const store = await cookies();
   const result = await joinRoom(createAdminSupabase(), {
     joinCode,
     userId: null,
     displayName: String(formData.get('display_name') ?? ''),
     language: String(formData.get('language') ?? ''),
+    guestParticipantId: (roomId) => readGuestParticipantId(store, roomId),
   });
 
   switch (result.kind) {
@@ -38,7 +49,6 @@ export async function joinAsGuestAction(
     case 'ended':
       return { error: 'Questa riunione è terminata.' };
     case 'joined': {
-      const store = await cookies();
       store.set(
         guestCookieName(result.room.id),
         signGuestToken(

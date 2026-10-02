@@ -5,7 +5,7 @@ import { createKv } from '@/lib/kv/kv';
 import { readGuestParticipantId } from '@/lib/rooms/guest-cookie';
 import { issueRoomToken } from '@/lib/rooms/room-token';
 import { toTokenResponse } from '@/lib/rooms/token-response';
-import { allowTokenRequest, tokenRateSubject } from '@/lib/rooms/token-rate-limit';
+import { allowTokenRequest, tokenRateSubject } from '@/lib/rooms/rate-limit';
 import { createAdminSupabase } from '@/lib/supabase/admin';
 import { createServerSupabase } from '@/lib/supabase/server';
 

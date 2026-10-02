@@ -107,10 +107,14 @@ export const stageMessageSchema = z.discriminatedUnion('type', [
     command: commandSchema,
   }),
   z.object({ type: z.literal('snapshot'), stage: stageSchema }),
+  // Battito dello scrittore: chi ha perso l'ultimo comando se ne accorge senza aspettare il successivo.
+  z.object({ type: z.literal('heartbeat'), version: z.number().int().min(0) }),
 ]);
 
 export type StageMessage =
-  { type: 'command'; version: number; command: StageCommand } | { type: 'snapshot'; stage: Stage };
+  | { type: 'command'; version: number; command: StageCommand }
+  | { type: 'snapshot'; stage: Stage }
+  | { type: 'heartbeat'; version: number };
 
 // Zod con exactOptionalPropertyTypes produce `archived?: boolean | undefined`:
 // la forma è la stessa, il cast documenta che lo schema è la fonte di verità.
