@@ -168,7 +168,7 @@ Verifica su telefono: `docs/spikes/2026-09-27-spike-mobile-call.md`.
       Serve una spec prima di iniziare
 - [x] Esc del tutto schermo scatta anche mentre si scrive nel palco o all'agente
 - [x] Pulsante della tessera: il nome accessibile perde lo stato del microfono
-- [ ] Dopo una riconnessione completa tessere, spotlight e PiP restano legati alle tracce
+- [x] Dopo una riconnessione completa tessere, spotlight e PiP restano legati alle tracce
       della sessione vecchia (da slice 2)
 
 ## Redesign (Nod) — 29/09
@@ -223,8 +223,8 @@ branch `slice/redesign-call` (PR #9).
 - [ ] Misurare i costi reali e decidere l'economia
 - [x] Indice unico host senza filtro `left_at`: l'host non rientra dopo l'uscita
       (slice 2)
-- [ ] Ospite anonimo che reinvia il form crea righe aperte orfane; action pubblica
-      senza rate limit
+- [x] Ospite anonimo che reinvia il form crea righe aperte orfane; action pubblica
+      senza rate limit (riusa la riga del suo cookie; 10 invii al minuto per hash dell'IP)
 - [x] Cookie ospite con path `/room/<code>`: le route di token della slice 2 vanno
       sotto quel path
 - [x] Codice stanza case-sensitive: normalizzare maiuscolo/trim quando si digita a
@@ -243,8 +243,8 @@ branch `slice/redesign-call` (PR #9).
 - [ ] Contenuto `file` (documenti caricati) non ancora supportato dal palco
 - [ ] `room:{id}:presence` in KV non serve finché LiveKit dà la presence: rivedere
 - [x] Contenuti di prova nel vassoio: nasconderli quando arriva l'agente (slice 4)
-- [ ] Nessun heartbeat di versione: un ospite che perde l'ultimo comando resta indietro
-      fino al comando successivo
+- [x] Nessun heartbeat di versione: un ospite che perde l'ultimo comando resta indietro
+      fino al comando successivo (battito dell'host ogni 5 secondi sul canale `stage`)
 - [ ] Richiesta scritta all'agente: tenerla anche dopo lo STT come via senza microfono?
 - [x] Contenuti di prova nel vassoio: toglierli quando `AI_PROVIDER=anthropic` è attivo
       (restano con il provider finto, per CI ed e2e)

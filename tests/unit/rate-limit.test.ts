@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import type { CounterKv } from '@/lib/kv/kv';
 import {
+  GUEST_JOIN_RATE_LIMIT,
   TOKEN_RATE_LIMIT,
+  allowGuestJoin,
   allowTokenRequest,
   tokenRateSubject,
-} from '@/lib/rooms/token-rate-limit';
+} from '@/lib/rooms/rate-limit';
 
 class MemoryCounter implements CounterKv {
   readonly counts = new Map<string, number>();
@@ -50,6 +52,26 @@ describe('allowTokenRequest', () => {
     const kv = new MemoryCounter();
     await allowTokenRequest(kv, 'u:1', start);
     expect([...kv.ttl.values()]).toEqual([TOKEN_RATE_LIMIT.windowSeconds]);
+  });
+});
+
+describe('allowGuestJoin', () => {
+  it('allows a few joins a minute from the same address, then asks to wait', async () => {
+    const kv = new MemoryCounter();
+    for (let i = 0; i < GUEST_JOIN_RATE_LIMIT.max; i++) {
+      expect(await allowGuestJoin(kv, 'ip:a', start)).toEqual({ ok: true });
+    }
+    expect(await allowGuestJoin(kv, 'ip:a', start + 30_000)).toEqual({
+      ok: false,
+      retryAfterSeconds: 30,
+    });
+  });
+
+  it('keeps its own counter, apart from the token one', async () => {
+    const kv = new MemoryCounter();
+    for (let i = 0; i <= GUEST_JOIN_RATE_LIMIT.max; i++) await allowGuestJoin(kv, 'ip:a', start);
+    expect(await allowTokenRequest(kv, 'ip:a', start)).toEqual({ ok: true });
+    expect([...kv.counts.keys()].every((key) => key.startsWith('ratelimit:'))).toBe(true);
   });
 });
 

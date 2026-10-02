@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { emptyStage, followMessage, writeCommand, type Stage } from '@omnicanvas/canvas';
+import {
+  emptyStage,
+  followMessage,
+  parseStageMessage,
+  writeCommand,
+  type Stage,
+} from '@omnicanvas/canvas';
 
 const create = (windowId: string) =>
   ({ type: 'WINDOW_CREATE', windowId, title: windowId }) as const;
@@ -37,6 +43,35 @@ describe('single-writer sync', () => {
     const snapshot: Stage = { ...emptyStage(), version: 3 };
     expect(followMessage(ahead, { type: 'snapshot', stage: snapshot })).toEqual({
       stage: snapshot,
+      outOfSync: false,
+    });
+  });
+});
+
+describe('version heartbeat', () => {
+  it('parses the heartbeat the writer sends', () => {
+    expect(parseStageMessage({ type: 'heartbeat', version: 3 })).toEqual({
+      type: 'heartbeat',
+      version: 3,
+    });
+    expect(parseStageMessage({ type: 'heartbeat', version: -1 })).toBeNull();
+  });
+
+  it('flags a follower that missed the last command', () => {
+    const one = writeCommand(emptyStage(), create('A'))!;
+    const result = followMessage(emptyStage(), { type: 'heartbeat', version: one.stage.version });
+    expect(result).toEqual({ stage: emptyStage(), outOfSync: true });
+  });
+
+  it('flags a follower ahead of a restarted writer', () => {
+    const one = writeCommand(emptyStage(), create('A'))!;
+    expect(followMessage(one.stage, { type: 'heartbeat', version: 0 }).outOfSync).toBe(true);
+  });
+
+  it('leaves an aligned follower alone', () => {
+    const one = writeCommand(emptyStage(), create('A'))!;
+    expect(followMessage(one.stage, { type: 'heartbeat', version: 1 })).toEqual({
+      stage: one.stage,
       outOfSync: false,
     });
   });
