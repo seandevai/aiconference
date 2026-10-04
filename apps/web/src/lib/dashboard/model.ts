@@ -1,5 +1,7 @@
 // Logica pura della dashboard: niente Supabase, niente React. Solo metadati (regola 1).
 
+import { isRoomOver } from '@/lib/rooms/timer';
+
 export type DashboardRoom = {
   id: string;
   title: string;
@@ -7,19 +9,21 @@ export type DashboardRoom = {
   status: string;
   startedAt: string | null;
   endedAt: string | null;
+  endsAt: string | null;
   createdAt: string;
 };
 
 export type RoomGroups = { live: DashboardRoom[]; ready: DashboardRoom[]; past: DashboardRoom[] };
 
-// Oggi nessuno chiude una stanza (arriva con la slice 8): oltre questa soglia una stanza
-// «active» si considera finita. Dopo la slice 8 resta per chi chiude la scheda e basta.
+// Per le stanze senza scadenza (create prima del timer): oltre questa soglia una stanza
+// «active» si considera finita.
 export const LIVE_WINDOW_MS = 12 * 60 * 60 * 1000;
 
 const LIVE_STATUSES = new Set(['active', 'closing']);
 
 function isLive(room: DashboardRoom, now: Date): boolean {
   if (!LIVE_STATUSES.has(room.status) || !room.startedAt) return false;
+  if (isRoomOver(room, now)) return false;
   return now.getTime() - new Date(room.startedAt).getTime() < LIVE_WINDOW_MS;
 }
 

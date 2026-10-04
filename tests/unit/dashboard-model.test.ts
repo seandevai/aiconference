@@ -18,6 +18,7 @@ const room = (over: Partial<DashboardRoom>): DashboardRoom => ({
   status: 'created',
   startedAt: null,
   endedAt: null,
+  endsAt: null,
   createdAt: '2026-09-29T08:00:00Z',
   ...over,
 });
@@ -39,6 +40,24 @@ describe('groupRooms', () => {
   it('treats an active room without a start time as past', () => {
     const groups = groupRooms([room({ id: 'x', status: 'active' })], now);
     expect(groups.past.map((r) => r.id)).toEqual(['x']);
+  });
+
+  it('moves an active room past its deadline among the past ones', () => {
+    const expired = room({
+      id: 'expired',
+      status: 'active',
+      startedAt: '2026-09-30T08:00:00Z',
+      endsAt: '2026-09-30T09:00:00Z',
+    });
+    const running = room({
+      id: 'running',
+      status: 'active',
+      startedAt: '2026-09-30T09:30:00Z',
+      endsAt: '2026-09-30T10:30:00Z',
+    });
+    const groups = groupRooms([expired, running], now);
+    expect(groups.live.map((r) => r.id)).toEqual(['running']);
+    expect(groups.past.map((r) => r.id)).toEqual(['expired']);
   });
 
   it('puts closed, purged and unknown statuses among the past ones', () => {

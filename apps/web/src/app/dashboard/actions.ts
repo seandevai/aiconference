@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { parseDisplayName } from '@/lib/auth/display-name';
 import { createRoomForUser } from '@/lib/rooms/create-room';
+import { DEFAULT_PLANNED_MINUTES } from '@/lib/rooms/timer';
 import { createServerSupabase } from '@/lib/supabase/server';
 
 export type CreateRoomState = { error: string | null };
@@ -25,6 +26,7 @@ export async function createRoomAction(
 
   const result = await createRoomForUser(supabase, data.user.id, {
     title: String(formData.get('title') ?? ''),
+    plannedMinutes: Number(formData.get('planned_minutes') ?? DEFAULT_PLANNED_MINUTES),
   });
   if (!result.ok) return { error: MESSAGES[result.error] };
   redirect(`/room/${result.joinCode}`);
