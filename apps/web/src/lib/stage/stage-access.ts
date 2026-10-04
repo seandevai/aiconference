@@ -2,8 +2,9 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@omnicanvas/db';
 import { parseStage } from '@omnicanvas/canvas';
 import type { KvLike } from '@/lib/kv/kv';
+import { kvTtlSeconds } from '@/lib/rooms/timer';
 import { resolveParticipant, type ResolveParticipantInput } from '@/lib/rooms/resolve-participant';
-import { loadStage, saveStage } from './snapshot-store';
+import { STAGE_TTL_SECONDS, loadStage, saveStage } from './snapshot-store';
 
 export const MAX_STAGE_BODY_BYTES = 256 * 1024;
 
@@ -51,7 +52,12 @@ export async function writeStage(
   const stage = parseStage(json);
   if (!stage) return { status: 400, body: { error: 'invalid_stage' } };
 
-  const result = await saveStage(kv, resolved.room.id, stage);
+  const result = await saveStage(
+    kv,
+    resolved.room.id,
+    stage,
+    kvTtlSeconds(resolved.room.endsAt, new Date(), STAGE_TTL_SECONDS),
+  );
   return result === 'saved'
     ? { status: 200, body: { version: stage.version } }
     : { status: 409, body: { error: 'stale_version' } };

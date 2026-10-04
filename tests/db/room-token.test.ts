@@ -57,6 +57,62 @@ describe('issueRoomToken', () => {
     expect(data?.started_at).not.toBeNull();
   });
 
+  it('sets the deadline at activation and returns the timing', async () => {
+    const created = await createRoomForUser(await signedInClient(host), host.id, {
+      title: 'Timer',
+      plannedMinutes: 30,
+    });
+    if (!created.ok) throw new Error('setup failed');
+    await joinedId(created.joinCode, host.id, 'Sean');
+    const now = new Date();
+    const result = await issueRoomToken(
+      admin,
+      { joinCode: created.joinCode, userId: host.id, guestParticipantId: noGuest },
+      config,
+      now,
+    );
+    if (result.kind !== 'ok') throw new Error(`expected ok, got ${result.kind}`);
+    const { data } = await admin
+      .from('rooms')
+      .select('started_at, ends_at')
+      .eq('id', created.id)
+      .single();
+    const startedAt = Date.parse(data!.started_at!);
+    expect(Date.parse(data!.ends_at!) - startedAt).toBe(30 * 60_000);
+    expect(result.endsAt).toBe(new Date(data!.ends_at!).toISOString());
+    expect(Date.parse(result.capAt) - startedAt).toBe(180 * 60_000);
+    expect(result.serverNow).toBe(now.toISOString());
+  });
+
+  it('keeps the first deadline when a second token comes later', async () => {
+    const created = await roomOf(host, 'Secondo token');
+    await joinedId(created.joinCode, host.id, 'Sean');
+    const input = { joinCode: created.joinCode, userId: host.id, guestParticipantId: noGuest };
+    const first = await issueRoomToken(admin, input, config);
+    const second = await issueRoomToken(admin, input, config, new Date(Date.now() + 60_000));
+    if (first.kind !== 'ok' || second.kind !== 'ok') throw new Error('expected ok');
+    expect(second.endsAt).toBe(first.endsAt);
+  });
+
+  it('refuses a token once the deadline and the grace period are over', async () => {
+    const created = await roomOf(host, 'Scaduta');
+    await joinedId(created.joinCode, host.id, 'Sean');
+    await admin
+      .from('rooms')
+      .update({
+        status: 'active',
+        started_at: new Date(Date.now() - 70 * 60_000).toISOString(),
+        ends_at: new Date(Date.now() - 3 * 60_000).toISOString(),
+      })
+      .eq('id', created.id);
+    const result = await issueRoomToken(
+      admin,
+      { joinCode: created.joinCode, userId: host.id, guestParticipantId: noGuest },
+      config,
+    );
+    expect(result).toEqual({ kind: 'ended' });
+  });
+
   it('gives an anonymous guest with a valid cookie a guest token', async () => {
     const result = await issueRoomToken(
       admin,

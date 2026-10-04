@@ -27,6 +27,12 @@ const stageAt = (version: number): Stage => ({
 });
 
 describe('snapshot store', () => {
+  it('uses the ttl it is given', async () => {
+    const kv = new MemoryKv();
+    await saveStage(kv, roomId, stageAt(1), 720);
+    expect(kv.ttl.get(stageKey(roomId))).toBe(720);
+  });
+
   it('saves with the session ttl and loads it back', async () => {
     const kv = new MemoryKv();
     expect(await saveStage(kv, roomId, stageAt(3))).toBe('saved');

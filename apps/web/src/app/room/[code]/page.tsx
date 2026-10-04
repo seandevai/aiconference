@@ -4,6 +4,7 @@ import { serverEnv } from '@/env';
 import { guestCookieName, verifyGuestToken } from '@/lib/rooms/guest-token';
 import { isValidJoinCode, normalizeJoinCode } from '@/lib/rooms/join-code';
 import { findActiveParticipant, joinRoom } from '@/lib/rooms/join-room';
+import { isRoomOver } from '@/lib/rooms/timer';
 import { showSampleContent } from '@/lib/stage/sample-content';
 import { createAdminSupabase } from '@/lib/supabase/admin';
 import { createServerSupabase } from '@/lib/supabase/server';
@@ -55,11 +56,13 @@ export default async function RoomPage({ params }: { params: Promise<{ code: str
   // Anonimo: rientra se ha un cookie valido e la sua riga è ancora aperta.
   const { data: room } = await admin
     .from('rooms')
-    .select('id, title, status')
+    .select('id, title, status, ends_at')
     .eq('join_code', code)
     .maybeSingle();
   if (!room) notFound();
-  if (['closing', 'closed', 'purged'].includes(room.status)) return <RoomEnded />;
+  if (isRoomOver({ status: room.status, endsAt: room.ends_at }, new Date())) {
+    return <RoomEnded />;
+  }
 
   const token = (await cookies()).get(guestCookieName(room.id))?.value;
   const participantId = token
