@@ -40,6 +40,17 @@ async function activate(
     if (error) throw error;
   } else if (room.startedAt && room.endsAt) {
     return { startedAt: room.startedAt, endsAt: room.endsAt };
+  } else if (room.startedAt) {
+    // Stanza attivata dal codice precedente alla migrazione 0006: scadenza assente.
+    // Si ripara dal started_at; il filtro su ends_at null rende la scrittura idempotente.
+    const { error } = await admin
+      .from('rooms')
+      .update({
+        ends_at: activationEndsAt(new Date(room.startedAt), room.plannedMinutes).toISOString(),
+      })
+      .eq('id', room.id)
+      .is('ends_at', null);
+    if (error) throw error;
   }
   const { data, error } = await admin
     .from('rooms')

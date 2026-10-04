@@ -94,6 +94,29 @@ describe('issueRoomToken', () => {
     expect(second.endsAt).toBe(first.endsAt);
   });
 
+  it('repairs an active room that has started_at but no deadline', async () => {
+    const created = await createRoomForUser(await signedInClient(host), host.id, {
+      title: 'Senza scadenza',
+      plannedMinutes: 30,
+    });
+    if (!created.ok) throw new Error('setup failed');
+    await joinedId(created.joinCode, host.id, 'Sean');
+    const startedAt = new Date(Date.now() - 5 * 60_000).toISOString();
+    await admin
+      .from('rooms')
+      .update({ status: 'active', started_at: startedAt, ends_at: null })
+      .eq('id', created.id);
+    const result = await issueRoomToken(
+      admin,
+      { joinCode: created.joinCode, userId: host.id, guestParticipantId: noGuest },
+      config,
+    );
+    if (result.kind !== 'ok') throw new Error(`expected ok, got ${result.kind}`);
+    expect(result.endsAt).toBe(new Date(Date.parse(startedAt) + 30 * 60_000).toISOString());
+    const { data } = await admin.from('rooms').select('ends_at').eq('id', created.id).single();
+    expect(new Date(data!.ends_at!).toISOString()).toBe(result.endsAt);
+  });
+
   it('refuses a token once the deadline and the grace period are over', async () => {
     const created = await roomOf(host, 'Scaduta');
     await joinedId(created.joinCode, host.id, 'Sean');

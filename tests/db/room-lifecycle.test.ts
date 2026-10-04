@@ -171,6 +171,25 @@ describe('room lifecycle', () => {
       });
     });
 
+    it('still closes the realtime room when the stage key cannot be deleted', async () => {
+      const room = await liveRoom();
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const kv = new MemoryKeys();
+      kv.del = async () => {
+        throw new Error('kv down');
+      };
+      const closeLive = vi.fn(async () => {});
+      expect((await closeRoomAsHost(admin, kv, room.asHost, closeLive)).status).toBe(200);
+      const { data } = await admin.from('rooms').select('status').eq('id', room.id).single();
+      expect(data?.status).toBe('closed');
+      expect(closeLive).toHaveBeenCalledTimes(1);
+      expect(warn).toHaveBeenCalledWith('room close: stage key not deleted', {
+        roomId: room.id,
+        error: 'Error',
+      });
+      warn.mockRestore();
+    });
+
     it('still closes the room when the realtime service fails', async () => {
       const room = await liveRoom();
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});

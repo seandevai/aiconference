@@ -63,7 +63,12 @@ export function RoomCall({ joinCode, role, showSamples }: Props) {
       await end();
       return;
     }
-    const latest = await latestEndsAt(joinCode);
+    let latest = await latestEndsAt(joinCode);
+    // Un errore di rete o un 429 darebbe null: un solo secondo tentativo prima di uscire.
+    if (!latest) {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      latest = await latestEndsAt(joinCode);
+    }
     if (timer && latest && guestShouldStay(timer.endsAt, latest.endsAt)) {
       applyTiming(latest.endsAt, latest.capAt);
       finishingRef.current = false;
@@ -175,7 +180,9 @@ export function RoomCall({ joinCode, role, showSamples }: Props) {
               onEndNow={() => void finish()}
             />
           )}
-          {extendFailed && live && (
+          {extendFailed &&
+            live &&
+            (timer?.phase === 'warning' || timer?.phase === 'last-minute') && (
             <StatusBanner tone="error" live="alert">
               Non sono riuscito a prorogare la riunione. Riprova.
             </StatusBanner>

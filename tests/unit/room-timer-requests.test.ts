@@ -31,6 +31,21 @@ describe('room timer requests', () => {
     await expect(closeRoomRequest('ABCD2345')).resolves.toBeUndefined();
   });
 
+  it('bounds the close and the deadline read with an abort signal', async () => {
+    const fetchMock = vi.fn(async () => json(200, { endsAt: 'e', capAt: 'c' }));
+    vi.stubGlobal('fetch', fetchMock);
+    await closeRoomRequest('ABCD2345');
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      '/room/ABCD2345/close',
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
+    await latestEndsAt('ABCD2345');
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      '/room/ABCD2345/token',
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
+  });
+
   it('reads the latest deadline from a fresh token, null when the room is over', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => json(200, { url: 'u', token: 't', endsAt: 'e', capAt: 'c', serverNow: 'n' })));
     expect(await latestEndsAt('ABCD2345')).toEqual({ endsAt: 'e', capAt: 'c' });

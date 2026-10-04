@@ -96,7 +96,16 @@ export async function closeRoomAsHost(
   if (error) throw error;
   if ((data ?? []).length === 0) return { status: 200, body: { closed: true } };
 
-  await kv.del(stageKey(room.id));
+  // La stanza è già chiusa e un nuovo tentativo non farebbe nulla: un errore del KV non deve
+  // impedire di chiudere la stanza realtime, altrimenti gli ospiti restano connessi.
+  try {
+    await kv.del(stageKey(room.id));
+  } catch (cause) {
+    console.warn('room close: stage key not deleted', {
+      roomId: room.id,
+      error: cause instanceof Error ? cause.name : 'unknown',
+    });
+  }
   try {
     await closeLive(room.id);
   } catch (cause) {
