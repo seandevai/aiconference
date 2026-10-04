@@ -4,6 +4,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, StatusBanner } from '@omnicanvas/ui';
 import { useCall } from '@/lib/call/use-call';
+import { closeRoomRequest, extendRoomRequest, latestEndsAt } from '@/lib/call/room-timer-requests';
+import { useRoomTimer, useTimerEnd } from '@/lib/call/use-room-timer';
+import { guestShouldStay, type ExtendMinutes } from '@/lib/rooms/timer';
 import { cameraButtonLabel, micButtonLabel } from '@/lib/call/labels';
 import { phaseMessage, type CallPhase } from '@/lib/call/phase';
 import { isMirrored } from '@/lib/call/mirror';
@@ -14,6 +17,7 @@ import { leaveRoomAction } from './actions';
 import { PipVideo } from './pip-video';
 import { SpotlightView } from './spotlight-view';
 import { StageArea } from './stage-area';
+import { RoomTimerNotice, RoomTimerPill } from './room-timer';
 import { VideoTile } from './video-tile';
 
 type Props = { joinCode: string; role: 'host' | 'guest'; showSamples: boolean };
@@ -31,12 +35,51 @@ export function RoomCall({ joinCode, role, showSamples }: Props) {
     startAudio,
     retry,
     leave,
+    end,
     attachVideo,
   } = useCall(joinCode);
   const stageApi = useStage({ joinCode, role, session, roster: state.roster });
+  const { timer, applyTiming } = useRoomTimer({
+    timing: state.timing,
+    session,
+    roster: state.roster,
+  });
+  const [extending, setExtending] = useState(false);
+  const [extendFailed, setExtendFailed] = useState(false);
   const local = state.roster.find((entry) => entry.isLocal);
   const message = phaseMessage(state.phase);
   const live = LIVE_PHASES.includes(state.phase);
+  // Host: chiude la stanza per tutti (dalla slice 8 il pacchetto si compone prima).
+  // Ospite: chiede al server se l'host ha prorogato e il messaggio si è perso.
+  const finish = useCallback(async () => {
+    if (role === 'host') {
+      await closeRoomRequest(joinCode);
+      await end();
+      return;
+    }
+    const latest = await latestEndsAt(joinCode);
+    if (timer && latest && guestShouldStay(timer.endsAt, latest.endsAt)) {
+      applyTiming(latest.endsAt, latest.capAt);
+      return;
+    }
+    await end();
+  }, [role, joinCode, end, timer, applyTiming]);
+
+  useTimerEnd(timer?.phase ?? null, live, () => void finish());
+
+  async function handleExtend(minutes: ExtendMinutes) {
+    setExtending(true);
+    setExtendFailed(false);
+    const next = await extendRoomRequest(joinCode, minutes);
+    setExtending(false);
+    if (!next) {
+      setExtendFailed(true);
+      return;
+    }
+    applyTiming(next.endsAt, next.capAt);
+    void session?.sendData('room-timer', next).catch(() => {});
+  }
+
   const [selected, setSelected] = useState<string | null>(null);
   const spotlight = resolveSpotlight(selected, state.roster);
   // Chi esce chiude lo spotlight: senza azzerare, rientrando lo riaprirebbe.
@@ -114,6 +157,20 @@ export function RoomCall({ joinCode, role, showSamples }: Props) {
               {state.mediaError}
             </StatusBanner>
           )}
+          {timer && live && (
+            <RoomTimerNotice
+              role={role}
+              timer={timer}
+              extending={extending}
+              onExtend={(minutes) => void handleExtend(minutes)}
+              onEndNow={() => void finish()}
+            />
+          )}
+          {extendFailed && live && (
+            <StatusBanner tone="error" live="alert">
+              Non sono riuscito a prorogare la riunione. Riprova.
+            </StatusBanner>
+          )}
           {state.audioBlocked && live && (
             <StatusBanner
               tone="warning"
@@ -169,6 +226,7 @@ export function RoomCall({ joinCode, role, showSamples }: Props) {
           aria-label="Controlli della chiamata"
           className="flex flex-wrap items-center justify-center gap-2 px-4 py-2 [grid-area:dock] phone-landscape:py-1"
         >
+          {role === 'host' && timer && <RoomTimerPill timer={timer} />}
           <Button onClick={toggleMic} aria-pressed={!local?.micOn}>
             {micButtonLabel(local?.micOn ?? false)}
           </Button>

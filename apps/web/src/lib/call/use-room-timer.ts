@@ -70,3 +70,22 @@ export function useRoomTimer({ timing, session, roster }: Args) {
   };
   return { timer, applyTiming };
 }
+
+// Chiama onEnd una volta quando il timer arriva a zero; di nuovo solo se una proroga lo
+// ha fatto ripartire e torna a zero.
+export function useTimerEnd(phase: TimerPhase | null, active: boolean, onEnd: () => void) {
+  const firedRef = useRef(false);
+  const onEndRef = useRef(onEnd);
+  useEffect(() => {
+    onEndRef.current = onEnd;
+  }, [onEnd]);
+  useEffect(() => {
+    if (phase !== 'over') {
+      firedRef.current = false;
+      return;
+    }
+    if (!active || firedRef.current) return;
+    firedRef.current = true;
+    onEndRef.current();
+  }, [phase, active]);
+}
