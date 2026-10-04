@@ -17,6 +17,10 @@ import {
   tokenErrorPhase,
   type CallPhase,
 } from './phase';
+import type { TokenGrantBody } from '@/lib/rooms/token-response';
+
+// Scadenza della stanza e scarto fra l'orologio del server e quello di questo browser.
+export type RoomTiming = { endsAt: string; capAt: string; offsetMs: number };
 
 export type CallState = {
   phase: CallPhase;
@@ -25,6 +29,7 @@ export type CallState = {
   mediaError: string | null;
   canSwitchCamera: boolean;
   cameraFacing: FacingMode;
+  timing: RoomTiming | null;
 };
 
 class TokenRefusedError extends Error {
@@ -33,12 +38,12 @@ class TokenRefusedError extends Error {
   }
 }
 
-async function fetchRoomToken(joinCode: string): Promise<{ url: string; token: string }> {
+async function fetchRoomToken(joinCode: string): Promise<TokenGrantBody> {
   const response = await fetch(`/room/${joinCode}/token`, { method: 'POST', cache: 'no-store' });
   // 4xx è una risposta definitiva: non ha senso riprovare. 5xx e rete sì.
   if (isTokenRefusal(response.status)) throw new TokenRefusedError(response.status);
   if (!response.ok) throw new Error(`room token failed with status ${response.status}`);
-  return (await response.json()) as { url: string; token: string };
+  return (await response.json()) as TokenGrantBody;
 }
 
 const initialState: CallState = {
@@ -48,6 +53,7 @@ const initialState: CallState = {
   mediaError: null,
   canSwitchCamera: false,
   cameraFacing: 'user',
+  timing: null,
 };
 
 export function useCall(joinCode: string) {
@@ -67,7 +73,7 @@ export function useCall(joinCode: string) {
 
     const connect = async (): Promise<void> => {
       patch({ phase: 'connecting' });
-      let credentials: { url: string; token: string };
+      let credentials: TokenGrantBody;
       try {
         credentials = await fetchRoomToken(joinCode);
       } catch (error) {
@@ -78,6 +84,13 @@ export function useCall(joinCode: string) {
         throw error;
       }
       if (lifecycle.stopped) return;
+      patch({
+        timing: {
+          endsAt: credentials.endsAt,
+          capAt: credentials.capAt,
+          offsetMs: Date.parse(credentials.serverNow) - Date.now(),
+        },
+      });
 
       const live = await connectToRoom(credentials.url, credentials.token);
       if (lifecycle.stopped) {
@@ -158,14 +171,18 @@ export function useCall(joinCode: string) {
 
   const retry = useCallback(() => reconnectorRef.current?.retryNow(), []);
 
-  const leave = useCallback(async () => {
+  const stop = useCallback(async (phase: 'left' | 'ended') => {
     if (lifecycleRef.current) lifecycleRef.current.stopped = true;
     reconnectorRef.current?.cancel();
     await sessionRef.current?.disconnect();
     sessionRef.current = null;
     setSession(null);
-    setState((s) => ({ ...s, phase: 'left', roster: [] }));
+    setState((s) => ({ ...s, phase, roster: [] }));
   }, []);
+
+  const leave = useCallback(() => stop('left'), [stop]);
+  // Allo zero del timer: stessa uscita, ma la riunione è finita per tutti.
+  const end = useCallback(() => stop('ended'), [stop]);
 
   // Legata alla sessione: dopo una riconnessione completa cambia, e tessere, spotlight e
   // PiP rifanno l'aggancio sulle tracce nuove.
@@ -184,6 +201,7 @@ export function useCall(joinCode: string) {
     startAudio,
     retry,
     leave,
+    end,
     attachVideo,
   };
 }
