@@ -9,6 +9,7 @@ import { createServerSupabase } from '@/lib/supabase/server';
 export type CreateRoomState = { error: string | null };
 
 const MESSAGES = {
+  INVALID_DURATION: 'Scegli una durata valida (30, 45, 60 o 90 minuti).',
   INVALID_TITLE: 'Dai un titolo alla stanza (massimo 120 caratteri).',
   NO_WORKSPACE: 'Il tuo account non ha un workspace. Contatta il supporto.',
   JOIN_CODE_COLLISION: 'Non siamo riusciti a generare un codice libero. Riprova.',
