@@ -1,5 +1,5 @@
 import 'server-only';
-import { AccessToken } from 'livekit-server-sdk';
+import { AccessToken, RoomServiceClient } from 'livekit-server-sdk';
 import type { ParticipantRole } from './types';
 
 // Basta per entrare: una volta connesso, LiveKit rinnova il token da solo.
@@ -37,4 +37,13 @@ export async function createRoomToken(
     canUpdateOwnMetadata: false,
   });
   return token.toJwt();
+}
+
+// Chiude la stanza per tutti: LiveKit scollega i partecipanti con causa «room_closed».
+// L'URL può essere ws(s)://: l'SDK lo converte in http(s):// per le chiamate di servizio.
+export async function closeRoom(
+  roomId: string,
+  config: LiveKitCredentials & { url: string },
+): Promise<void> {
+  await new RoomServiceClient(config.url, config.apiKey, config.apiSecret).deleteRoom(roomId);
 }
