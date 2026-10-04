@@ -361,7 +361,7 @@ CREATA        riga in rooms
 ATTIVA        primo join: stato in KV, token emessi
 IN CHIUSURA   host termina: il suo browser compone e cifra il pacchetto
 CHIUSA        rooms.ended_at valorizzato, KV cancellato
-SCADUTA       dopo 7 giorni: blob rimosso dal lifecycle di R2
+PACCHETTO SCADUTO  dopo 7 giorni: blob rimosso dal lifecycle di R2
 ```
 
 Se l'host chiude il browser senza terminare, la stanza scade da sola alla fine della durata

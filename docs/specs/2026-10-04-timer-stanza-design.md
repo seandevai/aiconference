@@ -78,7 +78,8 @@ scrive. Lo stato `active` con `ends_at` passato è uno stato legittimo: «scadut
   `ENDED_STATUSES` oppure se `endsAt` non è nullo e `now > endsAt + margine`.
 - `activationEndsAt(startedAt, plannedMinutes): Date`.
 - `extendEndsAt({ startedAt, endsAt }, minutes, now)` →
-  `{ ok: true, endsAt, capAt } | { ok: false, reason: 'cap_reached' | 'expired' }`.
+  `{ ok: true, endsAt } | { ok: false, reason: 'cap_reached' | 'expired' }`; la route
+  aggiunge `capAt` alla risposta con `capAt(startedAt)`.
   `expired` se `now >= endsAt`; `cap_reached` se il nuovo `endsAt` supera
   `startedAt + ROOM_MAX_MINUTES`.
 - `kvTtlSeconds(endsAt, now): number` — secondi fino a `endsAt + margine`, minimo 60.
@@ -102,8 +103,8 @@ scrive. Lo stato `active` con `ends_at` passato è uno stato legittimo: «scadut
 | Caso | Risposta |
 |---|---|
 | `minutes` diverso da 15 o 30 | 400 `invalid_minutes` |
-| non autenticato o non host della stanza | 403 `host_only` |
-| autenticato ma non partecipante | 403 `not_a_participant` |
+| non autenticato o non partecipante della stanza | 403 `not_a_participant` |
+| partecipante ma non host (ospite) | 403 `host_only` |
 | stanza inesistente | 404 `room_not_found` |
 | stanza chiusa, scaduta o `now >= ends_at` | 410 `room_ended` |
 | oltre il tetto | 409 `cap_reached` |

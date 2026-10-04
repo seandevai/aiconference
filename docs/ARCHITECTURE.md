@@ -248,6 +248,9 @@ IN CHIUSURA   host termina (o zero con host presente): dalla slice 8 il browser
 CHIUSA        route close: status = closed, ended_at, KV cancellato, stanza LiveKit chiusa
 SCADUTA       now > ends_at + margine senza close: trattata come chiusa da ogni route;
               KV già scaduto per TTL; LiveKit chiude la stanza vuota (emptyTimeout)
+
+PACCHETTO     dopo 7 giorni: blob rimosso dal lifecycle di R2, resta la riga in bundles
+SCADUTO       (riguarda il pacchetto, non la stanza: «SCADUTA» sopra è solo la stanza)
 ```
 
 Vedi ADR-0014: la durata della stanza sostituisce la purga per presence. Lo stato `active`
