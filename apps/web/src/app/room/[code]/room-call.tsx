@@ -51,7 +51,13 @@ export function RoomCall({ joinCode, role, showSamples }: Props) {
   const live = LIVE_PHASES.includes(state.phase);
   // Host: chiude la stanza per tutti (dalla slice 8 il pacchetto si compone prima).
   // Ospite: chiede al server se l'host ha prorogato e il messaggio si è perso.
+  // finishingRef evita il doppio avvio (zero automatico + clic su «Termina ora»).
+  const finishingRef = useRef(false);
+  const [closing, setClosing] = useState(false);
   const finish = useCallback(async () => {
+    if (finishingRef.current) return;
+    finishingRef.current = true;
+    setClosing(true);
     if (role === 'host') {
       await closeRoomRequest(joinCode);
       await end();
@@ -60,6 +66,8 @@ export function RoomCall({ joinCode, role, showSamples }: Props) {
     const latest = await latestEndsAt(joinCode);
     if (timer && latest && guestShouldStay(timer.endsAt, latest.endsAt)) {
       applyTiming(latest.endsAt, latest.capAt);
+      finishingRef.current = false;
+      setClosing(false);
       return;
     }
     await end();
@@ -162,6 +170,7 @@ export function RoomCall({ joinCode, role, showSamples }: Props) {
               role={role}
               timer={timer}
               extending={extending}
+              closing={closing}
               onExtend={(minutes) => void handleExtend(minutes)}
               onEndNow={() => void finish()}
             />

@@ -29,7 +29,8 @@ describe('RoomTimerPill', () => {
 describe('RoomTimerNotice', () => {
   it('shows nothing to the host before five minutes', () => {
     const { container } = render(
-      <RoomTimerNotice role="host" timer={view({})} extending={false} {...handlers()} />,
+      <RoomTimerNotice role="host" timer={view({})} extending={false}
+        closing={false} {...handlers()} />,
     );
     expect(container.textContent).toBe('');
   });
@@ -41,6 +42,7 @@ describe('RoomTimerNotice', () => {
         role="host"
         timer={view({ remainingSeconds: 299, phase: 'warning' })}
         extending={false}
+        closing={false}
         {...h}
       />,
     );
@@ -57,6 +59,7 @@ describe('RoomTimerNotice', () => {
         role="host"
         timer={view({ remainingSeconds: 200, phase: 'warning', extendOptions: [15] })}
         extending={false}
+        closing={false}
         {...handlers()}
       />,
     );
@@ -67,6 +70,7 @@ describe('RoomTimerNotice', () => {
         role="host"
         timer={view({ remainingSeconds: 200, phase: 'warning', extendOptions: [] })}
         extending={false}
+        closing={false}
         {...handlers()}
       />,
     );
@@ -80,10 +84,24 @@ describe('RoomTimerNotice', () => {
         role="host"
         timer={view({ remainingSeconds: 200, phase: 'warning' })}
         extending
+        closing={false}
         {...handlers()}
       />,
     );
     expect((screen.getByRole('button', { name: '+15 min' }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('disables ending now while closing', () => {
+    render(
+      <RoomTimerNotice
+        role="host"
+        timer={view({ remainingSeconds: 200, phase: 'warning' })}
+        extending={false}
+        closing
+        {...handlers()}
+      />,
+    );
+    expect((screen.getByRole('button', { name: 'Termina ora' }) as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('warns a guest only in the last minute', () => {
@@ -92,6 +110,7 @@ describe('RoomTimerNotice', () => {
         role="guest"
         timer={view({ remainingSeconds: 200, phase: 'warning' })}
         extending={false}
+        closing={false}
         {...handlers()}
       />,
     );
@@ -101,6 +120,7 @@ describe('RoomTimerNotice', () => {
         role="guest"
         timer={view({ remainingSeconds: 42, phase: 'last-minute' })}
         extending={false}
+        closing={false}
         {...handlers()}
       />,
     );

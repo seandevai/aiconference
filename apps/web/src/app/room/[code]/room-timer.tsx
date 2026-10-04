@@ -19,13 +19,14 @@ type NoticeProps = {
   role: 'host' | 'guest';
   timer: RoomTimerView;
   extending: boolean;
+  closing: boolean;
   onExtend: (minutes: ExtendMinutes) => void;
   onEndNow: () => void;
 };
 
 // Non blocca nulla: la call continua sotto. L'host vede l'avviso a −5 minuti, l'ospite
 // solo nell'ultimo minuto, senza pulsanti (solo l'host proroga).
-export function RoomTimerNotice({ role, timer, extending, onExtend, onEndNow }: NoticeProps) {
+export function RoomTimerNotice({ role, timer, extending, closing, onExtend, onEndNow }: NoticeProps) {
   const left = formatRemaining(timer.remainingSeconds);
   if (role === 'guest') {
     if (timer.phase !== 'last-minute') return null;
@@ -46,7 +47,7 @@ export function RoomTimerNotice({ role, timer, extending, onExtend, onEndNow }: 
               {`+${minutes} min`}
             </Button>
           ))}
-          <Button size="sm" variant="exit" onClick={onEndNow}>
+          <Button size="sm" variant="exit" disabled={closing} onClick={onEndNow}>
             Termina ora
           </Button>
         </span>
