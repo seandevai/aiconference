@@ -89,6 +89,9 @@ laboratorio dell'host) su `slice/redesign-call` (PR #9). Accesso «Sobrio» e da
 `docs/specs/2026-09-30-accesso-dashboard-design.md`. Spike CPU e iOS in attesa di misura. Prima demo =
 slice 0-5: completa lato codice salvo la voce (slice 4B), in attesa del test con i consulenti.
 
+Timer della stanza (durata scelta dall'host, proroghe, chiusura allo zero, niente purga per presence)
+su `slice/timer-stanza`, spec `docs/specs/2026-10-04-timer-stanza-design.md`, ADR-0014.
+
 Spec v3 del 23/09, dopo un secondo brainstorming con Sean. Rispetto alla v2: palco a
 finestre a slot magnetici invece della lista di schede (ADR-0009), agente a comando
 con parola chiave locale e modalità companion opzionale, sottotitoli tradotti

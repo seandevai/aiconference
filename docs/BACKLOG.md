@@ -114,8 +114,18 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 - [ ] Pagina `/p/<id>` che decifra nel browser, senza script di terze parti
 - [ ] PDF riassuntivo a quota
 - [ ] Avviso prima della chiusura: senza «termina» il pacchetto non esiste
-- [ ] Job di purga delle stanze abbandonate
-- [ ] Test: dopo la purga i dati di sessione non esistono
+- [x] Durata della stanza al posto della purga (ADR-0014, `slice/timer-stanza`)
+- [ ] Pacchetto composto dal browser dell'host prima di `close`, anche allo zero del timer
+
+## Dopo il timer
+
+- [ ] Cron di riserva: `closeRoom` sulle stanze `active` con `ends_at` passato (piano Vercel Pro
+      o servizio esterno)
+- [ ] Pulizia delle stanze CREATE mai aperte
+- [ ] `close` chiude anche le righe aperte di `room_participants` (oggi restano con `left_at` nullo)
+- [ ] Rimuovere `room:{id}:presence` dai documenti: nessun codice la usa e non serve più
+- [ ] Il cookie dell'ospite resta di 12 ore: innocuo (la stanza scaduta rifiuta il token),
+      ma si può legare a `ends_at` quando la scadenza è nota all'ingresso
 
 ## Da verificare su Supabase reale
 

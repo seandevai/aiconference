@@ -361,13 +361,12 @@ CREATA        riga in rooms
 ATTIVA        primo join: stato in KV, token emessi
 IN CHIUSURA   host termina: il suo browser compone e cifra il pacchetto
 CHIUSA        rooms.ended_at valorizzato, KV cancellato
-PURGATA       entro 10 minuti: nessuno stato di sessione sui server
 SCADUTA       dopo 7 giorni: blob rimosso dal lifecycle di R2
 ```
 
-Se l'host chiude il browser senza terminare, un job purga la stanza dopo N minuti
-senza presence. In quel caso il pacchetto non viene prodotto: il contenuto viveva
-solo nei browser. È il prezzo della promessa, e l'interfaccia lo dice prima.
+Se l'host chiude il browser senza terminare, la stanza scade da sola alla fine della durata
+scelta; vedi ADR-0014. Il pacchetto non viene prodotto: il contenuto viveva solo nei
+browser. È il prezzo della promessa, e l'interfaccia lo dice prima.
 
 ### 4.10 Autorizzazione, errori, telemetria
 

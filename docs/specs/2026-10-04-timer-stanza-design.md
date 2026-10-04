@@ -78,7 +78,7 @@ scrive. Lo stato `active` con `ends_at` passato è uno stato legittimo: «scadut
   `ENDED_STATUSES` oppure se `endsAt` non è nullo e `now > endsAt + margine`.
 - `activationEndsAt(startedAt, plannedMinutes): Date`.
 - `extendEndsAt({ startedAt, endsAt }, minutes, now)` →
-  `{ ok: true, endsAt, remainingExtendMinutes } | { ok: false, reason: 'cap_reached' | 'expired' }`.
+  `{ ok: true, endsAt, capAt } | { ok: false, reason: 'cap_reached' | 'expired' }`.
   `expired` se `now >= endsAt`; `cap_reached` se il nuovo `endsAt` supera
   `startedAt + ROOM_MAX_MINUTES`.
 - `kvTtlSeconds(endsAt, now): number` — secondi fino a `endsAt + margine`, minimo 60.
@@ -97,22 +97,24 @@ scrive. Lo stato `active` con `ends_at` passato è uno stato legittimo: «scadut
 
 ### 3.3 Route nuove
 
-**`POST /api/rooms/[id]/extend`** — corpo `{ minutes: 15 | 30 }`.
+**`POST /room/[code]/extend`** — corpo `{ minutes: 15 | 30 }`.
 
 | Caso | Risposta |
 |---|---|
-| non autenticato o non host della stanza | 403 `not_the_host` |
+| `minutes` diverso da 15 o 30 | 400 `invalid_minutes` |
+| non autenticato o non host della stanza | 403 `host_only` |
+| autenticato ma non partecipante | 403 `not_a_participant` |
 | stanza inesistente | 404 `room_not_found` |
 | stanza chiusa, scaduta o `now >= ends_at` | 410 `room_ended` |
 | oltre il tetto | 409 `cap_reached` |
-| ok | 200 `{ endsAt, serverNow, remainingExtendMinutes }` |
+| ok | 200 `{ endsAt, capAt, serverNow }`; il client calcola le proroghe che restano con `extendOptions` |
 
 La scrittura è condizionata sul vecchio `ends_at` (`eq('ends_at', previous)`): due click
 contemporanei non sommano due proroghe; il secondo rilegge e risponde con lo stato
 corrente. Dopo la scrittura allunga il TTL delle chiavi KV della stanza. Nessun costo,
 nessun ledger.
 
-**`POST /api/rooms/[id]/close`** — solo l'host.
+**`POST /room/[code]/close`** — solo l'host.
 
 - Update condizionata su `status = 'active'`: `status = closed`, `ended_at = now`.
   Idempotente: se la stanza è già chiusa risponde 200 senza effetti.
@@ -147,7 +149,9 @@ nessun ledger.
 
 - Nulla fino a −1 minuto; poi banner «La riunione sta per terminare» con il conto alla
   rovescia.
-- Allo zero si disconnette da solo e mostra la schermata di riunione terminata.
+- Allo zero chiede un token nuovo (`latestEndsAt`) e resta connesso solo se la scadenza è stata
+  spostata più in là (`guestShouldStay`); altrimenti si disconnette e mostra la schermata di
+  riunione terminata.
 
 ### 4.4 Creazione e dashboard
 
@@ -174,7 +178,7 @@ l'host non è da mobile.
 ## 6. Test (prima del codice)
 
 - **Unit:** `isRoomOver` (stato terminato, nel margine, oltre il margine, `endsAt` nullo);
-  `extendEndsAt` (ok, tetto, scaduta, `remainingExtendMinutes`); `kvTtlSeconds`;
+  `extendEndsAt` (ok, tetto, scaduta, `capAt`); `kvTtlSeconds`;
   `timerPhase`; `groupRooms` con stanza `active` scaduta.
 - **Integrazione su database** (job `db`): insert con `planned_minutes` non ammesso
   rifiutato; insert con `ends_at` rifiutato dalla RLS; attivazione che scrive `ends_at`;
