@@ -73,7 +73,11 @@ function LabClient() {
           {lab.live === 'on' ? (
             <Button onClick={lab.stopLive}>Ferma la webcam</Button>
           ) : (
-            <Button variant="accent" onClick={() => void lab.startLive()}>
+            <Button
+              variant="accent"
+              disabled={lab.live === 'loading'}
+              onClick={() => void lab.startLive()}
+            >
               Avvia la webcam
             </Button>
           )}

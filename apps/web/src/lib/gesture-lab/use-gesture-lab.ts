@@ -57,6 +57,9 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
   const replayerRef = useRef<ReturnType<typeof createReplayer> | null>(null);
   const stageRef = useRef(stage);
   const startRef = useRef(0);
+  const pipelineRef = useRef<Pipeline | null>(null);
+  // Cambia a ogni stop, avvio del rigioco o smontaggio: gli avvii in corso lo controllano dopo ogni await.
+  const generationRef = useRef(0);
   const handlerRef = useRef<((event: GestureEvent) => void) | null>(null);
 
   useEffect(() => {
@@ -65,10 +68,9 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
 
   useEffect(() => {
     saveLabSettings(safeStorage(), settings);
-    runnerRef.current?.reconfigure({
-      tuning: effectiveTuning(settings),
-      dictionary: settings.dictionary,
-    });
+    const next = { tuning: effectiveTuning(settings), dictionary: settings.dictionary };
+    runnerRef.current?.reconfigure(next);
+    pipelineRef.current?.reconfigure(next);
   }, [settings]);
 
   // Il gestore si costruisce in un effetto: legge i ref solo quando un evento arriva, mai durante il render.
@@ -126,6 +128,7 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
   const cursor = settings.toggles.smoothCursor && target ? (smoothed ?? target) : target;
 
   const stopLive = useCallback(() => {
+    generationRef.current += 1;
     runnerRef.current?.stop();
     runnerRef.current = null;
     streamRef.current?.getTracks().forEach((track) => track.stop());
@@ -140,22 +143,44 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
     setPlaying(false);
     const video = videoRef.current;
     if (!video) return;
+    const generation = ++generationRef.current;
+    const cancelled = () => generationRef.current !== generation;
+    const releaseStream = () => {
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+      video.srcObject = null;
+    };
     setLive('loading');
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { width: 640, height: 480 },
       });
+      if (cancelled()) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
       streamRef.current = stream;
       video.srcObject = stream;
       await video.play();
     } catch {
+      if (cancelled()) return;
+      releaseStream();
       setLive('no_camera');
       return;
     }
+    if (cancelled()) {
+      releaseStream();
+      return;
+    }
+    let runner: GestureRunner;
     try {
       const { startGestures } = await import('@omnicanvas/gesture/runner');
+      if (cancelled()) {
+        releaseStream();
+        return;
+      }
       startRef.current = performance.now();
-      runnerRef.current = await startGestures(video, {
+      runner = await startGestures(video, {
         armed: true,
         tuning: effectiveTuning(settings),
         dictionary: settings.dictionary,
@@ -166,15 +191,26 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
           setHand(processed.hands[0] ?? null);
         },
       });
-      setArmed(true);
-      setLive('on');
     } catch {
+      if (cancelled()) return;
+      releaseStream();
       setLive('unavailable');
+      return;
     }
+    if (cancelled()) {
+      runner.stop();
+      releaseStream();
+      return;
+    }
+    runnerRef.current = runner;
+    setArmed(true);
+    setLive('on');
   }, [onEvent, settings, videoRef, framesRef]);
 
   const loadRecording = useCallback((next: Recording) => {
     replayerRef.current?.pause();
+    replayerRef.current = null;
+    pipelineRef.current = null;
     setPlaying(false);
     setRecording(next);
     setFired([]);
@@ -183,12 +219,14 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
   const play = useCallback(() => {
     if (!recording) return;
     stopLive();
-    if (!replayerRef.current || !playing) {
+    // Un replayer esiste solo dopo «Pausa»: si riprende dal fotogramma successivo.
+    if (!replayerRef.current) {
       const pipeline: Pipeline = createPipeline({
         tuning: effectiveTuning(settings),
         dictionary: settings.dictionary,
         armed: recording.armed,
       });
+      pipelineRef.current = pipeline;
       setFired([]);
       startRef.current = performance.now();
       replayerRef.current = createReplayer(
@@ -200,12 +238,16 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
           setHand(out.frame.hands[0] ?? null);
           out.events.forEach(onEvent);
         },
-        () => setPlaying(false),
+        () => {
+          replayerRef.current = null;
+          pipelineRef.current = null;
+          setPlaying(false);
+        },
       );
     }
     replayerRef.current.play();
     setPlaying(true);
-  }, [recording, playing, settings, onEvent, stopLive, framesRef]);
+  }, [recording, settings, onEvent, stopLive, framesRef]);
 
   const pause = useCallback(() => {
     replayerRef.current?.pause();
@@ -214,6 +256,7 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
 
   useEffect(
     () => () => {
+      generationRef.current += 1;
       replayerRef.current?.pause();
       runnerRef.current?.stop();
       streamRef.current?.getTracks().forEach((track) => track.stop());
