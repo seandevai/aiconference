@@ -28,3 +28,4 @@ export {
   type RecognizerView,
 } from './recognizer';
 export { FPS_LADDER, createAdaptiveController } from './adaptive';
+export { createHandSmoother, type HandSmoother } from './filter';
