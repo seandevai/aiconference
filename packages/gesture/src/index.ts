@@ -18,5 +18,13 @@ export {
   type Timings,
   type Tuning,
 } from './tuning';
-export { DEFAULT_DICTIONARY, TIMINGS, createRecognizer, type Recognizer } from './recognizer';
+export {
+  DEFAULT_DICTIONARY,
+  GESTURE_COMMANDS,
+  GESTURE_NAMES,
+  TIMINGS,
+  createRecognizer,
+  type Recognizer,
+  type RecognizerView,
+} from './recognizer';
 export { FPS_LADDER, createAdaptiveController } from './adaptive';
