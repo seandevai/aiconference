@@ -29,3 +29,4 @@ export {
 } from './recognizer';
 export { FPS_LADDER, createAdaptiveController } from './adaptive';
 export { createHandSmoother, type HandSmoother } from './filter';
+export { createPipeline, type Pipeline, type PipelineOutput } from './pipeline';
