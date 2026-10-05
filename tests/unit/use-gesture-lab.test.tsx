@@ -165,4 +165,60 @@ describe('useGestureLab live', () => {
     expect(runner.stop).toHaveBeenCalled();
     expect(track.stop).toHaveBeenCalled();
   });
+
+  async function startWithRunner() {
+    const { stream } = fakeStream();
+    Object.defineProperty(navigator, 'mediaDevices', {
+      configurable: true,
+      value: { getUserMedia: vi.fn().mockResolvedValue(stream) },
+    });
+    const runner = { stop: vi.fn(), setArmed: vi.fn(), reconfigure: vi.fn() };
+    let finish: (r: typeof runner) => void = () => {};
+    runnerMock.startGestures.mockImplementation(() => new Promise((r) => (finish = r)));
+    const hook = setup();
+    hook.video.play = vi.fn().mockResolvedValue(undefined);
+    let started: Promise<void> = Promise.resolve();
+    await act(async () => {
+      started = hook.result.current.startLive();
+      await vi.dynamicImportSettled();
+    });
+    return {
+      ...hook,
+      runner,
+      finish: (r = runner) =>
+        act(async () => {
+          finish(r);
+          await started;
+        }),
+    };
+  }
+
+  it('does not reconfigure the recognizer for UI-only toggles', async () => {
+    const { result, runner, finish } = await startWithRunner();
+    await finish();
+    runner.reconfigure.mockClear();
+    act(() =>
+      result.current.setSettings((s) => ({ ...s, toggles: { ...s.toggles, feedback: true } })),
+    );
+    act(() =>
+      result.current.setSettings((s) => ({ ...s, toggles: { ...s.toggles, smoothCursor: true } })),
+    );
+    expect(runner.reconfigure).not.toHaveBeenCalled();
+    act(() =>
+      result.current.setSettings((s) => ({ ...s, toggles: { ...s.toggles, stablePoses: true } })),
+    );
+    expect(runner.reconfigure).toHaveBeenCalledTimes(1);
+    expect(runner.reconfigure.mock.calls[0]![0].tuning.stability.frames).toBe(3);
+  });
+
+  it('applies settings changed while the webcam was loading', async () => {
+    const { result, runner, finish } = await startWithRunner();
+    act(() =>
+      result.current.setSettings((s) => ({ ...s, toggles: { ...s.toggles, stablePoses: true } })),
+    );
+    await finish();
+    expect(runner.reconfigure).toHaveBeenLastCalledWith(
+      expect.objectContaining({ tuning: expect.objectContaining({ stability: { frames: 3 } }) }),
+    );
+  });
 });

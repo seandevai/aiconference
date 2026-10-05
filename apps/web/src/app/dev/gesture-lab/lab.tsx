@@ -4,7 +4,7 @@ import { useRef, useState, useSyncExternalStore } from 'react';
 import { Button } from '@omnicanvas/ui';
 import { StageBoard } from '@/app/room/[code]/stage-board';
 import type { Frame } from '@omnicanvas/gesture';
-import { effectiveTuning, tuningToCode } from '@/lib/gesture-lab/settings';
+import { effectiveTuning, labCode } from '@/lib/gesture-lab/settings';
 import { useGestureLab } from '@/lib/gesture-lab/use-gesture-lab';
 import { EventList } from './event-list';
 import { HandPanel } from './hand-panel';
@@ -41,7 +41,7 @@ function LabClient() {
   const message = LIVE_MESSAGES[lab.live];
 
   async function copyCode() {
-    const text = tuningToCode(lab.settings.tuning, lab.settings.dictionary);
+    const text = labCode(lab.settings);
     try {
       await navigator.clipboard.writeText(text);
       setCode(null);

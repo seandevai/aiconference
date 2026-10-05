@@ -5,6 +5,7 @@ import {
   LAB_STORAGE_KEY,
   TUNING_SLIDERS,
   effectiveTuning,
+  labCode,
   loadLabSettings,
   parseDictionary,
   readTuningValue,
@@ -127,5 +128,16 @@ describe('labStage', () => {
     expect(stage.windows).toHaveLength(3);
     expect(stage.windows.every((w) => w.contents.length === 1)).toBe(true);
     expect(stage.tray).toEqual([]);
+  });
+});
+
+describe('labCode', () => {
+  it('copies the effective tuning, so stability stays off when the toggle is off', () => {
+    const code = labCode(DEFAULT_LAB_SETTINGS);
+    expect(code).toContain('"frames": 1');
+    expect(code).not.toContain('"frames": 3');
+    const start = code.indexOf('{');
+    const end = code.indexOf('\n};');
+    expect(JSON.parse(code.slice(start, end + 2))).toEqual(DEFAULT_TUNING);
   });
 });

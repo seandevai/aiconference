@@ -139,3 +139,9 @@ export function tuningToCode(tuning: Tuning, dictionary: Dictionary): string {
     '',
   ].join('\n');
 }
+
+// Il codice da copiare usa la taratura effettiva: con «Pose stabili» spento la stabilità vale 1,
+// altrimenti incollarlo in DEFAULT_TUNING accenderebbe la stabilità nella call.
+export function labCode(settings: LabSettings): string {
+  return tuningToCode(effectiveTuning(settings), settings.dictionary);
+}

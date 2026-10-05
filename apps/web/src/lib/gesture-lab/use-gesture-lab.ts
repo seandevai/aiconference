@@ -66,12 +66,24 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
     stageRef.current = stage;
   }, [stage]);
 
+  // Le impostazioni più recenti, per chi parte mentre la webcam sta ancora caricando.
+  const settingsRef = useRef(settings);
   useEffect(() => {
+    settingsRef.current = settings;
     saveLabSettings(safeStorage(), settings);
-    const next = { tuning: effectiveTuning(settings), dictionary: settings.dictionary };
+  }, [settings]);
+
+  // Si riconfigura solo se cambia la taratura effettiva o il dizionario: gli interruttori della sola
+  // interfaccia (cursore fluido, feedback) non devono ricostruire il riconoscitore e perdere un trascinamento.
+  const configKey = JSON.stringify({
+    tuning: effectiveTuning(settings),
+    dictionary: settings.dictionary,
+  });
+  useEffect(() => {
+    const next = JSON.parse(configKey) as Parameters<GestureRunner['reconfigure']>[0];
     runnerRef.current?.reconfigure(next);
     pipelineRef.current?.reconfigure(next);
-  }, [settings]);
+  }, [configKey]);
 
   // Il gestore si costruisce in un effetto: legge i ref solo quando un evento arriva, mai durante il render.
   useEffect(() => {
@@ -87,7 +99,11 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
           appendEvent(current, { type: 'AGENT_ACTIVATE' }, performance.now() - startRef.current),
         ),
       onArmed: setArmed,
-      onCursor: setTarget,
+      onCursor: (cursor) => {
+        setTarget(cursor);
+        // Dopo un rilascio il cursore fluido riparte dal prossimo bersaglio, non dal vecchio punto.
+        if (!cursor) setSmoothed(null);
+      },
     });
     return () => {
       handlerRef.current = null;
@@ -203,6 +219,9 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
       return;
     }
     runnerRef.current = runner;
+    // Le impostazioni cambiate durante il caricamento non erano ancora arrivate al riconoscitore.
+    const latest = settingsRef.current;
+    runner.reconfigure({ tuning: effectiveTuning(latest), dictionary: latest.dictionary });
     setArmed(true);
     setLive('on');
   }, [onEvent, settings, videoRef, framesRef]);

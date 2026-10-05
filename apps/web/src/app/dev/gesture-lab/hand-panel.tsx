@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   poseMetrics,
   type Frame,
@@ -28,6 +28,8 @@ const FINGER_LABELS = {
 
 export function HandPanel({ videoRef, framesRef, view, hand, tuning, feedback }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  // Scheletro e video condividono la proporzione dello stream (640x480 finché è ignota).
+  const [size, setSize] = useState({ w: 640, h: 480 });
 
   useEffect(() => {
     if (!feedback) {
@@ -54,17 +56,24 @@ export function HandPanel({ videoRef, framesRef, view, hand, tuning, feedback }:
 
   return (
     <section className="flex flex-col gap-2 text-sm text-fg">
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-tile bg-stage">
+      <div
+        style={{ aspectRatio: `${size.w} / ${size.h}` }}
+        className="relative w-full overflow-hidden rounded-tile bg-stage"
+      >
         <video
           ref={videoRef}
           muted
           playsInline
-          className="h-full w-full -scale-x-100 object-cover"
+          onLoadedMetadata={(event) => {
+            const { videoWidth, videoHeight } = event.currentTarget;
+            if (videoWidth && videoHeight) setSize({ w: videoWidth, h: videoHeight });
+          }}
+          className="h-full w-full -scale-x-100 object-contain"
         />
         <canvas
           ref={canvasRef}
-          width={640}
-          height={480}
+          width={size.w}
+          height={size.h}
           className="pointer-events-none absolute inset-0 h-full w-full"
         />
         {feedback && view && (
