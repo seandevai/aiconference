@@ -8,9 +8,7 @@ const json = (status: number, body: unknown) =>
 
 describe('room timer requests', () => {
   it('posts the extension and returns the new timing', async () => {
-    const fetchMock = vi.fn(async () =>
-      json(200, { endsAt: 'e', capAt: 'c', serverNow: 'n' }),
-    );
+    const fetchMock = vi.fn(async () => json(200, { endsAt: 'e', capAt: 'c', serverNow: 'n' }));
     vi.stubGlobal('fetch', fetchMock);
     expect(await extendRoomRequest('ABCD2345', 15)).toEqual({ endsAt: 'e', capAt: 'c' });
     expect(fetchMock).toHaveBeenCalledWith('/room/ABCD2345/extend', {
@@ -22,12 +20,18 @@ describe('room timer requests', () => {
   });
 
   it('returns null when the extension is refused', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => json(409, { error: 'cap_reached' })));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => json(409, { error: 'cap_reached' })),
+    );
     expect(await extendRoomRequest('ABCD2345', 30)).toBeNull();
   });
 
   it('closes without throwing on a network error', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => Promise.reject(new TypeError('offline'))));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Promise.reject(new TypeError('offline'))),
+    );
     await expect(closeRoomRequest('ABCD2345')).resolves.toBeUndefined();
   });
 
@@ -47,9 +51,17 @@ describe('room timer requests', () => {
   });
 
   it('reads the latest deadline from a fresh token, null when the room is over', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => json(200, { url: 'u', token: 't', endsAt: 'e', capAt: 'c', serverNow: 'n' })));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        json(200, { url: 'u', token: 't', endsAt: 'e', capAt: 'c', serverNow: 'n' }),
+      ),
+    );
     expect(await latestEndsAt('ABCD2345')).toEqual({ endsAt: 'e', capAt: 'c' });
-    vi.stubGlobal('fetch', vi.fn(async () => json(410, { error: 'room_ended' })));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => json(410, { error: 'room_ended' })),
+    );
     expect(await latestEndsAt('ABCD2345')).toBeNull();
   });
 });
