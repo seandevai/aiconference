@@ -50,7 +50,9 @@ describe('clampTuning', () => {
   });
 
   it('keeps pinch-on below pinch-off and folded below extended', () => {
-    const tuning = clampTuning({ pose: { pinchOn: 0.5, pinchOff: 0.3, extended: 1.1, folded: 1.4 } });
+    const tuning = clampTuning({
+      pose: { pinchOn: 0.5, pinchOff: 0.3, extended: 1.1, folded: 1.4 },
+    });
     expect(tuning.pose.pinchOn).toBeLessThan(tuning.pose.pinchOff);
     expect(tuning.pose.folded).toBeLessThan(tuning.pose.extended);
   });
