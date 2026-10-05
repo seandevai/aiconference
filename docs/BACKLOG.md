@@ -253,6 +253,11 @@ branch `slice/redesign-call` (PR #9).
 - [ ] Prezzi in `packages/ai/src/pricing.ts` scritti a mano: aggiornarli se cambia il listino
 - [x] Preview Vercel: `AI_PROVIDER=anthropic` e `ANTHROPIC_API_KEY` (con il task 0.5)
 - [ ] Registrare gesture reali con `/dev/gesture-recorder` e aggiungerle ai test
+- [x] Laboratorio gesture `/dev/gesture-lab`: dizionario, soglie, filtro One Euro, cursore a
+      60fps, riscontro, pose stabili, rigioco (spec `docs/specs/2026-10-05-gesture-lab-design.md`)
+- [ ] Decidere quali correzioni accendere nella call dopo le prove nel laboratorio, e portarle
+      nei predefiniti con un test
+- [ ] Gesti continui (zoom con le dita, rotazione): serve un ADR nuovo, ADR-0010 non li prevede
 - [ ] CONFIRM/REJECT a gesto non fanno ancora nulla: servono le immagini con conferma (4B)
 - [ ] MediaPipe si scarica da jsdelivr e googleapis: valutare l'hosting dei file
 - [ ] Soglie delle gesture tarate su mani sintetiche: ritararle con le registrazioni reali
