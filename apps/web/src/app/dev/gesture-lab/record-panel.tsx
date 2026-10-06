@@ -56,7 +56,12 @@ export function RecordPanel({ live, capture, onRecorded, onSave }: Props) {
 
   async function record() {
     setPhase({ kind: 'recording' });
-    const frames = await capture(RECORD_MS);
+    let frames: Frame[];
+    try {
+      frames = await capture(RECORD_MS);
+    } catch {
+      frames = [];
+    }
     if (frames.length === 0) {
       setPhase({ kind: 'idle' });
       setMessage('Nessun fotogramma registrato: la webcam era accesa e la mano in vista?');
@@ -90,20 +95,25 @@ export function RecordPanel({ live, capture, onRecorded, onSave }: Props) {
     if (savingRef.current) return;
     savingRef.current = true;
     setSaving(true);
-    const result = await onSave({
-      label: label.trim(),
-      expect: clip.expect,
-      description: description.trim(),
-      armed: clip.armed,
-      frames: clip.frames,
-    });
-    savingRef.current = false;
-    setSaving(false);
-    if (result.ok) {
-      setPhase({ kind: 'idle' });
-      setMessage('Registrazione salvata.');
-    } else {
-      setMessage(LAB_MESSAGES[result.error]);
+    try {
+      const result = await onSave({
+        label: label.trim(),
+        expect: clip.expect,
+        description: description.trim(),
+        armed: clip.armed,
+        frames: clip.frames,
+      });
+      if (result.ok) {
+        setPhase({ kind: 'idle' });
+        setMessage('Registrazione salvata.');
+      } else {
+        setMessage(LAB_MESSAGES[result.error]);
+      }
+    } catch {
+      setMessage(LAB_MESSAGES.failed);
+    } finally {
+      savingRef.current = false;
+      setSaving(false);
     }
   }
 

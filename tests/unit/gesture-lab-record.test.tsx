@@ -101,4 +101,25 @@ describe('RecordPanel', () => {
       armed: false,
     });
   });
+
+  it('recovers when onSave rejects', async () => {
+    const { onSave } = await recordClip();
+    onSave.mockRejectedValue(new Error('network'));
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Salva' }));
+    });
+    expect(screen.getByText(/Non sono riuscito a salvare/)).toBeTruthy();
+    expect((screen.getByRole('button', { name: 'Salva' }) as HTMLButtonElement).disabled).toBe(
+      false,
+    );
+    expect(screen.getByRole('button', { name: 'Scarica JSON' })).toBeTruthy();
+  });
+
+  it('recovers when capture rejects', async () => {
+    await recordClip({ capture: vi.fn().mockRejectedValue(new Error('camera')) });
+    expect(screen.getByText(/Nessun fotogramma registrato/)).toBeTruthy();
+    expect((screen.getByRole('button', { name: 'Registra' }) as HTMLButtonElement).disabled).toBe(
+      false,
+    );
+  });
 });
