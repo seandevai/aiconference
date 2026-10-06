@@ -79,6 +79,7 @@ function LabClient({ archive }: { archive: LabArchive | null }) {
               tuning={effectiveTuning(lab.settings)}
               feedback={lab.settings.toggles.feedback}
               idle={lab.live !== 'on' && !lab.playing}
+              replaying={lab.playing}
             />
           </div>
           <div className={`min-h-0 overflow-y-auto ${CARD}`}>
