@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_LAB_SETTINGS } from '@/lib/gesture-lab/settings';
 import { labStage } from '@/lib/gesture-lab/lab-stage';
@@ -25,7 +25,16 @@ vi.mock('@/lib/gesture-lab/use-gesture-lab', () => ({
     play: vi.fn(),
     pause: vi.fn(),
     fired: [],
+    capture: vi.fn(),
   }),
+}));
+
+vi.mock('@/app/dev/gesture-lab/actions', () => ({
+  saveRecordingAction: vi.fn(),
+  getRecordingAction: vi.fn(),
+  deleteRecordingAction: vi.fn(),
+  savePresetAction: vi.fn(),
+  deletePresetAction: vi.fn(),
 }));
 
 const { Lab } = await import('@/app/dev/gesture-lab/lab');
@@ -34,7 +43,7 @@ afterEach(cleanup);
 
 describe('gesture lab layout', () => {
   it('keeps the hand view and the events beside the stage, the controls in the side column', () => {
-    render(<Lab />);
+    render(<Lab archive={null} />);
     const stageColumn = screen.getByRole('heading', { name: 'Laboratorio gesture' }).parentElement!;
     const side = screen.getByRole('complementary');
 
@@ -45,5 +54,16 @@ describe('gesture lab layout', () => {
       true,
     );
     expect(side.querySelector('video')).toBeNull();
+  });
+
+  it('shows the server panels only to a lab admin', () => {
+    render(<Lab archive={null} />);
+    expect(screen.queryByRole('heading', { name: 'Archivio' })).toBeNull();
+    cleanup();
+    render(<Lab archive={{ userId: 'me', recordings: [], presets: [] }} />);
+    const side = screen.getByRole('complementary');
+    expect(within(side).getByRole('heading', { name: 'Registra' })).toBeTruthy();
+    expect(within(side).getByRole('heading', { name: 'Archivio' })).toBeTruthy();
+    expect(within(side).getByRole('heading', { name: 'Preset' })).toBeTruthy();
   });
 });

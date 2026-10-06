@@ -4,12 +4,14 @@ import { useRef, useState, useSyncExternalStore } from 'react';
 import { Button } from '@omnicanvas/ui';
 import { StageBoard } from '@/app/room/[code]/stage-board';
 import type { Frame } from '@omnicanvas/gesture';
+import type { LabArchive } from '@/lib/gesture-lab/lab-store';
 import { effectiveTuning, labCode } from '@/lib/gesture-lab/settings';
 import { useGestureLab } from '@/lib/gesture-lab/use-gesture-lab';
 import { EventList } from './event-list';
 import { HandPanel } from './hand-panel';
 import { LabControls } from './lab-controls';
 import { ReplayPanel } from './replay-panel';
+import { ServerPanels } from './server-panels';
 
 const LIVE_MESSAGES = {
   off: null,
@@ -23,16 +25,16 @@ const LIVE_MESSAGES = {
 
 // Solo nel browser: le impostazioni vengono da localStorage, il server non le conosce.
 const subscribe = () => () => {};
-export function Lab() {
+export function Lab({ archive }: { archive: LabArchive | null }) {
   const mounted = useSyncExternalStore(
     subscribe,
     () => true,
     () => false,
   );
-  return mounted ? <LabClient /> : null;
+  return mounted ? <LabClient archive={archive} /> : null;
 }
 
-function LabClient() {
+function LabClient({ archive }: { archive: LabArchive | null }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const areaRef = useRef<HTMLDivElement>(null);
   const framesRef = useRef<{ raw: Frame; processed: Frame } | null>(null);
@@ -111,6 +113,16 @@ function LabClient() {
           onPlay={lab.play}
           onPause={lab.pause}
         />
+        {archive && (
+          <ServerPanels
+            archive={archive}
+            live={lab.live === 'on'}
+            capture={lab.capture}
+            onLoad={lab.loadRecording}
+            settings={lab.settings}
+            onApplySettings={lab.setSettings}
+          />
+        )}
         <LabControls settings={lab.settings} onChange={lab.setSettings} />
         <Button onClick={() => void copyCode()}>Copia come codice</Button>
         {code && (
