@@ -221,4 +221,37 @@ describe('useGestureLab live', () => {
       expect.objectContaining({ tuning: expect.objectContaining({ stability: { frames: 3 } }) }),
     );
   });
+
+  it('captures the raw frames for a while, with times starting at zero', async () => {
+    const { stream } = fakeStream();
+    Object.defineProperty(navigator, 'mediaDevices', {
+      configurable: true,
+      value: { getUserMedia: vi.fn().mockResolvedValue(stream) },
+    });
+    const { result, video } = setup();
+    video.play = vi.fn().mockResolvedValue(undefined);
+    let onFrame: ((raw: Frame, processed: Frame, view: null) => void) | undefined;
+    runnerMock.startGestures.mockImplementation(async (_video, options) => {
+      onFrame = options.onFrame;
+      return { stop: vi.fn(), reconfigure: vi.fn() };
+    });
+    await act(async () => {
+      await result.current.startLive();
+    });
+    act(() => onFrame!(frame(500), frame(500), null));
+    let captured: Promise<Frame[]> | undefined;
+    act(() => {
+      captured = result.current.capture(1_000);
+    });
+    act(() => onFrame!(frame(1_000), frame(1_000), null));
+    act(() => onFrame!(frame(1_100), frame(1_100), null));
+    act(() => {
+      vi.advanceTimersByTime(1_000);
+    });
+    const frames = await captured!;
+    expect(frames.map((f) => f.t)).toEqual([0, 100]);
+    // Dopo la registrazione i fotogrammi non si accumulano più.
+    act(() => onFrame!(frame(1_200), frame(1_200), null));
+    expect(frames).toHaveLength(2);
+  });
 });

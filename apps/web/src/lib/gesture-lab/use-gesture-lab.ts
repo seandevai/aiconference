@@ -61,6 +61,8 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
   // Cambia a ogni stop, avvio del rigioco o smontaggio: gli avvii in corso lo controllano dopo ogni await.
   const generationRef = useRef(0);
   const handlerRef = useRef<((event: GestureEvent) => void) | null>(null);
+  // Fotogrammi grezzi della registrazione in corso; null quando non si registra.
+  const captureRef = useRef<Frame[] | null>(null);
 
   useEffect(() => {
     stageRef.current = stage;
@@ -202,6 +204,7 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
         dictionary: settings.dictionary,
         onEvent,
         onFrame: (raw, processed, nextView) => {
+          captureRef.current?.push(raw);
           framesRef.current = { raw, processed };
           setView(nextView);
           setHand(processed.hands[0] ?? null);
@@ -273,6 +276,21 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
     setPlaying(false);
   }, []);
 
+  // Registra dal flusso già acceso: niente seconda webcam. Tempi riportati a 0 come nel registratore.
+  const capture = useCallback(
+    (ms: number) =>
+      new Promise<Frame[]>((resolve) => {
+        captureRef.current = [];
+        setTimeout(() => {
+          const frames = captureRef.current ?? [];
+          captureRef.current = null;
+          const t0 = frames[0]?.t ?? 0;
+          resolve(frames.map((f) => ({ ...f, t: f.t - t0 })));
+        }, ms);
+      }),
+    [],
+  );
+
   useEffect(
     () => () => {
       generationRef.current += 1;
@@ -301,6 +319,7 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
     playing,
     play,
     pause,
+    capture,
     fired,
   };
 }
