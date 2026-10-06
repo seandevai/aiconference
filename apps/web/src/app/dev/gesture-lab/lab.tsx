@@ -51,11 +51,28 @@ function LabClient() {
   }
 
   return (
-    <main className="grid min-h-dvh grid-cols-1 gap-4 bg-bg p-4 text-fg lg:grid-cols-[minmax(0,1fr)_380px]">
+    // Su schermo largo la pagina è alta quanto lo schermo: il palco, la mano e gli eventi
+    // restano sempre in vista, e solo la colonna dei comandi scorre.
+    <main className="grid min-h-dvh grid-cols-1 gap-4 bg-bg p-4 text-fg lg:h-dvh lg:grid-cols-[minmax(0,1fr)_380px] lg:grid-rows-[minmax(0,1fr)]">
       <section className="flex min-h-0 flex-col gap-2">
         <h1 className="text-lg font-extrabold">Laboratorio gesture</h1>
-        <div ref={areaRef} className="relative min-h-[480px] flex-1">
+        <div ref={areaRef} className="relative min-h-[320px] flex-1">
           <StageBoard stage={lab.stage} assetUrls={{}} dispatch={lab.dispatch} />
+        </div>
+        <div className="grid shrink-0 grid-cols-1 gap-4 md:grid-cols-2 lg:h-[40%]">
+          <div className="min-h-0 overflow-y-auto">
+            <HandPanel
+              videoRef={videoRef}
+              framesRef={framesRef}
+              hand={lab.hand}
+              view={lab.view}
+              tuning={effectiveTuning(lab.settings)}
+              feedback={lab.settings.toggles.feedback}
+            />
+          </div>
+          <div className="min-h-0 overflow-y-auto">
+            <EventList entries={lab.log} />
+          </div>
         </div>
         {lab.cursor && (
           <div
@@ -68,7 +85,7 @@ function LabClient() {
         )}
       </section>
 
-      <aside className="flex flex-col gap-4 overflow-y-auto">
+      <aside className="flex min-h-0 flex-col gap-4 overflow-y-auto">
         <div className="flex flex-wrap gap-2">
           {lab.live === 'on' ? (
             <Button onClick={lab.stopLive}>Ferma la webcam</Button>
@@ -86,14 +103,6 @@ function LabClient() {
           </span>
         </div>
         {message && <p className="text-xs text-muted">{message}</p>}
-        <HandPanel
-          videoRef={videoRef}
-          framesRef={framesRef}
-          hand={lab.hand}
-          view={lab.view}
-          tuning={effectiveTuning(lab.settings)}
-          feedback={lab.settings.toggles.feedback}
-        />
         <ReplayPanel
           recording={lab.recording}
           playing={lab.playing}
@@ -102,7 +111,6 @@ function LabClient() {
           onPlay={lab.play}
           onPause={lab.pause}
         />
-        <EventList entries={lab.log} />
         <LabControls settings={lab.settings} onChange={lab.setSettings} />
         <Button onClick={() => void copyCode()}>Copia come codice</Button>
         {code && (
