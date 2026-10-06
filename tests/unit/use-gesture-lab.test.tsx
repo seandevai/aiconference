@@ -254,4 +254,41 @@ describe('useGestureLab live', () => {
     act(() => onFrame!(frame(1_200), frame(1_200), null));
     expect(frames).toHaveLength(2);
   });
+
+  it('ignores a capture while another is running', async () => {
+    const { stream } = fakeStream();
+    Object.defineProperty(navigator, 'mediaDevices', {
+      configurable: true,
+      value: { getUserMedia: vi.fn().mockResolvedValue(stream) },
+    });
+    const { result, video } = setup();
+    video.play = vi.fn().mockResolvedValue(undefined);
+    let onFrame: ((raw: Frame, processed: Frame, view: null) => void) | undefined;
+    runnerMock.startGestures.mockImplementation(async (_video, options) => {
+      onFrame = options.onFrame;
+      return { stop: vi.fn(), reconfigure: vi.fn() };
+    });
+    await act(async () => {
+      await result.current.startLive();
+    });
+    let firstCapture: Promise<Frame[]> | undefined;
+    act(() => {
+      firstCapture = result.current.capture(1_000);
+    });
+    act(() => onFrame!(frame(100), frame(100), null));
+    let secondCapture: Promise<Frame[]> | undefined;
+    act(() => {
+      secondCapture = result.current.capture(1_000);
+    });
+    act(() => onFrame!(frame(200), frame(200), null));
+    act(() => {
+      vi.advanceTimersByTime(1_000);
+    });
+    const firstFrames = await firstCapture!;
+    const secondFrames = await secondCapture!;
+    // La seconda cattura risolve a [] subito.
+    expect(secondFrames).toEqual([]);
+    // La prima cattura ottiene comunque i suoi fotogrammi con tempi riallineati a 0.
+    expect(firstFrames.map((f) => f.t)).toEqual([0, 100]);
+  });
 });

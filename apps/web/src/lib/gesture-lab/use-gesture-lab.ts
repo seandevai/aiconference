@@ -280,6 +280,11 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
   const capture = useCallback(
     (ms: number) =>
       new Promise<Frame[]>((resolve) => {
+        // Se una registrazione è già in corso, ignora la nuova chiamata.
+        if (captureRef.current !== null) {
+          resolve([]);
+          return;
+        }
         captureRef.current = [];
         setTimeout(() => {
           const frames = captureRef.current ?? [];
