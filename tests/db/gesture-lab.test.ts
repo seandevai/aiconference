@@ -105,7 +105,7 @@ describe('RLS on the gesture lab tables', () => {
     const { error } = await asAdmin
       .from('gesture_recordings')
       .insert({ ...recording(labAdmin.id), frames: big });
-    expect(error).not.toBeNull();
+    expect(error?.code).toBe('23514');
   });
 
   it('lets an admin save a preset that another admin reads', async () => {
@@ -122,5 +122,16 @@ describe('RLS on the gesture lab tables', () => {
       .select('id')
       .eq('id', data!.id);
     expect(seen).toHaveLength(1);
+  });
+
+  it('hides presets from a non-admin', async () => {
+    const asAdmin = await signedInClient(labAdmin);
+    const { error } = await asAdmin
+      .from('gesture_lab_presets')
+      .insert({ author_id: labAdmin.id, author_name: 'Test', name: 'nascosto', settings: {} });
+    expect(error).toBeNull();
+    const asStranger = await signedInClient(stranger);
+    const { data } = await asStranger.from('gesture_lab_presets').select('id');
+    expect(data).toEqual([]);
   });
 });

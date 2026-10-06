@@ -126,7 +126,7 @@ describe('ServerPanels', () => {
     await act(async () => {
       fireEvent.click(open);
     });
-    expect(screen.getByText(/Non sono riuscito a salvare/)).toBeTruthy();
+    expect(screen.getByText('Operazione non riuscita. Riprova.')).toBeTruthy();
     expect(
       (screen.getByRole('button', { name: 'swipe di Luca' }) as HTMLButtonElement).disabled,
     ).toBe(false);
@@ -140,7 +140,7 @@ describe('ServerPanels', () => {
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Salva taratura' }));
     });
-    expect(screen.getByText(/Non sono riuscito a salvare/)).toBeTruthy();
+    expect(screen.getByText('Operazione non riuscita. Riprova.')).toBeTruthy();
     expect(input.value).toBe('rapido');
     expect(
       (screen.getByRole('button', { name: 'Salva taratura' }) as HTMLButtonElement).disabled,

@@ -107,6 +107,8 @@ Policy:
 Una registrazione di 4 s a 30 fps pesa circa 200 KB: il tetto di 2 MB lascia margine e sta
 sotto il limite di 4,5 MB del corpo di una richiesta Vercel.
 
+_Nota: il tetto implementato è 1 MB (app 900.000 byte, database `octet_length` ≤ 1.048.576), come negli scostamenti del piano._
+
 ### 2.3 `gesture_lab_presets`
 
 | Colonna | Tipo | Vincoli |
@@ -186,6 +188,8 @@ dell'utente: l'RLS resta la seconda barriera. Nessun service role. In produzione
 Validazione con zod in `apps/web/src/lib/gesture-lab/recording-schema.ts`: forma dei frame
 (tempo e landmark numerici), testi entro i limiti, dimensione serializzata entro 2 MB,
 evento atteso fra quelli noti o `null`.
+
+_Nota: il tetto implementato è 1 MB (app 900.000 byte, database `octet_length` ≤ 1.048.576), come negli scostamenti del piano._
 
 Gli elenchi di registrazioni e preset li carica la pagina server e li passa al client; dopo
 un salvataggio o un'eliminazione il client aggiorna il proprio stato con la risposta.

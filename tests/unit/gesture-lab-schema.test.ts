@@ -16,6 +16,14 @@ describe('parseRecordingInput', () => {
     expect(parseRecordingInput(input)).toEqual({ ...input, label: 'due dita a V' });
   });
 
+  it('keeps only t and landmarks in the frames', () => {
+    const dirty = {
+      ...input,
+      frames: [{ t: 0, image: 'data:x', hands: [{ ...hand('fist'), photo: 'data:y' }] }],
+    };
+    expect(parseRecordingInput(dirty)?.frames).toEqual(input.frames);
+  });
+
   it('accepts a known expected event', () => {
     expect(parseRecordingInput({ ...input, expect: 'FOCUS_NEXT' })?.expect).toBe('FOCUS_NEXT');
   });

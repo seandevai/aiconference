@@ -13,7 +13,7 @@ import {
   saveRecordingAction,
 } from './actions';
 import { ArchivePanel } from './archive-panel';
-import { LAB_MESSAGES } from './lab-messages';
+import { LAB_MESSAGES, UNEXPECTED_MESSAGE } from './lab-messages';
 import { PresetPanel } from './preset-panel';
 import { RecordPanel } from './record-panel';
 
@@ -39,7 +39,7 @@ export function ServerPanels({ archive, live, capture, onLoad, settings, onApply
     try {
       return await action();
     } catch {
-      setMessage(LAB_MESSAGES.failed);
+      setMessage(UNEXPECTED_MESSAGE);
       return null;
     } finally {
       setBusy(false);

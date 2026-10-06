@@ -6,3 +6,6 @@ export const LAB_MESSAGES: Record<LabError, string> = {
   not_found: 'Non più disponibile: forse è stata eliminata.',
   failed: 'Non sono riuscito a salvare. Riprova, oppure scarica il JSON.',
 };
+
+// Errore imprevisto (azione lanciata o rete caduta): non è detto che si stesse salvando.
+export const UNEXPECTED_MESSAGE = 'Operazione non riuscita. Riprova.';

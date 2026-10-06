@@ -54,7 +54,14 @@ export function parseRecording(value: unknown): Recording | null {
     );
   });
   if (!valid) return null;
-  const recording: Recording = { expect, armed, frames: frames as Frame[] };
+  // Ricostruisce i fotogrammi: chiavi extra (immagini incluse) non devono mai arrivare né a DB né su file.
+  const clean: Frame[] = (frames as Frame[]).map((f) => ({
+    t: f.t,
+    hands: f.hands.map((h) => ({
+      landmarks: h.landmarks.map((p) => ({ x: p.x, y: p.y, z: p.z })),
+    })),
+  }));
+  const recording: Recording = { expect, armed, frames: clean };
   return typeof label === 'string' ? { ...recording, label } : recording;
 }
 

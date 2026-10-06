@@ -140,7 +140,7 @@ di riunione.
 | author_id | uuid FK | `auth.users`, cascade |
 | author_name | text | 1-80 caratteri |
 | label | text | 1-60 caratteri |
-| expect | text | nullable, un comando del dizionario gesture |
+| expect | text | nullable, un evento noto del riconoscitore |
 | description | text | massimo 500 caratteri |
 | armed | boolean | |
 | frames | jsonb | array, massimo 1 MiB di testo |

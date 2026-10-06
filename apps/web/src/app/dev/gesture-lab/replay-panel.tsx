@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@omnicanvas/ui';
+import { downloadRecording } from '@/lib/gesture-lab/download';
 import { parseRecording, type Recording } from '@/lib/gesture-lab/recording';
 
 type Props = {
@@ -59,6 +60,12 @@ export function ReplayPanel({ recording, playing, fired, onLoad, onPlay, onPause
               Rigioca
             </Button>
           )}
+          <Button
+            size="sm"
+            onClick={() => downloadRecording(recording, recording.expect, recording.label)}
+          >
+            Scarica JSON
+          </Button>
         </>
       )}
     </section>

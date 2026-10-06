@@ -65,6 +65,20 @@ describe('ReplayPanel', () => {
     expect(screen.getByText('Atteso: gesture nuova, nessun confronto')).toBeTruthy();
   });
 
+  it('offers the loaded recording for download', () => {
+    render(
+      <ReplayPanel
+        recording={{ expect: 'CONFIRM', armed: true, frames: [], label: 'ok' }}
+        playing={false}
+        fired={[]}
+        onLoad={vi.fn()}
+        onPlay={vi.fn()}
+        onPause={vi.fn()}
+      />,
+    );
+    expect(screen.getByRole('button', { name: 'Scarica JSON' })).toBeTruthy();
+  });
+
   const file = (content: string) =>
     new File([content], 'FOCUS_NEXT-test.json', { type: 'application/json' });
 

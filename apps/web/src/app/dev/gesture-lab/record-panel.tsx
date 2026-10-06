@@ -6,6 +6,7 @@ import type { Frame, GestureEvent } from '@omnicanvas/gesture';
 import type { LabResult, RecordingSummary } from '@/lib/gesture-lab/lab-store';
 import type { Recording } from '@/lib/gesture-lab/recording';
 import type { RecordingInput } from '@/lib/gesture-lab/recording-schema';
+import { downloadRecording } from '@/lib/gesture-lab/download';
 import { LAB_MESSAGES } from './lab-messages';
 
 const COUNTDOWN = 3;
@@ -118,18 +119,7 @@ export function RecordPanel({ live, capture, onRecorded, onSave }: Props) {
   }
 
   function download(clip: Recording) {
-    const json = JSON.stringify({ ...clip, description: description.trim() });
-    const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
-    const link = document.createElement('a');
-    link.href = url;
-    const slug =
-      label
-        .trim()
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-') || 'gesture';
-    link.download = `${clip.expect ?? 'NUOVA'}-${slug}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
+    downloadRecording({ ...clip, description: description.trim() }, clip.expect, label);
   }
 
   return (
