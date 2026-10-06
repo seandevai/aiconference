@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { Frame } from '@omnicanvas/gesture';
-import type { LabArchive, PresetSummary } from '@/lib/gesture-lab/lab-store';
+import type { LabArchive, LabResult, PresetSummary } from '@/lib/gesture-lab/lab-store';
 import type { Recording } from '@/lib/gesture-lab/recording';
 import type { LabSettings } from '@/lib/gesture-lab/settings';
 import {
@@ -33,10 +33,22 @@ export function ServerPanels({ archive, live, capture, onLoad, settings, onApply
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  async function open(id: string) {
+  // Esegue un'azione col lab occupato; se lancia, mostra l'errore e sblocca i pulsanti.
+  async function run<T>(action: () => Promise<LabResult<T>>): Promise<LabResult<T> | null> {
     setBusy(true);
-    const result = await getRecordingAction(id);
-    setBusy(false);
+    try {
+      return await action();
+    } catch {
+      setMessage(LAB_MESSAGES.failed);
+      return null;
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function open(id: string) {
+    const result = await run(() => getRecordingAction(id));
+    if (!result) return;
     if (result.ok) {
       setMessage(null);
       onLoad(result.value);
@@ -46,20 +58,35 @@ export function ServerPanels({ archive, live, capture, onLoad, settings, onApply
     if (result.error === 'not_found') setRecordings((list) => list.filter((r) => r.id !== id));
   }
 
-  async function removeRecording(id: string) {
-    if (!window.confirm('Eliminare questa registrazione?')) return;
-    setBusy(true);
-    const result = await deleteRecordingAction(id);
-    setBusy(false);
-    if (result.ok || result.error === 'not_found')
-      setRecordings((list) => list.filter((r) => r.id !== id));
+  async function remove(
+    question: string,
+    action: () => Promise<LabResult<null>>,
+    drop: () => void,
+  ) {
+    if (!window.confirm(question)) return;
+    const result = await run(action);
+    if (!result) return;
+    if (result.ok || result.error === 'not_found') drop();
     setMessage(result.ok ? null : LAB_MESSAGES[result.error]);
   }
 
+  const removeRecording = (id: string) =>
+    remove(
+      'Eliminare questa registrazione?',
+      () => deleteRecordingAction(id),
+      () => setRecordings((list) => list.filter((r) => r.id !== id)),
+    );
+
+  const removePreset = (id: string) =>
+    remove(
+      'Eliminare questo preset?',
+      () => deletePresetAction(id),
+      () => setPresets((list) => list.filter((p) => p.id !== id)),
+    );
+
   async function savePreset(name: string) {
-    setBusy(true);
-    const result = await savePresetAction({ name, settings });
-    setBusy(false);
+    const result = await run(() => savePresetAction({ name, settings }));
+    if (!result) return false;
     if (!result.ok) {
       setMessage(LAB_MESSAGES[result.error]);
       return false;
@@ -67,16 +94,6 @@ export function ServerPanels({ archive, live, capture, onLoad, settings, onApply
     setMessage(null);
     setPresets((list) => [result.value, ...list]);
     return true;
-  }
-
-  async function removePreset(id: string) {
-    if (!window.confirm('Eliminare questo preset?')) return;
-    setBusy(true);
-    const result = await deletePresetAction(id);
-    setBusy(false);
-    if (result.ok || result.error === 'not_found')
-      setPresets((list) => list.filter((p) => p.id !== id));
-    setMessage(result.ok ? null : LAB_MESSAGES[result.error]);
   }
 
   return (

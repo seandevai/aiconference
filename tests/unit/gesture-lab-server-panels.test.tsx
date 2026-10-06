@@ -118,4 +118,32 @@ describe('ServerPanels', () => {
     });
     expect(screen.getByRole('button', { name: 'Applica rapido' })).toBeTruthy();
   });
+
+  it('recovers when opening a recording rejects', async () => {
+    actions.getRecordingAction.mockRejectedValue(new Error('network'));
+    setup();
+    const open = screen.getByRole('button', { name: 'swipe di Luca' });
+    await act(async () => {
+      fireEvent.click(open);
+    });
+    expect(screen.getByText(/Non sono riuscito a salvare/)).toBeTruthy();
+    expect(
+      (screen.getByRole('button', { name: 'swipe di Luca' }) as HTMLButtonElement).disabled,
+    ).toBe(false);
+  });
+
+  it('recovers when saving a preset rejects', async () => {
+    actions.savePresetAction.mockRejectedValue(new Error('network'));
+    setup();
+    const input = screen.getByLabelText('Nome del preset') as HTMLInputElement;
+    fireEvent.change(input, { target: { value: 'rapido' } });
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Salva taratura' }));
+    });
+    expect(screen.getByText(/Non sono riuscito a salvare/)).toBeTruthy();
+    expect(input.value).toBe('rapido');
+    expect(
+      (screen.getByRole('button', { name: 'Salva taratura' }) as HTMLButtonElement).disabled,
+    ).toBe(false);
+  });
 });
