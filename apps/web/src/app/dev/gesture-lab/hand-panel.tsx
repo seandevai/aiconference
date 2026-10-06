@@ -17,6 +17,8 @@ type Props = {
   hand: Hand | null;
   tuning: Tuning;
   feedback: boolean;
+  // Né webcam né rigioco: al posto del riquadro nero si dice cosa fare.
+  idle: boolean;
 };
 
 const FINGER_LABELS = {
@@ -26,7 +28,7 @@ const FINGER_LABELS = {
   pinky: 'Mignolo',
 } as const;
 
-export function HandPanel({ videoRef, framesRef, view, hand, tuning, feedback }: Props) {
+export function HandPanel({ videoRef, framesRef, view, hand, tuning, feedback, idle }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   // Scheletro e video condividono la proporzione dello stream (640x480 finché è ignota).
   const [size, setSize] = useState({ w: 640, h: 480 });
@@ -76,6 +78,12 @@ export function HandPanel({ videoRef, framesRef, view, hand, tuning, feedback }:
           height={size.h}
           className="pointer-events-none absolute inset-0 h-full w-full"
         />
+        {idle && (
+          <p className="absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-muted">
+            Webcam spenta: avviala, oppure rigioca una registrazione dall&apos;Archivio o da un
+            file.
+          </p>
+        )}
         {feedback && view && (
           <div className="absolute left-2 top-2 flex items-center gap-2 rounded-full bg-surface px-3 py-1">
             <svg width="28" height="28" viewBox="0 0 28 28" aria-label="Attesa del gesto">

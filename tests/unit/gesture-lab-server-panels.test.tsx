@@ -49,6 +49,7 @@ function setup() {
       onLoad={onLoad}
       settings={DEFAULT_LAB_SETTINGS}
       onApplySettings={onApplySettings}
+      tab="archive"
     />,
   );
   return { onLoad, onApplySettings };

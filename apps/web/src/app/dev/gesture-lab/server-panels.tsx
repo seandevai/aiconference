@@ -14,6 +14,7 @@ import {
 } from './actions';
 import { ArchivePanel } from './archive-panel';
 import { LAB_MESSAGES, UNEXPECTED_MESSAGE } from './lab-messages';
+import { CARD, LabTabPanel, type LabTab } from './lab-tabs';
 import { PresetPanel } from './preset-panel';
 import { RecordPanel } from './record-panel';
 
@@ -24,10 +25,20 @@ type Props = {
   onLoad: (recording: Recording) => void;
   settings: LabSettings;
   onApplySettings: (settings: LabSettings) => void;
+  // Scheda visibile: le schede di questi pannelli restano montate anche quando sono nascoste.
+  tab: LabTab;
 };
 
 // Pannelli che parlano col server: esistono solo per un admin del laboratorio.
-export function ServerPanels({ archive, live, capture, onLoad, settings, onApplySettings }: Props) {
+export function ServerPanels({
+  archive,
+  live,
+  capture,
+  onLoad,
+  settings,
+  onApplySettings,
+  tab,
+}: Props) {
   const [recordings, setRecordings] = useState(archive.recordings);
   const [presets, setPresets] = useState(archive.presets);
   const [busy, setBusy] = useState(false);
@@ -98,32 +109,42 @@ export function ServerPanels({ archive, live, capture, onLoad, settings, onApply
 
   return (
     <>
-      <RecordPanel
-        live={live}
-        capture={capture}
-        onRecorded={onLoad}
-        onSave={async (input) => {
-          const result = await saveRecordingAction(input);
-          if (result.ok) setRecordings((list) => [result.value, ...list]);
-          return result;
-        }}
-      />
-      <ArchivePanel
-        userId={archive.userId}
-        recordings={recordings}
-        busy={busy}
-        onOpen={(id) => void open(id)}
-        onDelete={(id) => void removeRecording(id)}
-      />
-      <PresetPanel
-        userId={archive.userId}
-        presets={presets}
-        busy={busy}
-        onSave={savePreset}
-        onApply={(preset: PresetSummary) => onApplySettings(preset.settings)}
-        onDelete={(id) => void removePreset(id)}
-      />
       {message && <p className="text-xs text-danger">{message}</p>}
+      <LabTabPanel tab="record" active={tab}>
+        <div className={CARD}>
+          <RecordPanel
+            live={live}
+            capture={capture}
+            onRecorded={onLoad}
+            onSave={async (input) => {
+              const result = await saveRecordingAction(input);
+              if (result.ok) setRecordings((list) => [result.value, ...list]);
+              return result;
+            }}
+          />
+        </div>
+      </LabTabPanel>
+      <LabTabPanel tab="archive" active={tab}>
+        <div className={CARD}>
+          <ArchivePanel
+            userId={archive.userId}
+            recordings={recordings}
+            busy={busy}
+            onOpen={(id) => void open(id)}
+            onDelete={(id) => void removeRecording(id)}
+          />
+        </div>
+        <div className={CARD}>
+          <PresetPanel
+            userId={archive.userId}
+            presets={presets}
+            busy={busy}
+            onSave={savePreset}
+            onApply={(preset: PresetSummary) => onApplySettings(preset.settings)}
+            onDelete={(id) => void removePreset(id)}
+          />
+        </div>
+      </LabTabPanel>
     </>
   );
 }
