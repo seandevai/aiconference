@@ -43,7 +43,12 @@ export function ReplayPanel({ recording, playing, fired, onLoad, onPlay, onPause
       {error && <p className="text-xs text-danger">{error}</p>}
       {recording && (
         <>
-          <p className="text-xs">{`Atteso: ${recording.expect}`}</p>
+          {recording.label && <p className="text-xs font-semibold">{recording.label}</p>}
+          <p className="text-xs">
+            {recording.expect
+              ? `Atteso: ${recording.expect}`
+              : 'Atteso: gesture nuova, nessun confronto'}
+          </p>
           <p className="text-xs">{`Scattati: ${fired.length > 0 ? fired.join(', ') : 'nessuno'}`}</p>
           {playing ? (
             <Button size="sm" onClick={onPause}>

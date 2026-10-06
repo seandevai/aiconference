@@ -50,6 +50,21 @@ describe('LabControls', () => {
 });
 
 describe('ReplayPanel', () => {
+  it('shows a new gesture without an expected event', () => {
+    render(
+      <ReplayPanel
+        recording={{ expect: null, armed: true, frames: [], label: 'due dita a V' }}
+        playing={false}
+        fired={[]}
+        onLoad={vi.fn()}
+        onPlay={vi.fn()}
+        onPause={vi.fn()}
+      />,
+    );
+    expect(screen.getByText('due dita a V')).toBeTruthy();
+    expect(screen.getByText('Atteso: gesture nuova, nessun confronto')).toBeTruthy();
+  });
+
   const file = (content: string) =>
     new File([content], 'FOCUS_NEXT-test.json', { type: 'application/json' });
 

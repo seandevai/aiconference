@@ -17,6 +17,14 @@ describe('parseRecording', () => {
     expect(parseRecording(valid)).toEqual(valid);
   });
 
+  it('accepts a new gesture with no expected event, and keeps its label', () => {
+    expect(parseRecording({ ...valid, expect: null, label: 'due dita a V' })).toEqual({
+      ...valid,
+      expect: null,
+      label: 'due dita a V',
+    });
+  });
+
   it('rejects anything else', () => {
     expect(parseRecording(null)).toBeNull();
     expect(parseRecording({ ...valid, expect: 'DANCE' })).toBeNull();

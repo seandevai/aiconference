@@ -46,22 +46,26 @@ export function parseDictionary(value: unknown): Dictionary {
 
 const bool = (value: unknown, fallback: boolean) => (typeof value === 'boolean' ? value : fallback);
 
+export function parseLabSettings(value: unknown): LabSettings {
+  const parsed =
+    typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : {};
+  const toggles = (parsed.toggles ?? {}) as Record<string, unknown>;
+  const d = DEFAULT_LAB_SETTINGS.toggles;
+  return {
+    tuning: clampTuning(parsed.tuning ?? DEFAULT_LAB_SETTINGS.tuning),
+    dictionary: parseDictionary(parsed.dictionary),
+    toggles: {
+      smoothCursor: bool(toggles.smoothCursor, d.smoothCursor),
+      feedback: bool(toggles.feedback, d.feedback),
+      stablePoses: bool(toggles.stablePoses, d.stablePoses),
+    },
+  };
+}
+
 export function loadLabSettings(storage: Pick<Storage, 'getItem'> | null): LabSettings {
   try {
     const raw = storage?.getItem(LAB_STORAGE_KEY);
-    if (!raw) return DEFAULT_LAB_SETTINGS;
-    const parsed = JSON.parse(raw) as Record<string, unknown>;
-    const toggles = (parsed.toggles ?? {}) as Record<string, unknown>;
-    const d = DEFAULT_LAB_SETTINGS.toggles;
-    return {
-      tuning: clampTuning(parsed.tuning ?? DEFAULT_LAB_SETTINGS.tuning),
-      dictionary: parseDictionary(parsed.dictionary),
-      toggles: {
-        smoothCursor: bool(toggles.smoothCursor, d.smoothCursor),
-        feedback: bool(toggles.feedback, d.feedback),
-        stablePoses: bool(toggles.stablePoses, d.stablePoses),
-      },
-    };
+    return raw ? parseLabSettings(JSON.parse(raw)) : DEFAULT_LAB_SETTINGS;
   } catch {
     return DEFAULT_LAB_SETTINGS;
   }
