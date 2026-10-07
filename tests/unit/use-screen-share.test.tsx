@@ -11,7 +11,12 @@ import {
   type StageCommand,
 } from '@omnicanvas/canvas';
 import { ScreenShareCancelled, type RealtimeSession } from '@omnicanvas/realtime';
-import { SCREEN_SHARE_ERROR, useScreenShare } from '@/lib/stage/use-screen-share';
+import {
+  SCREEN_SHARE_ERROR,
+  SCREEN_STOP_ERROR,
+  SCREEN_TRAY_FULL,
+  useScreenShare,
+} from '@/lib/stage/use-screen-share';
 
 let counter = 0;
 const newId = () => `00000000-0000-4000-8000-${String(++counter).padStart(12, '0')}`;
@@ -137,6 +142,43 @@ describe('useScreenShare', () => {
     expect(session.stopScreenShare).toHaveBeenCalled();
     expect(hook.result.current.share.sharing).toBe(false);
     expect(hook.result.current.stage.windows).toEqual([]);
+    expect(hook.result.current.share.error).toBe(SCREEN_TRAY_FULL);
+  });
+
+  it('tries the stop again once when it fails', async () => {
+    vi.useFakeTimers();
+    try {
+      const { hook, session } = setup();
+      await act(() => hook.result.current.share.start());
+      session.stopScreenShare.mockRejectedValueOnce(new Error('busy'));
+      await act(async () => hook.result.current.share.stop());
+      expect(session.stopScreenShare).toHaveBeenCalledTimes(1);
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(1_000);
+      });
+      expect(session.stopScreenShare).toHaveBeenCalledTimes(2);
+      expect(hook.result.current.share.sharing).toBe(false);
+      expect(hook.result.current.share.error).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('asks to stop from the browser when the stop keeps failing', async () => {
+    vi.useFakeTimers();
+    try {
+      const { hook, session } = setup();
+      await act(() => hook.result.current.share.start());
+      session.stopScreenShare.mockRejectedValue(new Error('busy'));
+      await act(async () => hook.result.current.share.stop());
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(1_000);
+      });
+      expect(session.stopScreenShare).toHaveBeenCalledTimes(2);
+      expect(hook.result.current.share.error).toBe(SCREEN_STOP_ERROR);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('stops a share that starts on a session no longer current', async () => {

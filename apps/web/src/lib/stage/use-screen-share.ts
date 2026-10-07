@@ -11,6 +11,12 @@ import {
 import { ScreenShareCancelled, type RealtimeSession } from '@omnicanvas/realtime';
 
 export const SCREEN_SHARE_ERROR = 'Non riesco a condividere lo schermo.';
+export const SCREEN_TRAY_FULL =
+  'Il vassoio è pieno: togli qualche contenuto per condividere lo schermo.';
+export const SCREEN_STOP_ERROR =
+  'Non riesco a interrompere la condivisione: chiudila dalla barra del browser.';
+
+const STOP_RETRY_MS = 1_000;
 
 type Options = {
   session: RealtimeSession | null;
@@ -52,6 +58,18 @@ export function useScreenShare({
     };
   }, []);
 
+  // Lo stop può fallire mentre la connessione è instabile: un secondo tentativo, poi si
+  // chiede di chiudere dalla barra del browser, che ferma comunque la cattura.
+  const stopShare = useCallback((target: RealtimeSession) => {
+    target.stopScreenShare().catch(() => {
+      setTimeout(() => {
+        target.stopScreenShare().catch(() => {
+          if (mountedRef.current) setError(SCREEN_STOP_ERROR);
+        });
+      }, STOP_RETRY_MS);
+    });
+  }, []);
+
   const isHost = role === 'host';
   const sharing = session !== null && sharedOn === session;
   const available = isHost && session !== null && session.canShareScreen();
@@ -68,8 +86,8 @@ export function useScreenShare({
   useEffect(() => {
     if (!isHost || !ready) return;
     if (onStage && !sharing) screenEndCommands(stageRef.current).forEach(dispatch);
-    if (!onStage && sharing) void session?.stopScreenShare().catch(() => {});
-  }, [isHost, ready, onStage, sharing, session, dispatch]);
+    if (!onStage && sharing && session) stopShare(session);
+  }, [isHost, ready, onStage, sharing, session, dispatch, stopShare]);
 
   const start = useCallback(async () => {
     if (!session || !isHost || sharing || pickingRef.current) return;
@@ -89,16 +107,20 @@ export function useScreenShare({
       return;
     }
     setSharedOn(session);
-    screenStartCommands(stageRef.current, {
+    const commands = screenStartCommands(stageRef.current, {
       owner: session.localIdentity,
       contentId: newId(),
       windowId: newId(),
-    }).forEach(dispatch);
+    });
+    // Nessun comando con lo schermo assente: il vassoio è pieno. L'invariante ferma la
+    // condivisione, il messaggio dice perché.
+    if (commands.length === 0 && !findScreen(stageRef.current)) setError(SCREEN_TRAY_FULL);
+    commands.forEach(dispatch);
   }, [session, isHost, sharing, dispatch, newId]);
 
   const stop = useCallback(() => {
-    void session?.stopScreenShare().catch(() => {});
-  }, [session]);
+    if (session) stopShare(session);
+  }, [session, stopShare]);
 
   return { available, sharing, error, start, stop };
 }
