@@ -44,14 +44,19 @@ Nessun comando nuovo. Il contenuto passa dagli stessi comandi di mouse, gesto e 
 |---|---|
 | Avvio, palco con meno di 4 finestre | `TRAY_ADD` → `WINDOW_CREATE` («Schermo») → `CONTENT_PLACE` → `FOCUS` |
 | Avvio, palco pieno | `TRAY_ADD` → `CONTENT_PLACE` nella finestra in primo piano |
-| Fine | `CONTENT_REMOVE`; se la finestra resta vuota, `WINDOW_ARCHIVE` |
+| Fine, lo schermo è l'unico contenuto della finestra | `WINDOW_ARCHIVE` |
+| Fine, la finestra ha anche altri contenuti | `CONTENT_REMOVE` |
 
 Regole:
 
 - al massimo un contenuto `screen` sul palco; un secondo avvio non ne crea un altro
-- l'host che ricarica la pagina non può essere in condivisione: al caricamento del palco
-  salvato si tolgono i contenuti `screen` (e le finestre rimaste vuote), con gli stessi
-  comandi della fine
+- lo schermo non va mai nel vassoio: `CONTENT_REMOVE` e `WINDOW_ARCHIVE` lo tolgono del
+  tutto invece di archiviarlo, perché un riferimento a una traccia finita non serve a nulla
+- un contenuto `screen` non si negozia
+- **invariante dell'host:** lo schermo è sul palco se e solo se l'host sta condividendo.
+  Schermo sul palco senza condivisione (pagina ricaricata, sessione ricreata dopo una
+  caduta, stop dal browser) → si toglie con i comandi della fine. Condivisione senza schermo
+  sul palco (l'host ha chiuso la finestra a mano) → la condivisione si ferma
 - lo schema zod del palco accetta `screen` con `owner` non vuoto e `title` breve
 
 ## 2. Realtime (`packages/realtime`)
