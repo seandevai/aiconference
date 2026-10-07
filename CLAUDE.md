@@ -88,6 +88,10 @@ laboratorio dell'host) su `slice/redesign-call` (PR #9). Accesso «Sobrio» e da
 (riunioni per stato, crediti, profilo) su `slice/accesso-dashboard`, spec
 `docs/specs/2026-09-30-accesso-dashboard-design.md`. Spike CPU e iOS in attesa di misura. Prima demo =
 slice 0-5: completa lato codice salvo la voce (slice 4B), in attesa del test con i consulenti.
+Laboratorio gesture `/dev/gesture-lab` su `slice/gesture-lab` (spec
+`docs/specs/2026-10-05-gesture-lab-design.md`): solo sviluppo (`notFound()` in produzione), predefiniti
+invariati e quindi call invariata; la traduzione gesto → palco sta in
+`apps/web/src/lib/stage/stage-gesture-handler.ts`, condivisa da call e laboratorio.
 
 Spec v3 del 23/09, dopo un secondo brainstorming con Sean. Rispetto alla v2: palco a
 finestre a slot magnetici invece della lista di schede (ADR-0009), agente a comando
