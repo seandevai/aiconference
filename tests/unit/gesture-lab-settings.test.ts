@@ -124,9 +124,9 @@ describe('tuningToCode', () => {
 });
 
 describe('labStage', () => {
-  it('builds three windows, each with a sample content', () => {
+  it('builds two windows, each with a sample content', () => {
     const stage = labStage();
-    expect(stage.windows).toHaveLength(3);
+    expect(stage.windows).toHaveLength(2);
     expect(stage.windows.every((w) => w.contents.length === 1)).toBe(true);
     expect(stage.tray).toEqual([]);
   });
