@@ -147,7 +147,10 @@ describe('slot under the dragged item', () => {
 describe('host layout below lg', () => {
   it('puts the lab under the stage instead of squeezing it', () => {
     // Il pannello dell'agente chiede il contatore al server: qui basta una risposta vuota.
-    vi.stubGlobal('fetch', vi.fn(() => new Promise(() => {})));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => new Promise(() => {})),
+    );
     render(
       <StageArea
         joinCode="ABCD2345"
