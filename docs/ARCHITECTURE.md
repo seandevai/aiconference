@@ -191,6 +191,8 @@ arrivano dagli eventi LiveKit e non toccano Postgres. LiveKit si ricollega da so
 cali brevi; se rinuncia, `createReconnector` chiede un token nuovo con backoff
 1-16 s e dopo cinque tentativi mostra «Riprova».
 
+Lo schermo condiviso è un contenuto `screen` del palco che porta solo l'identità di chi condivide. La traccia la pubblica solo l'host (grant per ruolo) e non entra mai nel pacchetto (ADR-0015).
+
 Il codice dell'applicazione parla solo a questa interfaccia. Il giorno in cui
 LiveKit diventa caro o inadatto, si riscrive un file invece di trenta. Si parte dal
 free tier di LiveKit Cloud; il self-hosting è l'uscita.

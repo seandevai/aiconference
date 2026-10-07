@@ -12,7 +12,12 @@ export default defineConfig({
     // Camera e microfono finti di Chromium: la call parte senza dispositivi reali.
     permissions: ['camera', 'microphone'],
     launchOptions: {
-      args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'],
+      args: [
+        '--use-fake-ui-for-media-stream',
+        '--use-fake-device-for-media-stream',
+        // Lo schermo condiviso: Chromium sceglie da solo senza aprire il selettore.
+        '--auto-select-desktop-capture-source=Entire screen',
+      ],
     },
   },
   projects: [
