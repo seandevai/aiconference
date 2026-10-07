@@ -40,7 +40,7 @@ anticipo dall'Agenda.
 
 ## 1. Modello dati
 
-Migrazione `0006_room_timer.sql`, con le policy nella stessa migrazione.
+Migrazione `0007_room_timer.sql`, con le policy nella stessa migrazione.
 
 | Colonna | Tipo | Note |
 |---|---|---|

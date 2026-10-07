@@ -61,7 +61,7 @@ Branch: `slice/timer-stanza` (già creato da `main`, contiene la spec).
 | File | Responsabilità |
 |---|---|
 | `apps/web/src/lib/rooms/timer.ts` | costanti e funzioni pure del timer |
-| `supabase/migrations/0006_room_timer.sql` | colonne, backfill, policy di insert |
+| `supabase/migrations/0007_room_timer.sql` | colonne, backfill, policy di insert |
 | `packages/db/src/database.types.ts` | tipi di `rooms` con le colonne nuove |
 | `apps/web/src/lib/rooms/create-room.ts` | `plannedMinutes` alla creazione |
 | `apps/web/src/lib/rooms/resolve-participant.ts` | stanza con tempi, `isRoomOver` |
@@ -404,7 +404,7 @@ git commit -m "feat(rooms): pure room timer logic — deadline, cap, phases, ttl
 ### Task 2: migrazione, tipi e durata alla creazione
 
 **Files:**
-- Create: `supabase/migrations/0006_room_timer.sql`
+- Create: `supabase/migrations/0007_room_timer.sql`
 - Modify: `packages/db/src/database.types.ts` (blocco `rooms`, righe 227-270 circa)
 - Modify: `apps/web/src/lib/rooms/create-room.ts`
 - Test: `tests/db/rls-rooms.test.ts`, `tests/db/create-room.test.ts`
@@ -497,7 +497,7 @@ Expected: FAIL sulle colonne mancanti.
 
 - [ ] **Step 3: Write the migration**
 
-`supabase/migrations/0006_room_timer.sql`:
+`supabase/migrations/0007_room_timer.sql`:
 
 ```sql
 -- Durata della stanza (spec 2026-10-04, ADR-0014): l'host sceglie la durata alla creazione,
@@ -586,7 +586,7 @@ Expected: PASS.
 - [ ] **Step 7: Commit**
 
 ```bash
-git add supabase/migrations/0006_room_timer.sql packages/db/src/database.types.ts apps/web/src/lib/rooms/create-room.ts tests/db/rls-rooms.test.ts tests/db/create-room.test.ts
+git add supabase/migrations/0007_room_timer.sql packages/db/src/database.types.ts apps/web/src/lib/rooms/create-room.ts tests/db/rls-rooms.test.ts tests/db/create-room.test.ts
 git commit -m "feat(db): room planned duration and server-only deadline"
 ```
 
