@@ -1,8 +1,8 @@
 import { applyCommand, emptyStage, sampleContent, type Stage } from '@omnicanvas/canvas';
 
-const KINDS = ['chart', 'text', 'table'] as const;
+const KINDS = ['chart', 'text'] as const;
 
-// Palco di prova costruito con comandi veri: tre finestre, ognuna col suo contenuto d'esempio.
+// Palco di prova costruito con comandi veri: due finestre, ognuna col suo contenuto d'esempio.
 export function labStage(): Stage {
   let stage = emptyStage();
   KINDS.forEach((kind, i) => {

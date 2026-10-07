@@ -17,6 +17,35 @@ describe('parseRecording', () => {
     expect(parseRecording(valid)).toEqual(valid);
   });
 
+  it('accepts a new gesture with no expected event, and keeps its label', () => {
+    expect(parseRecording({ ...valid, expect: null, label: 'due dita a V' })).toEqual({
+      ...valid,
+      expect: null,
+      label: 'due dita a V',
+    });
+  });
+
+  it('drops any key that is not a timestamp or a landmark coordinate', () => {
+    const dirty = {
+      ...valid,
+      frames: [
+        {
+          t: 0,
+          image: 'data:image/png;base64,AAAA',
+          hands: [
+            {
+              handedness: 'Left',
+              landmarks: hand('fist').landmarks.map((p) => ({ ...p, label: 'x' })),
+            },
+          ],
+        },
+      ],
+    };
+    const parsed = parseRecording(dirty)!;
+    expect(parsed.frames).toEqual([{ t: 0, hands: [{ landmarks: hand('fist').landmarks }] }]);
+    expect(Object.keys(parsed.frames[0]!)).toEqual(['t', 'hands']);
+  });
+
   it('rejects anything else', () => {
     expect(parseRecording(null)).toBeNull();
     expect(parseRecording({ ...valid, expect: 'DANCE' })).toBeNull();

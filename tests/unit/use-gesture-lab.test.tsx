@@ -83,6 +83,24 @@ describe('useGestureLab replay', () => {
     act(() => result.current.play());
     expect(refs.framesRef.current?.raw.t).toBe(0);
   });
+
+  it('reports how far the replay has gone', () => {
+    const { result } = setup();
+    act(() => result.current.loadRecording(recording));
+    expect(result.current.progress).toBe(0);
+    act(() => result.current.play());
+    expect(result.current.progress).toBe(0);
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+    expect(result.current.progress).toBe(0.5);
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+    expect(result.current.progress).toBe(1);
+    act(() => result.current.loadRecording(recording));
+    expect(result.current.progress).toBe(0);
+  });
 });
 
 describe('useGestureLab live', () => {
@@ -220,5 +238,75 @@ describe('useGestureLab live', () => {
     expect(runner.reconfigure).toHaveBeenLastCalledWith(
       expect.objectContaining({ tuning: expect.objectContaining({ stability: { frames: 3 } }) }),
     );
+  });
+
+  it('captures the raw frames for a while, with times starting at zero', async () => {
+    const { stream } = fakeStream();
+    Object.defineProperty(navigator, 'mediaDevices', {
+      configurable: true,
+      value: { getUserMedia: vi.fn().mockResolvedValue(stream) },
+    });
+    const { result, video } = setup();
+    video.play = vi.fn().mockResolvedValue(undefined);
+    let onFrame: ((raw: Frame, processed: Frame, view: null) => void) | undefined;
+    runnerMock.startGestures.mockImplementation(async (_video, options) => {
+      onFrame = options.onFrame;
+      return { stop: vi.fn(), reconfigure: vi.fn() };
+    });
+    await act(async () => {
+      await result.current.startLive();
+    });
+    act(() => onFrame!(frame(500), frame(500), null));
+    let captured: Promise<Frame[]> | undefined;
+    act(() => {
+      captured = result.current.capture(1_000);
+    });
+    act(() => onFrame!(frame(1_000), frame(1_000), null));
+    act(() => onFrame!(frame(1_100), frame(1_100), null));
+    act(() => {
+      vi.advanceTimersByTime(1_000);
+    });
+    const frames = await captured!;
+    expect(frames.map((f) => f.t)).toEqual([0, 100]);
+    // Dopo la registrazione i fotogrammi non si accumulano più.
+    act(() => onFrame!(frame(1_200), frame(1_200), null));
+    expect(frames).toHaveLength(2);
+  });
+
+  it('ignores a capture while another is running', async () => {
+    const { stream } = fakeStream();
+    Object.defineProperty(navigator, 'mediaDevices', {
+      configurable: true,
+      value: { getUserMedia: vi.fn().mockResolvedValue(stream) },
+    });
+    const { result, video } = setup();
+    video.play = vi.fn().mockResolvedValue(undefined);
+    let onFrame: ((raw: Frame, processed: Frame, view: null) => void) | undefined;
+    runnerMock.startGestures.mockImplementation(async (_video, options) => {
+      onFrame = options.onFrame;
+      return { stop: vi.fn(), reconfigure: vi.fn() };
+    });
+    await act(async () => {
+      await result.current.startLive();
+    });
+    let firstCapture: Promise<Frame[]> | undefined;
+    act(() => {
+      firstCapture = result.current.capture(1_000);
+    });
+    act(() => onFrame!(frame(100), frame(100), null));
+    let secondCapture: Promise<Frame[]> | undefined;
+    act(() => {
+      secondCapture = result.current.capture(1_000);
+    });
+    act(() => onFrame!(frame(200), frame(200), null));
+    act(() => {
+      vi.advanceTimersByTime(1_000);
+    });
+    const firstFrames = await firstCapture!;
+    const secondFrames = await secondCapture!;
+    // La seconda cattura risolve a [] subito.
+    expect(secondFrames).toEqual([]);
+    // La prima cattura ottiene comunque i suoi fotogrammi con tempi riallineati a 0.
+    expect(firstFrames.map((f) => f.t)).toEqual([0, 100]);
   });
 });

@@ -50,7 +50,9 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
   const [live, setLive] = useState<LiveStatus>('off');
   const [recording, setRecording] = useState<Recording | null>(null);
   const [playing, setPlaying] = useState(false);
-  const [fired, setFired] = useState<string[]>([]);
+  const [fired, setFired] = useState<GestureEvent['type'][]>([]);
+  // Quanto del rigioco è passato, da 0 a 1.
+  const [progress, setProgress] = useState(0);
 
   const runnerRef = useRef<GestureRunner | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -61,6 +63,8 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
   // Cambia a ogni stop, avvio del rigioco o smontaggio: gli avvii in corso lo controllano dopo ogni await.
   const generationRef = useRef(0);
   const handlerRef = useRef<((event: GestureEvent) => void) | null>(null);
+  // Fotogrammi grezzi della registrazione in corso; null quando non si registra.
+  const captureRef = useRef<Frame[] | null>(null);
 
   useEffect(() => {
     stageRef.current = stage;
@@ -202,6 +206,7 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
         dictionary: settings.dictionary,
         onEvent,
         onFrame: (raw, processed, nextView) => {
+          captureRef.current?.push(raw);
           framesRef.current = { raw, processed };
           setView(nextView);
           setHand(processed.hands[0] ?? null);
@@ -233,6 +238,7 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
     setPlaying(false);
     setRecording(next);
     setFired([]);
+    setProgress(0);
   }, []);
 
   const play = useCallback(() => {
@@ -246,6 +252,7 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
         armed: recording.armed,
       });
       pipelineRef.current = pipeline;
+      const last = recording.frames[recording.frames.length - 1]?.t ?? 0;
       setFired([]);
       startRef.current = performance.now();
       replayerRef.current = createReplayer(
@@ -256,6 +263,7 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
           setView(out.view);
           setHand(out.frame.hands[0] ?? null);
           out.events.forEach(onEvent);
+          setProgress(last > 0 ? frame.t / last : 1);
         },
         () => {
           replayerRef.current = null;
@@ -272,6 +280,26 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
     replayerRef.current?.pause();
     setPlaying(false);
   }, []);
+
+  // Registra dal flusso già acceso: niente seconda webcam. Tempi riportati a 0 come nel registratore.
+  const capture = useCallback(
+    (ms: number) =>
+      new Promise<Frame[]>((resolve) => {
+        // Se una registrazione è già in corso, ignora la nuova chiamata.
+        if (captureRef.current !== null) {
+          resolve([]);
+          return;
+        }
+        captureRef.current = [];
+        setTimeout(() => {
+          const frames = captureRef.current ?? [];
+          captureRef.current = null;
+          const t0 = frames[0]?.t ?? 0;
+          resolve(frames.map((f) => ({ ...f, t: f.t - t0 })));
+        }, ms);
+      }),
+    [],
+  );
 
   useEffect(
     () => () => {
@@ -301,6 +329,8 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
     playing,
     play,
     pause,
+    capture,
     fired,
+    progress,
   };
 }

@@ -171,6 +171,20 @@ Verifica su telefono: `docs/spikes/2026-09-27-spike-mobile-call.md`.
 - [x] Dopo una riconnessione completa tessere, spotlight e PiP restano legati alle tracce
       della sessione vecchia (da slice 2)
 
+## Richieste di Sean del 06/10 (ADVICES)
+
+In programma il 07/10, in quest'ordine: prima la fotocamera su PC (difetto piccolo, si
+corregge con un test), poi la condivisione dello schermo (brainstorming e spec), il PiP
+automatico resta fermo finché non c'è l'app nativa.
+
+- [ ] **(3, fermo)** Swipe verso l'alto su iPhone: la call non passa ancora nel riquadro PiP. È il caso
+      già deciso il 29/09 (vedi sopra): dal web Safari non lo permette per un video dentro
+      la pagina. Da riaprire solo con l'app nativa o un'idea nuova
+- [ ] **(1)** «Gira fotocamera» su PC: l'immagine viene ridimensionata come se fosse la fotocamera
+      verticale di un telefono. Da correggere: su desktop il formato resta orizzontale
+- [ ] **(2)** Condivisione dello schermo per l'host: nuova funzione, serve una spec (LiveKit in
+      `packages/realtime`; dove compare sul palco o accanto ai video)
+
 ## Redesign (Nod) — 29/09
 
 Spec `docs/specs/2026-09-29-redesign-call-design.md`, piano `docs/plans/2026-09-29-redesign-call.md`,

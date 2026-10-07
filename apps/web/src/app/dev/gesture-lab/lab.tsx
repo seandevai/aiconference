@@ -1,127 +1,186 @@
 'use client';
 
-import { useRef, useState, useSyncExternalStore } from 'react';
-import { Button } from '@omnicanvas/ui';
-import { StageBoard } from '@/app/room/[code]/stage-board';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { cx } from '@omnicanvas/ui';
 import type { Frame } from '@omnicanvas/gesture';
-import { effectiveTuning, labCode } from '@/lib/gesture-lab/settings';
+import { StageBoard } from '@/app/room/[code]/stage-board';
+import type { LabArchive, RecordingSummary } from '@/lib/gesture-lab/lab-store';
+import { useLabView } from '@/lib/gesture-lab/lab-view';
+import { effectiveTuning } from '@/lib/gesture-lab/settings';
 import { useGestureLab } from '@/lib/gesture-lab/use-gesture-lab';
-import { EventList } from './event-list';
-import { HandPanel } from './hand-panel';
-import { LabControls } from './lab-controls';
-import { ReplayPanel } from './replay-panel';
-
-const LIVE_MESSAGES = {
-  off: null,
-  loading: 'Avvio della webcam e del riconoscimento…',
-  on: null,
-  no_camera:
-    'Webcam non disponibile: consenti la fotocamera nel browser. Il rigioco funziona lo stesso.',
-  unavailable:
-    'Riconoscimento delle mani non disponibile su questo dispositivo. Il rigioco funziona lo stesso.',
-} as const;
+import { AdvancedPanel } from './advanced-panel';
+import { Diagnostics } from './diagnostics';
+import { HandView } from './hand-view';
+import { HomeScreen } from './home-screen';
+import { LabScene } from './lab-scene';
+import { PresetSection } from './preset-panel';
+import { RecordWizard } from './record-wizard';
+import { ReplayScreen } from './replay-screen';
+import { TryScreen } from './try-screen';
 
 // Solo nel browser: le impostazioni vengono da localStorage, il server non le conosce.
 const subscribe = () => () => {};
-export function Lab() {
+export function Lab({ archive }: { archive: LabArchive | null }) {
   const mounted = useSyncExternalStore(
     subscribe,
     () => true,
     () => false,
   );
-  return mounted ? <LabClient /> : null;
+  return mounted ? <LabClient archive={archive} /> : null;
 }
 
-function LabClient() {
+function LabClient({ archive }: { archive: LabArchive | null }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const areaRef = useRef<HTMLDivElement>(null);
   const framesRef = useRef<{ raw: Frame; processed: Frame } | null>(null);
   const lab = useGestureLab({ videoRef, areaRef, framesRef });
-  const [code, setCode] = useState<string | null>(null);
-  const message = LIVE_MESSAGES[lab.live];
+  const { view, id, go } = useLabView(archive !== null);
+  // Registrazioni e preset vivono qui: restano cambiando schermata o chiudendo Avanzate.
+  const [recordings, setRecordings] = useState<RecordingSummary[]>(archive?.recordings ?? []);
+  const [presets, setPresets] = useState(archive?.presets ?? []);
+  const [advanced, setAdvanced] = useState(false);
+  const [screenScene, setScreenScene] = useState(false);
+  const sceneVisible = view === 'prova' || screenScene;
+  const showAdvanced = advanced && sceneVisible;
 
-  async function copyCode() {
-    const text = labCode(lab.settings);
-    try {
-      await navigator.clipboard.writeText(text);
-      setCode(null);
-    } catch {
-      setCode(text);
-    }
-  }
+  // La fotocamera segue la schermata. Ogni schermata ha il suo <video>: cambiando schermata lo
+  // stream resterebbe su un elemento staccato (che il browser mette in pausa), quindi si ferma
+  // sempre e riparte entrando in Prova; Registra la accende da sé al passo 2. Anche il rigioco
+  // si ferma. Il hook si legge da un ref: l'effetto dipende solo dalla vista.
+  const labRef = useRef(lab);
+  useEffect(() => {
+    labRef.current = lab;
+  });
+  useEffect(() => {
+    const current = labRef.current;
+    current.pause();
+    current.stopLive();
+    if (view === 'prova') void current.startLive();
+  }, [view]);
+
+  const removeRecording = useCallback(
+    (recordingId: string) => setRecordings((list) => list.filter((r) => r.id !== recordingId)),
+    [],
+  );
+  const addRecording = useCallback(
+    (summary: RecordingSummary) => setRecordings((list) => [summary, ...list]),
+    [],
+  );
+  const openAdvanced = useCallback(() => setAdvanced(true), []);
+  const toHome = useCallback(() => go('home'), [go]);
+  const toList = useCallback(() => go('rigioca'), [go]);
+  const openRecording = useCallback((recordingId: string) => go('rigioca', recordingId), [go]);
+
+  const scene = (
+    <LabScene
+      areaRef={areaRef}
+      hand={
+        <HandView
+          videoRef={videoRef}
+          framesRef={framesRef}
+          view={lab.view}
+          lastEvent={lab.fired[lab.fired.length - 1] ?? null}
+          feedback={lab.settings.toggles.feedback}
+          idle={lab.live !== 'on' && !lab.playing}
+          replaying={lab.playing}
+        />
+      }
+      stage={<StageBoard stage={lab.stage} assetUrls={{}} dispatch={lab.dispatch} />}
+    />
+  );
 
   return (
-    // Su schermo largo la pagina è alta quanto lo schermo: il palco, la mano e gli eventi
-    // restano sempre in vista, e solo la colonna dei comandi scorre.
-    <main className="grid min-h-dvh grid-cols-1 gap-4 bg-bg p-4 text-fg lg:h-dvh lg:grid-cols-[minmax(0,1fr)_380px] lg:grid-rows-[minmax(0,1fr)]">
-      <section className="flex min-h-0 flex-col gap-2">
-        <h1 className="text-lg font-extrabold">Laboratorio gesture</h1>
-        <div ref={areaRef} className="relative min-h-[320px] flex-1">
-          <StageBoard stage={lab.stage} assetUrls={{}} dispatch={lab.dispatch} />
-        </div>
-        <div className="grid shrink-0 grid-cols-1 gap-4 md:grid-cols-2 lg:h-[40%]">
-          <div className="min-h-0 overflow-y-auto">
-            <HandPanel
-              videoRef={videoRef}
-              framesRef={framesRef}
-              hand={lab.hand}
-              view={lab.view}
-              tuning={effectiveTuning(lab.settings)}
-              feedback={lab.settings.toggles.feedback}
+    <main
+      className={cx(
+        'flex h-dvh flex-col gap-3 overflow-hidden bg-bg p-4 text-fg',
+        showAdvanced && 'lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:grid-rows-[minmax(0,1fr)]',
+      )}
+    >
+      <div className="flex min-h-0 flex-1 flex-col gap-3">
+        {view === 'home' && <HomeScreen canArchive={archive !== null} onGo={go} />}
+        {view === 'prova' && (
+          <TryScreen
+            scene={scene}
+            live={lab.live}
+            armed={lab.armed}
+            onStart={() => void lab.startLive()}
+            onStop={lab.stopLive}
+            onBack={toHome}
+            onAdvanced={openAdvanced}
+          />
+        )}
+        {view === 'registra' && archive && (
+          <RecordWizard
+            live={lab.live}
+            hand={lab.hand}
+            settings={lab.settings}
+            scene={scene}
+            capture={lab.capture}
+            onStartCamera={() => void lab.startLive()}
+            onRecorded={lab.loadRecording}
+            onReview={lab.play}
+            onSaved={addRecording}
+            onScene={setScreenScene}
+            onAdvanced={openAdvanced}
+            onExit={toHome}
+          />
+        )}
+        {view === 'rigioca' && archive && (
+          <ReplayScreen
+            userId={archive.userId}
+            recordings={recordings}
+            onRemoved={removeRecording}
+            id={id}
+            scene={scene}
+            settings={lab.settings}
+            recording={lab.recording}
+            playing={lab.playing}
+            progress={lab.progress}
+            onLoad={lab.loadRecording}
+            onPlay={lab.play}
+            onPause={lab.pause}
+            onOpen={openRecording}
+            onList={toList}
+            onExit={toHome}
+            onScene={setScreenScene}
+            onAdvanced={openAdvanced}
+          />
+        )}
+      </div>
+      <AdvancedPanel
+        open={showAdvanced}
+        onClose={() => setAdvanced(false)}
+        settings={lab.settings}
+        onChange={lab.setSettings}
+        diagnostics={
+          <Diagnostics
+            view={lab.view}
+            hand={lab.hand}
+            tuning={effectiveTuning(lab.settings)}
+            log={lab.log}
+          />
+        }
+        presets={
+          archive ? (
+            <PresetSection
+              userId={archive.userId}
+              presets={presets}
+              onPresetsChange={setPresets}
+              settings={lab.settings}
+              onApply={lab.setSettings}
             />
-          </div>
-          <div className="min-h-0 overflow-y-auto">
-            <EventList entries={lab.log} />
-          </div>
-        </div>
-        {lab.cursor && (
-          <div
-            aria-hidden
-            style={{ left: lab.cursor.x, top: lab.cursor.y }}
-            className={`pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 ${
-              lab.cursor.grabbing ? 'h-8 w-8 border-accent bg-accent/30' : 'h-5 w-5 border-fg'
-            }`}
-          />
-        )}
-      </section>
-
-      <aside className="flex min-h-0 flex-col gap-4 overflow-y-auto">
-        <div className="flex flex-wrap gap-2">
-          {lab.live === 'on' ? (
-            <Button onClick={lab.stopLive}>Ferma la webcam</Button>
-          ) : (
-            <Button
-              variant="accent"
-              disabled={lab.live === 'loading'}
-              onClick={() => void lab.startLive()}
-            >
-              Avvia la webcam
-            </Button>
-          )}
-          <span className="self-center text-xs text-muted">
-            {lab.armed ? 'Gesture attive' : 'Gesture in pausa'}
-          </span>
-        </div>
-        {message && <p className="text-xs text-muted">{message}</p>}
-        <ReplayPanel
-          recording={lab.recording}
-          playing={lab.playing}
-          fired={lab.fired}
-          onLoad={lab.loadRecording}
-          onPlay={lab.play}
-          onPause={lab.pause}
+          ) : null
+        }
+      />
+      {lab.cursor && (
+        <div
+          aria-hidden
+          style={{ left: lab.cursor.x, top: lab.cursor.y }}
+          className={`pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 ${
+            lab.cursor.grabbing ? 'h-8 w-8 border-accent bg-accent/30' : 'h-5 w-5 border-fg'
+          }`}
         />
-        <LabControls settings={lab.settings} onChange={lab.setSettings} />
-        <Button onClick={() => void copyCode()}>Copia come codice</Button>
-        {code && (
-          <textarea
-            readOnly
-            value={code}
-            rows={12}
-            className="rounded-tile border border-line bg-stage p-2 font-mono text-xs"
-          />
-        )}
-      </aside>
+      )}
     </main>
   );
 }

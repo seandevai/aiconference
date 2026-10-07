@@ -83,15 +83,23 @@ Non toccare segreti, billing o policy di sicurezza senza dichiararlo nel piano.
 Slice 0, 1, 2 (call), 3 (palco), 4A (agente a comando con richiesta scritta,
 `AIService`, ledger) e 5 (gesture) in `main` dal 29/09 (PR #1-#6), con la call da
 telefono (PR #7). Nome di prodotto proposto: «Nod» (da verificare il marchio; bozze del
-logo in `design/`, fuori da git). Redesign della call e del palco nella veste Nod (antracite, lime, Manrope,
-laboratorio dell'host) su `slice/redesign-call` (PR #9). Accesso «Sobrio» e dashboard «Agenda»
-(riunioni per stato, crediti, profilo) su `slice/accesso-dashboard`, spec
-`docs/specs/2026-09-30-accesso-dashboard-design.md`. Spike CPU e iOS in attesa di misura. Prima demo =
+logo in `design/`, fuori da git). In `main` anche: redesign della call e del palco nella veste Nod
+(antracite, lime, Manrope, laboratorio dell'host, PR #9), accesso «Sobrio» e dashboard «Agenda» (PR #10,
+spec `docs/specs/2026-09-30-accesso-dashboard-design.md`), nucleo del pacchetto cifrato (slice 8, PR #13)
+e della negoziazione (slice 7, PR #14), robustezza della call (PR #16), contratto delle variabili (PR #15),
+report notturno del 02/10 (PR #19). PR aperte al 07/10: #11 profondità di call e palco, #17 untrack
+`.claude/settings.json`, #18 recupero immagini dagli ospiti, #20 timer della stanza, #21 e #22
+laboratorio gesture. Spike CPU e iOS in attesa di misura. Prima demo =
 slice 0-5: completa lato codice salvo la voce (slice 4B), in attesa del test con i consulenti.
 Laboratorio gesture `/dev/gesture-lab` su `slice/gesture-lab` (spec
 `docs/specs/2026-10-05-gesture-lab-design.md`): solo sviluppo (`notFound()` in produzione), predefiniti
 invariati e quindi call invariata; la traduzione gesto → palco sta in
-`apps/web/src/lib/stage/stage-gesture-handler.ts`, condivisa da call e laboratorio.
+`apps/web/src/lib/stage/stage-gesture-handler.ts`, condivisa da call e laboratorio. Su
+`slice/gesture-lab-staging` il laboratorio va su staging per gli admin
+(`docs/GESTURE-LAB.md`), con registrazioni e preset su Supabase (migrazione 0006). Redesign del laboratorio
+(spec `docs/specs/2026-10-06-gesture-lab-redesign-design.md`, piano
+`docs/plans/2026-10-07-gesture-lab-redesign.md`): pagina iniziale con Prova, Registra a passi
+e Rigioca, tecnico in «Avanzate», usabile da telefono.
 
 Spec v3 del 23/09, dopo un secondo brainstorming con Sean. Rispetto alla v2: palco a
 finestre a slot magnetici invece della lista di schede (ADR-0009), agente a comando
@@ -142,9 +150,13 @@ Il passo successivo, in ordine:
    con 5 consulenti (`docs/spikes/`).
 2. Redesign della UI della call, desktop e mobile, con «Riquadro» più visibile: da fare
    partendo da un brainstorming con i mockup e da una spec.
-3. Slice 4B (parola chiave, STT, immagini, companion): servono le decisioni di Sean
+3. Richieste di Sean del 06/10 (`docs/BACKLOG.md`, «ADVICES»): correggere «Gira fotocamera»
+   su PC (l'immagine non deve diventare verticale), poi la condivisione dello schermo
+   dell'host, da brainstorming e spec. Il PiP con lo swipe su iPhone resta fermo (limite di
+   Safari, deciso il 29/09).
+4. Slice 4B (parola chiave, STT, immagini, companion): servono le decisioni di Sean
    (spec §12) e le chiavi dei vendor.
-4. Dopo il test con i consulenti: slice 6-8 (sottotitoli, negoziazione, pacchetto).
+5. Dopo il test con i consulenti: slice 6-8 (sottotitoli, negoziazione, pacchetto).
 
 Decisioni prese e non da riaprire senza un ADR nuovo: palco a slot magnetici, solo
 l'host scrive sul palco e attiva l'agente, negoziazione aperta dall'host con tetto e

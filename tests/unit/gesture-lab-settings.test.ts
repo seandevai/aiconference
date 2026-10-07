@@ -8,6 +8,7 @@ import {
   labCode,
   loadLabSettings,
   parseDictionary,
+  parseLabSettings,
   readTuningValue,
   saveLabSettings,
   setTuningValue,
@@ -123,9 +124,9 @@ describe('tuningToCode', () => {
 });
 
 describe('labStage', () => {
-  it('builds three windows, each with a sample content', () => {
+  it('builds two windows, each with a sample content', () => {
     const stage = labStage();
-    expect(stage.windows).toHaveLength(3);
+    expect(stage.windows).toHaveLength(2);
     expect(stage.windows.every((w) => w.contents.length === 1)).toBe(true);
     expect(stage.tray).toEqual([]);
   });
@@ -139,5 +140,17 @@ describe('labCode', () => {
     const start = code.indexOf('{');
     const end = code.indexOf('\n};');
     expect(JSON.parse(code.slice(start, end + 2))).toEqual(DEFAULT_TUNING);
+  });
+});
+
+describe('parseLabSettings', () => {
+  it('falls back to the defaults for anything it does not understand', () => {
+    expect(parseLabSettings(null)).toEqual(DEFAULT_LAB_SETTINGS);
+    expect(parseLabSettings({ toggles: { feedback: 'yes' } })).toEqual(DEFAULT_LAB_SETTINGS);
+  });
+
+  it('keeps valid toggles', () => {
+    const settings = parseLabSettings({ toggles: { feedback: true } });
+    expect(settings.toggles.feedback).toBe(true);
   });
 });
