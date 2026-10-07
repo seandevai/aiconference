@@ -147,9 +147,13 @@ Il passo successivo, in ordine:
    con 5 consulenti (`docs/spikes/`).
 2. Redesign della UI della call, desktop e mobile, con «Riquadro» più visibile: da fare
    partendo da un brainstorming con i mockup e da una spec.
-3. Slice 4B (parola chiave, STT, immagini, companion): servono le decisioni di Sean
+3. Richieste di Sean del 06/10 (`docs/BACKLOG.md`, «ADVICES»): correggere «Gira fotocamera»
+   su PC (l'immagine non deve diventare verticale), poi la condivisione dello schermo
+   dell'host, da brainstorming e spec. Il PiP con lo swipe su iPhone resta fermo (limite di
+   Safari, deciso il 29/09).
+4. Slice 4B (parola chiave, STT, immagini, companion): servono le decisioni di Sean
    (spec §12) e le chiavi dei vendor.
-4. Dopo il test con i consulenti: slice 6-8 (sottotitoli, negoziazione, pacchetto).
+5. Dopo il test con i consulenti: slice 6-8 (sottotitoli, negoziazione, pacchetto).
 
 Decisioni prese e non da riaprire senza un ADR nuovo: palco a slot magnetici, solo
 l'host scrive sul palco e attiva l'agente, negoziazione aperta dall'host con tetto e
