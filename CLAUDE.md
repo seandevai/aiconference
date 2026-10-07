@@ -83,10 +83,13 @@ Non toccare segreti, billing o policy di sicurezza senza dichiararlo nel piano.
 Slice 0, 1, 2 (call), 3 (palco), 4A (agente a comando con richiesta scritta,
 `AIService`, ledger) e 5 (gesture) in `main` dal 29/09 (PR #1-#6), con la call da
 telefono (PR #7). Nome di prodotto proposto: «Nod» (da verificare il marchio; bozze del
-logo in `design/`, fuori da git). Redesign della call e del palco nella veste Nod (antracite, lime, Manrope,
-laboratorio dell'host) su `slice/redesign-call` (PR #9). Accesso «Sobrio» e dashboard «Agenda»
-(riunioni per stato, crediti, profilo) su `slice/accesso-dashboard`, spec
-`docs/specs/2026-09-30-accesso-dashboard-design.md`. Spike CPU e iOS in attesa di misura. Prima demo =
+logo in `design/`, fuori da git). In `main` anche: redesign della call e del palco nella veste Nod
+(antracite, lime, Manrope, laboratorio dell'host, PR #9), accesso «Sobrio» e dashboard «Agenda» (PR #10,
+spec `docs/specs/2026-09-30-accesso-dashboard-design.md`), nucleo del pacchetto cifrato (slice 8, PR #13)
+e della negoziazione (slice 7, PR #14), robustezza della call (PR #16), contratto delle variabili (PR #15),
+report notturno del 02/10 (PR #19). PR aperte al 07/10: #11 profondità di call e palco, #17 untrack
+`.claude/settings.json`, #18 recupero immagini dagli ospiti, #20 timer della stanza, #21 e #22
+laboratorio gesture. Spike CPU e iOS in attesa di misura. Prima demo =
 slice 0-5: completa lato codice salvo la voce (slice 4B), in attesa del test con i consulenti.
 Laboratorio gesture `/dev/gesture-lab` su `slice/gesture-lab` (spec
 `docs/specs/2026-10-05-gesture-lab-design.md`): solo sviluppo (`notFound()` in produzione), predefiniti
