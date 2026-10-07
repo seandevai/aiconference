@@ -117,6 +117,32 @@ describe('host that reloaded the page', () => {
     expect(result.current.assetUrls[ASSET]).toBe('blob:x');
   });
 
+  // L'impronta copre solo i byte: il tipo si prende dal palco, non dall'ospite.
+  it('keeps the mime written in the stage, not the one the guest sends', async () => {
+    const session = fakeSession();
+    const types: string[] = [];
+    vi.stubGlobal(
+      'URL',
+      Object.assign(URL, {
+        createObjectURL: (blob: Blob) => {
+          types.push(blob.type);
+          return 'blob:x';
+        },
+        revokeObjectURL: () => {},
+      }),
+    );
+    await renderHost(session);
+    await act(async () => {
+      session.deliverBytes(
+        'asset',
+        packAsset({ assetId: ASSET, mime: 'image/webp' }, BYTES),
+        'guest',
+      );
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(types).toEqual(['image/png']);
+  });
+
   it('refuses bytes that do not match the hash', async () => {
     const session = fakeSession();
     const { result } = await renderHost(session);

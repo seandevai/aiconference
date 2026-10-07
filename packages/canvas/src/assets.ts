@@ -47,12 +47,15 @@ export async function sha256Hex(bytes: Uint8Array): Promise<string> {
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-// Le impronte delle immagini sul palco, per verificare byte arrivati da un ospite.
-export function imageHashes(stage: Stage): Map<string, string> {
+// Le immagini sul palco recuperabili da un ospite: impronta per verificare i byte, tipo
+// preso dal palco perché l'impronta non copre l'intestazione che l'ospite manda.
+export function recoverableImages(stage: Stage): Map<string, { sha256: string; mime: ImageMime }> {
   const all = [...stage.tray, ...stage.windows.flatMap((w) => w.contents)];
   return new Map(
     all.flatMap((c) =>
-      c.kind === 'image' && c.data.sha256 ? [[c.data.assetId, c.data.sha256] as const] : [],
+      c.kind === 'image' && c.data.sha256
+        ? [[c.data.assetId, { sha256: c.data.sha256, mime: c.data.mime }] as const]
+        : [],
     ),
   );
 }

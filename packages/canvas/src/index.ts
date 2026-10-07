@@ -22,7 +22,7 @@ export { followMessage, writeCommand } from './sync';
 export {
   MAX_ASSET_BYTES,
   imageAssetIds,
-  imageHashes,
+  recoverableImages,
   packAsset,
   sha256Hex,
   unpackAsset,

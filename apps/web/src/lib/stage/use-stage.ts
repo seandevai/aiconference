@@ -6,7 +6,7 @@ import {
   emptyStage,
   followMessage,
   imageAssetIds,
-  imageHashes,
+  recoverableImages,
   packAsset,
   parseStage,
   parseStageMessage,
@@ -121,10 +121,11 @@ export function useStage({ joinCode, role, session, roster }: Options) {
       if (from === session.localIdentity) return;
       const asset = unpackAsset(bytes);
       if (!asset || assetsRef.current.has(asset.header.assetId)) return;
-      const expected = imageHashes(stageRef.current).get(asset.header.assetId);
+      const expected = recoverableImages(stageRef.current).get(asset.header.assetId);
       if (!expected) return;
       void sha256Hex(asset.bytes).then((actual) => {
-        if (actual === expected) storeAsset(asset.header.assetId, asset.header.mime, asset.bytes);
+        if (actual === expected.sha256)
+          storeAsset(asset.header.assetId, expected.mime, asset.bytes);
       });
     });
     // Battito di versione: un ospite che ha perso l'ultimo comando chiede lo snapshot.
@@ -147,7 +148,7 @@ export function useStage({ joinCode, role, session, roster }: Options) {
     if (role !== 'host' || !session || !ready) return;
     const requestLost = () => {
       const now = Date.now();
-      for (const assetId of imageHashes(stageRef.current).keys()) {
+      for (const assetId of recoverableImages(stageRef.current).keys()) {
         if (assetsRef.current.has(assetId)) continue;
         if (now - (requestedRef.current.get(assetId) ?? 0) < ASSET_RETRY_MS) continue;
         requestedRef.current.set(assetId, now);

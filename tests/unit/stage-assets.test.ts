@@ -5,7 +5,7 @@ import {
   contentSchema,
   emptyStage,
   imageAssetIds,
-  imageHashes,
+  recoverableImages,
   packAsset,
   sampleContent,
   sha256Hex,
@@ -59,7 +59,7 @@ describe('image integrity', () => {
     );
   });
 
-  it('maps every image on the stage to its hash, when it has one', () => {
+  it('maps every image on the stage to its hash and mime, when it has a hash', () => {
     const hash = 'a'.repeat(64);
     const image = (n: number, sha256?: string) => ({
       id: `00000000-0000-4000-8000-00000000000${n}`,
@@ -73,7 +73,9 @@ describe('image integrity', () => {
       },
     });
     const stage = { ...emptyStage(), tray: [image(1, hash), image(2)] };
-    expect(imageHashes(stage)).toEqual(new Map([['20000000-0000-4000-8000-000000000001', hash]]));
+    expect(recoverableImages(stage)).toEqual(
+      new Map([['20000000-0000-4000-8000-000000000001', { sha256: hash, mime: 'image/png' }]]),
+    );
   });
 
   it('accepts a well formed hash in the content schema, and only that', () => {
