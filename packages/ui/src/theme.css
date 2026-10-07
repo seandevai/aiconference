@@ -11,9 +11,109 @@
   --color-accent: #c8f25a;
   --color-on-accent: #202020;
   --color-danger: #ff6b6b;
+  /* Alone lime di ciò che è vivo (spec 2026-09-30, §1). */
+  --color-glow: rgb(200 242 90 / 0.45);
 
   --radius-tile: 10px;
   --radius-panel: 14px;
 
   --font-sans: var(--font-manrope), system-ui, sans-serif;
+
+  --animate-birth: birth 600ms cubic-bezier(0.2, 0.9, 0.25, 1.15);
+
+  @keyframes birth {
+    0% {
+      opacity: 0;
+      transform: perspective(900px) translateZ(-220px) scale(0.92);
+      filter: blur(6px);
+    }
+    40% {
+      opacity: 1;
+      transform: none;
+      filter: blur(0);
+      box-shadow:
+        0 0 0 2px var(--color-accent),
+        0 0 50px 4px var(--color-glow);
+    }
+    100% {
+      transform: none;
+    }
+  }
+}
+
+/* Ombre risolte dove si usano (inline): leggono --tilt-x e --tilt-y dell'antenato, così
+   l'ombra si sposta con l'inclinazione. Senza inclinazione valgono 0. */
+@theme inline {
+  --shadow-window:
+    inset 0 1px 0 rgb(255 255 255 / 0.07),
+    calc(var(--tilt-x, 0) * -10px) calc(14px + var(--tilt-y, 0) * -6px) 28px -12px
+      rgb(8 8 6 / 0.75);
+  --shadow-window-active:
+    inset 0 1px 0 rgb(255 255 255 / 0.07), 0 0 0 1px rgb(200 242 90 / 0.15),
+    0 0 30px -8px rgb(200 242 90 / 0.35),
+    calc(var(--tilt-x, 0) * -10px) calc(14px + var(--tilt-y, 0) * -6px) 28px -12px
+      rgb(8 8 6 / 0.75);
+  --shadow-edge: inset 0 1px 0 rgb(255 255 255 / 0.04);
+}
+
+/* Palco illuminato dall'alto: da stage verso un grigio più scuro, nessun colore nuovo. */
+@utility stage-light {
+  background: radial-gradient(
+    110% 80% at 50% -10%,
+    color-mix(in srgb, var(--color-stage) 80%, white) 0%,
+    var(--color-stage) 55%,
+    color-mix(in srgb, var(--color-stage) 70%, black) 100%
+  );
+}
+
+/* Grana leggera sopra il palco: rompe il piatto digitale, non intercetta il puntatore. */
+@utility grain {
+  position: relative;
+  isolation: isolate;
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0.08;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+/* Finestre vive: inclinazione e riflesso seguono --tilt-x/--tilt-y. Solo con un puntatore
+   fine e senza movimento ridotto; altrimenti la finestra resta piatta. */
+@utility window-tilt {
+  position: relative;
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    transform: perspective(900px) rotateX(calc(var(--tilt-y, 0) * -4deg))
+      rotateY(calc(var(--tilt-x, 0) * 5deg));
+    /* Una sola lista: un transition-property successivo annullerebbe l'inclinazione. */
+    transition:
+      transform 250ms ease-out,
+      box-shadow 250ms ease-out,
+      border-color 200ms ease-out;
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      background: radial-gradient(
+        60% 50% at calc(50% + var(--tilt-x, 0) * 40%) calc(var(--tilt-y, 0) * 30%),
+        rgb(255 255 255 / 0.07),
+        transparent 70%
+      );
+    }
+  }
+}
+
+/* Alone di chi parla: cresce con --level (0-1). */
+@utility voice-glow {
+  box-shadow:
+    0 0 0 2px var(--color-accent),
+    0 0 calc(6px + var(--level, 0) * 18px) calc(var(--level, 0) * 5px) var(--color-glow);
+  transition: box-shadow 90ms linear;
 }

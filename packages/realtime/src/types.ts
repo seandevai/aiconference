@@ -23,6 +23,9 @@ export type RosterEntry = {
   speaking: boolean;
 };
 
+// Volume di chi parla, 0-1 a passi di 0,1. Chi non compare è in silenzio. Solo in memoria.
+export type AudioLevels = Record<string, number>;
+
 export type Unsubscribe = () => void;
 
 export interface RealtimeSession {
@@ -34,6 +37,8 @@ export interface RealtimeSession {
   onRosterChange(handler: (roster: RosterEntry[]) => void): Unsubscribe;
   onAudioBlockedChange(handler: (blocked: boolean) => void): Unsubscribe;
   onDisconnected(handler: (cause: DisconnectCause) => void): Unsubscribe;
+  // Circa 8 volte al secondo, solo quando qualcosa cambia (alone della voce).
+  onAudioLevels(handler: (levels: AudioLevels) => void): Unsubscribe;
   // Da chiamare dentro un click: i browser bloccano l'audio senza un gesto dell'utente.
   startAudio(): Promise<void>;
   setMicrophoneEnabled(enabled: boolean): Promise<void>;

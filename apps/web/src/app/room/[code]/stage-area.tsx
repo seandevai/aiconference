@@ -1,10 +1,12 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { MAX_WINDOWS, type ImageMime, type Stage, type StageCommand } from '@omnicanvas/canvas';
+import { MAX_WINDOWS, nearestSlot, type ImageMime, type Stage, type StageCommand } from '@omnicanvas/canvas';
 import type { RealtimeSession } from '@omnicanvas/realtime';
 import { Button, Icon, Panel } from '@omnicanvas/ui';
+import { slotRectsFromDom } from '@/lib/stage/drop';
 import { stageCounter } from '@/lib/stage/stage-counter';
+import { useStageTilt } from '@/lib/stage/tilt';
 import { useGestures } from '@/lib/stage/use-gestures';
 import { AgentPanel } from './agent-panel';
 import { GestureControl } from './gesture-control';
@@ -21,30 +23,37 @@ type Props = {
   stage: Stage;
   ready: boolean;
   assetUrls: Record<string, string>;
+  born: string[];
   dispatch: (command: StageCommand) => void;
   addImage: (bytes: Uint8Array, mime: ImageMime, title: string, alt: string) => void;
 };
 
 export function StageArea(props: Props) {
-  const { role, stage, ready, assetUrls } = props;
+  const { role, stage, ready, assetUrls, born } = props;
   if (!ready) return <StageSkeleton />;
 
   if (role === 'guest') {
     const counter = stageCounter(stage);
     return (
       <>
-        <Panel tone="stage" className="hidden h-full flex-col gap-2 p-2 lg:flex">
+        <Panel tone="stage" lit className="hidden h-full flex-col gap-2 p-2 lg:flex">
           {counter && <span className="tabular text-xs text-muted">{counter}</span>}
-          <StageBoard stage={stage} assetUrls={assetUrls} />
+          <GuestBoard stage={stage} assetUrls={assetUrls} born={born} />
         </Panel>
         <div className="h-full lg:hidden">
-          <MobileStage stage={stage} assetUrls={assetUrls} />
+          <MobileStage stage={stage} assetUrls={assetUrls} born={born} />
         </div>
       </>
     );
   }
 
   return <HostStage {...props} />;
+}
+
+// Palco dell'ospite su desktop: gli hook non possono stare dopo il return condizionale.
+function GuestBoard({ stage, assetUrls, born }: Pick<Props, 'stage' | 'assetUrls' | 'born'>) {
+  const tilt = useStageTilt();
+  return <StageBoard stage={stage} assetUrls={assetUrls} born={born} boardRef={tilt.ref} />;
 }
 
 // La forma del palco (primo piano e tre laterali) mentre arriva lo stato: la pagina
@@ -54,6 +63,7 @@ function StageSkeleton() {
     // Niente regione propria: sta già dentro la sezione «Palco».
     <Panel
       tone="stage"
+      lit
       data-testid="stage-skeleton"
       aria-busy="true"
       className="grid h-full min-h-48 gap-2 p-2 lg:grid-cols-[3fr_1fr]"
@@ -81,11 +91,13 @@ function HostStage({
   showSamples,
   stage,
   assetUrls,
+  born,
   dispatch,
   addImage,
 }: Props) {
   const areaRef = useRef<HTMLDivElement>(null);
   const [agentFocus, setAgentFocus] = useState(0);
+  const tilt = useStageTilt();
   const gestures = useGestures({
     session,
     cameraOn,
@@ -93,8 +105,11 @@ function HostStage({
     dispatch,
     onAgent: () => setAgentFocus((n) => n + 1),
     areaRef,
+    onPointer: tilt.pointAt,
   });
   const counter = stageCounter(stage);
+  const cursor = gestures.cursor;
+  const handSlot = cursor?.grabbing ? nearestSlot(cursor, slotRectsFromDom()) : null;
 
   return (
     // Sotto lg il laboratorio scende sotto il palco: affiancato lo stringerebbe troppo.
@@ -117,7 +132,7 @@ function HostStage({
         </div>
       </Panel>
 
-      <Panel tone="stage" className="flex min-w-0 flex-1 flex-col gap-2 p-2">
+      <Panel tone="stage" lit className="flex min-w-0 flex-1 flex-col gap-2 p-2">
         <div className="flex items-center gap-2 text-xs">
           <Button
             size="sm"
@@ -155,7 +170,14 @@ function HostStage({
             <Icon name="plus" /> Nuova finestra
           </Button>
         </div>
-        <StageBoard stage={stage} assetUrls={assetUrls} dispatch={dispatch} />
+        <StageBoard
+          stage={stage}
+          assetUrls={assetUrls}
+          dispatch={dispatch}
+          born={born}
+          hotSlot={handSlot}
+          boardRef={tilt.ref}
+        />
       </Panel>
     </div>
   );

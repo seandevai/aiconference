@@ -15,9 +15,19 @@ type Options = {
   dispatch: (command: StageCommand) => void;
   onAgent: () => void;
   areaRef: React.RefObject<HTMLElement | null>;
+  // Posizione della mano sullo schermo durante un pizzico (null al rilascio): inclina il palco.
+  onPointer?: ((point: { x: number; y: number } | null) => void) | undefined;
 };
 
-export function useGestures({ session, cameraOn, stage, dispatch, onAgent, areaRef }: Options) {
+export function useGestures({
+  session,
+  cameraOn,
+  stage,
+  dispatch,
+  onAgent,
+  areaRef,
+  onPointer,
+}: Options) {
   const [status, setStatus] = useState<GestureStatus>('off');
   const [armed, setArmed] = useState(false);
   const [cursor, setCursor] = useState<StageCursor | null>(null);
@@ -25,12 +35,12 @@ export function useGestures({ session, cameraOn, stage, dispatch, onAgent, areaR
   const runnerRef = useRef<GestureRunner | null>(null);
   const detachRef = useRef<(() => void) | null>(null);
   const stageRef = useRef(stage);
-  const handlersRef = useRef({ dispatch, onAgent });
+  const handlersRef = useRef({ dispatch, onAgent, onPointer });
 
   useEffect(() => {
     stageRef.current = stage;
-    handlersRef.current = { dispatch, onAgent };
-  }, [stage, dispatch, onAgent]);
+    handlersRef.current = { dispatch, onAgent, onPointer };
+  }, [stage, dispatch, onAgent, onPointer]);
 
   // Punto normalizzato (vista specchio) → coordinate dello schermo sull'area del palco.
   const toScreen = useCallback(
@@ -50,7 +60,11 @@ export function useGestures({ session, cameraOn, stage, dispatch, onAgent, areaR
       dispatch: (command) => handlersRef.current.dispatch(command),
       onAgent: () => handlersRef.current.onAgent(),
       onArmed: setArmed,
-      onCursor: setCursor,
+      // Il cursore della mano guida anche l'inclinazione del palco: null quando la mano lascia.
+      onCursor: (cursor) => {
+        setCursor(cursor);
+        handlersRef.current.onPointer?.(cursor ? { x: cursor.x, y: cursor.y } : null);
+      },
     });
   }, [toScreen]);
   const onEvent = useCallback((event: GestureEvent) => handlerRef.current?.(event), []);
@@ -68,6 +82,8 @@ export function useGestures({ session, cameraOn, stage, dispatch, onAgent, areaR
       return;
     }
     setStatus('loading');
+    // Un cursore rimasto da un pizzico interrotto non deve ricomparire alla riaccensione.
+    setCursor(null);
     try {
       detachRef.current = session.attachVideo(session.localIdentity, video);
       const { startGestures } = await import('@omnicanvas/gesture/runner');
@@ -81,13 +97,15 @@ export function useGestures({ session, cameraOn, stage, dispatch, onAgent, areaR
     }
   }, [armed, cameraOn, onEvent, session]);
 
-  // Camera spenta o sessione finita: il riconoscimento si ferma, il mouse resta.
+  // Camera spenta o sessione finita: il riconoscimento si ferma, il mouse resta. Un pizzico
+  // in corso non riceverà mai il DROP: il palco torna dritto.
   useEffect(() => {
     if (cameraOn && session) return;
     runnerRef.current?.stop();
     runnerRef.current = null;
     detachRef.current?.();
     detachRef.current = null;
+    handlersRef.current.onPointer?.(null);
   }, [cameraOn, session]);
 
   useEffect(
@@ -103,7 +121,8 @@ export function useGestures({ session, cameraOn, stage, dispatch, onAgent, areaR
   return {
     status: effectiveStatus,
     armed: effectiveStatus === 'on' && armed,
-    cursor,
+    // Senza camera la mano non c'è: niente cursore né slot illuminato.
+    cursor: cameraOn && session ? cursor : null,
     videoRef,
     toggle,
   };

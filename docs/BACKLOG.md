@@ -197,7 +197,12 @@ branch `slice/redesign-call` (PR #9).
 - [ ] Logo definitivo in SVG (serve il file di Sean): sostituire `packages/ui/src/logo.tsx`
 - [x] Dashboard, login, registrazione nel nuovo stile (sotto-progetto 3, anticipato il 30/09:
       spec `docs/specs/2026-09-30-accesso-dashboard-design.md`, branch `slice/accesso-dashboard`)
-- [ ] Cambio visivo più marcato di call e palco (sotto-progetto separato, dopo l'accesso)
+- [x] Cambio visivo più marcato di call e palco: «Profondità» (luce, grana, finestre vive, nascita,
+      aggancio, alone della voce), spec `docs/specs/2026-09-30-profondita-call-design.md`,
+      branch `slice/profondita`
+- [ ] «Spazio»: palco come scena 3D con movimento di camera (CSS 3D)
+- [ ] «Olografico»: fondo vivo in WebGL, solo dopo la misura dello spike CPU
+- [ ] Scia dell'agente al lavoro nel laboratorio e accensione del palco all'ingresso in call
 - [ ] Accesso con link magico o codice monouso (servono le email transazionali)
 - [ ] Numero di partecipanti per riunione in dashboard: policy di lettura su
       `room_participants` per i membri del workspace, migrazione dedicata con test RLS

@@ -45,6 +45,38 @@ describe('theme tokens', () => {
     expect(contrast(token('danger'), token('bg'))).toBeGreaterThanOrEqual(4.5);
   });
 
+  it('defines the depth tokens and utilities of the 30/09 spec', () => {
+    expect(css).toMatch(/--color-glow:\s*rgb\(200 242 90 \/ 0\.45\)/);
+    for (const name of ['shadow-window', 'shadow-window-active', 'shadow-edge']) {
+      expect(css).toContain(`--${name}:`);
+    }
+    for (const utility of ['stage-light', 'grain', 'window-tilt', 'voice-glow']) {
+      expect(css).toContain(`@utility ${utility}`);
+    }
+    expect(css).toContain('--animate-birth:');
+    expect(css).toContain('@keyframes birth');
+  });
+
+  it('eases the tilt and the border in one transition list', () => {
+    const tilt = css.slice(css.indexOf('@utility window-tilt'), css.indexOf('@utility voice-glow'));
+    expect(tilt).toMatch(/transition:[^;]*transform[^;]*box-shadow[^;]*border-color/);
+  });
+
+  it('keeps clicks working while a window glides to its slot', () => {
+    const globals = readFileSync(
+      new URL('../../apps/web/src/app/globals.css', import.meta.url),
+      'utf8',
+    );
+    expect(globals).toMatch(/::view-transition\s*\{\s*pointer-events:\s*none;/);
+  });
+
+  it('moves the windows only for a fine pointer and when motion is welcome', () => {
+    const tilt = css.slice(css.indexOf('@utility window-tilt'));
+    expect(tilt).toMatch(
+      /@media \(hover: hover\) and \(pointer: fine\) and \(prefers-reduced-motion: no-preference\)/,
+    );
+  });
+
   it('keeps danger and accent readable as text on the panels (WCAG AA, 4.5:1)', () => {
     for (const surface of ['surface', 'stage']) {
       expect(contrast(token('danger'), token(surface))).toBeGreaterThanOrEqual(4.5);

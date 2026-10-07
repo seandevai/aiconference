@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { nearestSlot, type Slot, type Stage, type StageCommand } from '@omnicanvas/canvas';
 import { resolveDrop, slotRectsFromDom } from '@/lib/stage/drop';
 import { DRAG_TYPE, WindowView, type DragItem } from './window-view';
@@ -15,6 +16,11 @@ type Props = {
   stage: Stage;
   assetUrls: Record<string, string>;
   dispatch?: ((command: StageCommand) => void) | undefined;
+  born?: string[] | undefined;
+  // Slot sotto la mano durante un pizzico: ha la precedenza sul mouse.
+  hotSlot?: Slot | null | undefined;
+  // Riceve --tilt-x/--tilt-y: le finestre dentro si inclinano verso il puntatore.
+  boardRef?: React.Ref<HTMLDivElement> | undefined;
 };
 
 function readDragItem(event: React.DragEvent): DragItem | null {
@@ -28,8 +34,12 @@ function readDragItem(event: React.DragEvent): DragItem | null {
   }
 }
 
-export function StageBoard({ stage, assetUrls, dispatch }: Props) {
+export function StageBoard({ stage, assetUrls, dispatch, born = [], hotSlot, boardRef }: Props) {
+  const [dragSlot, setDragSlot] = useState<Slot | null>(null);
+  const hot = hotSlot ?? dragSlot;
+
   function handleDrop(event: React.DragEvent) {
+    setDragSlot(null);
     if (!dispatch) return;
     event.preventDefault();
     const item = readDragItem(event);
@@ -47,10 +57,17 @@ export function StageBoard({ stage, assetUrls, dispatch }: Props) {
         role="region"
         aria-label={SLOT_LABELS[slot]}
         data-slot={slot}
-        className={className}
+        data-hot={hot === slot ? '' : undefined}
+        className={`${className} rounded-tile motion-safe:transition-colors data-hot:bg-accent/5 data-hot:outline data-hot:outline-1 data-hot:outline-dashed data-hot:outline-accent/60`}
       >
         {window ? (
-          <WindowView window={window} assetUrls={assetUrls} dispatch={dispatch} />
+          <WindowView
+            window={window}
+            assetUrls={assetUrls}
+            dispatch={dispatch}
+            born={born.includes(window.id)}
+            transitionName
+          />
         ) : (
           <div className="flex h-full items-center justify-center rounded-tile border border-dashed border-line text-xs text-muted">
             {slot === 'main' ? 'Nessuna finestra' : 'Slot libero'}
@@ -62,9 +79,18 @@ export function StageBoard({ stage, assetUrls, dispatch }: Props) {
 
   return (
     <div
+      ref={boardRef}
       onDragOver={(event) => {
-        if (dispatch) event.preventDefault();
+        if (!dispatch) return;
+        event.preventDefault();
+        const slot = nearestSlot({ x: event.clientX, y: event.clientY }, slotRectsFromDom());
+        if (slot !== dragSlot) setDragSlot(slot);
       }}
+      onDragLeave={(event) => {
+        // Uscire da un figlio verso un altro figlio non conta: solo l'uscita dal palco.
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDragSlot(null);
+      }}
+      onDragEnd={() => setDragSlot(null)}
       onDrop={handleDrop}
       className="grid min-h-0 flex-1 gap-2 lg:grid-cols-[3fr_1fr]"
     >

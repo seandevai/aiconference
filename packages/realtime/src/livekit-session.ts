@@ -8,10 +8,12 @@ import {
   type Participant,
   type RemoteTrack,
 } from 'livekit-client';
+import { AUDIO_LEVEL_INTERVAL_MS, createLevelTracker } from './audio-levels';
 import { cameraCaptureOptions, countVideoInputs, createCameraController } from './camera';
 import { assertChannel, decodeData, encodeData } from './data-codec';
 import { sortRoster, toRosterEntry } from './roster';
 import type {
+  AudioLevels,
   ConnectionStatus,
   DisconnectCause,
   RealtimeSession,
@@ -96,6 +98,16 @@ export async function connectToRoom(url: string, token: string): Promise<Realtim
   const disconnectHandlers = new Set<(cause: DisconnectCause) => void>();
   const dataHandlers = new Map<string, Set<(payload: unknown, from: string) => void>>();
   const byteHandlers = new Map<string, Set<(bytes: Uint8Array, from: string) => void>>();
+  const levelHandlers = new Set<(levels: AudioLevels) => void>();
+  const trackLevels = createLevelTracker();
+  // Si campiona solo se qualcuno ascolta; il numero non lascia mai la memoria.
+  const levelTimer = setInterval(() => {
+    if (levelHandlers.size === 0) return;
+    const levels = trackLevels(
+      room.activeSpeakers.map((p) => ({ identity: p.identity, audioLevel: p.audioLevel })),
+    );
+    if (levels) levelHandlers.forEach((handler) => handler(levels));
+  }, AUDIO_LEVEL_INTERVAL_MS);
 
   const participant = (identity: string): Participant | undefined =>
     identity === room.localParticipant.identity
@@ -146,6 +158,7 @@ export async function connectToRoom(url: string, token: string): Promise<Realtim
       handlers.forEach((handler) => handler(decoded, sender.identity));
     })
     .on(RoomEvent.Disconnected, (reason) => {
+      clearInterval(levelTimer);
       audioSink.remove();
       disconnectHandlers.forEach((handler) => handler(toCause(reason)));
     });
@@ -153,6 +166,7 @@ export async function connectToRoom(url: string, token: string): Promise<Realtim
   try {
     await room.connect(url, token);
   } catch (error) {
+    clearInterval(levelTimer);
     audioSink.remove();
     throw error;
   }
@@ -168,6 +182,7 @@ export async function connectToRoom(url: string, token: string): Promise<Realtim
     onRosterChange: (handler) => subscribe(rosterHandlers, handler),
     onAudioBlockedChange: (handler) => subscribe(audioHandlers, handler),
     onDisconnected: (handler) => subscribe(disconnectHandlers, handler),
+    onAudioLevels: (handler) => subscribe(levelHandlers, handler),
 
     async startAudio() {
       await room.startAudio();
