@@ -10,7 +10,12 @@ import {
 } from 'livekit-client';
 import { cameraCaptureOptions, countVideoInputs, createCameraController } from './camera';
 import { assertChannel, decodeData, encodeData } from './data-codec';
-import { ScreenShareCancelled, isShareCancel, supportsScreenShare } from './screen';
+import {
+  ScreenShareCancelled,
+  isScreenShareOver,
+  isShareCancel,
+  supportsScreenShare,
+} from './screen';
 import { sortRoster, toRosterEntry } from './roster';
 import type {
   ConnectionStatus,
@@ -146,8 +151,12 @@ export async function connectToRoom(url: string, token: string): Promise<Realtim
     .on(RoomEvent.LocalTrackPublished, emitRoster)
     .on(RoomEvent.LocalTrackUnpublished, emitRoster)
     // Stop dalla UI o dal pulsante del browser: LiveKit toglie la pubblicazione in entrambi i casi.
+    // Anche la riconnessione la toglie, ma lascia viva la cattura e la ripubblica.
     .on(RoomEvent.LocalTrackUnpublished, (publication) => {
-      if (publication.source === Track.Source.ScreenShare) {
+      if (
+        publication.source === Track.Source.ScreenShare &&
+        isScreenShareOver(publication.track?.mediaStreamTrack)
+      ) {
         screenEndedHandlers.forEach((handler) => handler());
       }
     })
@@ -157,7 +166,9 @@ export async function connectToRoom(url: string, token: string): Promise<Realtim
       emitRoster();
     })
     .on(RoomEvent.TrackUnsubscribed, (track: RemoteTrack) => {
-      track.detach().forEach((element) => element.remove());
+      // Si rimuovono solo gli <audio> creati qui; i <video> appartengono a React.
+      const elements = track.detach();
+      if (track.kind === Track.Kind.Audio) elements.forEach((element) => element.remove());
       emitRoster();
     })
     .on(RoomEvent.AudioPlaybackStatusChanged, () =>

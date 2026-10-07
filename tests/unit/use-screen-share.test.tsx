@@ -139,6 +139,69 @@ describe('useScreenShare', () => {
     expect(hook.result.current.stage.windows).toEqual([]);
   });
 
+  it('stops a share that starts on a session no longer current', async () => {
+    const old = fakeSession();
+    const fresh = fakeSession();
+    let release!: () => void;
+    old.session.startScreenShare.mockImplementationOnce(
+      () => new Promise<void>((resolve) => (release = resolve)),
+    );
+    const hook = renderHook(
+      ({ session }: { session: RealtimeSession }) => {
+        const [stage, setStage] = useState(emptyStage());
+        const dispatch = useCallback(
+          (command: StageCommand) => setStage((s) => applyCommand(s, command)),
+          [],
+        );
+        return {
+          stage,
+          share: useScreenShare({ session, role: 'host', stage, ready: true, dispatch, newId }),
+        };
+      },
+      { initialProps: { session: old.session as unknown as RealtimeSession } },
+    );
+    let pending!: Promise<void>;
+    act(() => {
+      pending = hook.result.current.share.start();
+    });
+    hook.rerender({ session: fresh.session as unknown as RealtimeSession });
+    await act(async () => {
+      release();
+      await pending;
+    });
+    expect(old.session.stopScreenShare).toHaveBeenCalled();
+    expect(findScreen(hook.result.current.stage)).toBeNull();
+    expect(hook.result.current.share.sharing).toBe(false);
+  });
+
+  it('stops a share that starts after the call has closed', async () => {
+    const { session } = fakeSession();
+    let release!: () => void;
+    session.startScreenShare.mockImplementationOnce(
+      () => new Promise<void>((resolve) => (release = resolve)),
+    );
+    const dispatch = vi.fn();
+    const hook = renderHook(() =>
+      useScreenShare({
+        session: session as unknown as RealtimeSession,
+        role: 'host',
+        stage: emptyStage(),
+        ready: true,
+        dispatch,
+        newId,
+      }),
+    );
+    let pending!: Promise<void>;
+    act(() => {
+      pending = hook.result.current.start();
+    });
+    hook.unmount();
+    release();
+    await pending;
+    expect(session.stopScreenShare).toHaveBeenCalled();
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
   it('is not available to guests or where the browser cannot share', () => {
     expect(setup({ role: 'guest' }).hook.result.current.share.available).toBe(false);
     expect(setup({ canShare: false }).hook.result.current.share.available).toBe(false);

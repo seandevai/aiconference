@@ -39,6 +39,18 @@ export function useScreenShare({
   useEffect(() => {
     stageRef.current = stage;
   }, [stage]);
+  // Il selettore può chiudersi dopo un cambio di sessione o dopo l'uscita dalla call.
+  const sessionRef = useRef(session);
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    sessionRef.current = session;
+  }, [session]);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const isHost = role === 'host';
   const sharing = session !== null && sharedOn === session;
@@ -70,6 +82,11 @@ export function useScreenShare({
       return;
     } finally {
       pickingRef.current = false;
+    }
+    // Cattura partita su una sessione che non è più quella della call: la si ferma subito.
+    if (!mountedRef.current || sessionRef.current !== session) {
+      void session.stopScreenShare().catch(() => {});
+      return;
     }
     setSharedOn(session);
     screenStartCommands(stageRef.current, {

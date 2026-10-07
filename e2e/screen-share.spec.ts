@@ -7,15 +7,21 @@ test('the host shares the screen and the guest sees it on the stage', async ({ b
   test.skip(info.project.name === 'mobile', "l'host non condivide da telefono");
   const { host, roomUrl } = await signUpHostWithRoom(browser);
   const guest = await joinAsAnonymousGuest(browser, roomUrl);
-  const screenWindow = (page: typeof host) => page.getByRole('article', { name: 'Schermo' });
+  // Come in stage.spec: i ruoli escludono il palco nascosto (telefono o desktop), il testo no.
+  const screenWindow = (page: typeof host) =>
+    page
+      .getByRole('region', { name: 'Finestra in primo piano' })
+      .getByRole('article', { name: 'Schermo' });
 
   await host.getByRole('button', { name: 'Condividi schermo' }).click();
   await expect(host.getByRole('button', { name: 'Interrompi condivisione' })).toBeVisible();
   await expect(screenWindow(guest)).toBeVisible({ timeout: 20_000 });
-  await expect(guest.getByText('Schermo in arrivo…')).toBeHidden({ timeout: 20_000 });
+  await expect(screenWindow(guest).getByText('Schermo in arrivo…')).toBeHidden({
+    timeout: 20_000,
+  });
 
   await host.getByRole('button', { name: 'Interrompi condivisione' }).click();
-  await expect(screenWindow(host)).toBeHidden();
+  await expect(screenWindow(host)).toBeHidden({ timeout: 10_000 });
   await expect(screenWindow(guest)).toBeHidden({ timeout: 20_000 });
 });
 

@@ -16,7 +16,12 @@ export function ScreenView({ owner, title }: { owner: string; title: string }) {
   useEffect(() => {
     const video = videoRef.current;
     if (!attach || !video) return;
-    return attach(owner, video);
+    const detach = attach(owner, video);
+    // Nuovo aggancio, nuovo primo fotogramma da attendere.
+    return () => {
+      detach();
+      setLive(false);
+    };
   }, [attach, owner]);
 
   return (
@@ -28,6 +33,8 @@ export function ScreenView({ owner, title }: { owner: string; title: string }) {
         playsInline
         muted
         onLoadedData={() => setLive(true)}
+        // Il flusso si svuota quando la traccia viene tolta: torna il segnaposto.
+        onEmptied={() => setLive(false)}
         className="max-h-[60vh] w-full rounded-tile bg-bg object-contain"
       />
       {!live && (

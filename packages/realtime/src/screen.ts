@@ -21,3 +21,9 @@ export function isShareCancel(error: unknown): boolean {
     error instanceof Error && error.name === 'NotAllowedError' && !/system/i.test(error.message)
   );
 }
+
+// Alla riconnessione LiveKit toglie e ripubblica la traccia senza fermarla; uno stop vero
+// (pulsante, browser, server) la ferma prima di toglierla. Fine solo se la cattura non è più viva.
+export function isScreenShareOver(track: { readyState?: string } | undefined): boolean {
+  return track?.readyState !== 'live';
+}

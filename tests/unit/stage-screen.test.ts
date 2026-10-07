@@ -54,6 +54,7 @@ describe('screen content', () => {
   it('allows a single screen on the stage', () => {
     const stage = applyCommand(withScreenWindow(), { type: 'TRAY_ADD', content: screen(S2) });
     expect(stage.tray).toEqual([]);
+    expect(stage.windows[0]!.contents.map((c) => c.id)).toEqual([S]);
   });
 
   it('is dropped, not archived, when removed from its window', () => {

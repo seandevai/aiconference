@@ -24,6 +24,35 @@ describe('ScreenView', () => {
     expect(detach).toHaveBeenCalled();
   });
 
+  it('shows the placeholder again when the stream empties', () => {
+    render(
+      <ScreenAttachContext.Provider value={() => () => {}}>
+        <ScreenView owner="host-1" title="Schermo" />
+      </ScreenAttachContext.Provider>,
+    );
+    const video = screen.getByLabelText('Schermo');
+    fireEvent.loadedData(video);
+    expect(screen.queryByText('Schermo in arrivo…')).toBeNull();
+    fireEvent.emptied(video);
+    expect(screen.getByText('Schermo in arrivo…')).toBeTruthy();
+  });
+
+  it('waits for a new first frame when the owner changes', () => {
+    const attach = () => () => {};
+    const { rerender } = render(
+      <ScreenAttachContext.Provider value={attach}>
+        <ScreenView owner="host-1" title="Schermo" />
+      </ScreenAttachContext.Provider>,
+    );
+    fireEvent.loadedData(screen.getByLabelText('Schermo'));
+    rerender(
+      <ScreenAttachContext.Provider value={attach}>
+        <ScreenView owner="host-2" title="Schermo" />
+      </ScreenAttachContext.Provider>,
+    );
+    expect(screen.getByText('Schermo in arrivo…')).toBeTruthy();
+  });
+
   it('shows the placeholder without a session', () => {
     render(<ScreenView owner="host-1" title="Schermo" />);
     expect(screen.getByText('Schermo in arrivo…')).toBeTruthy();
