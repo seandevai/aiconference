@@ -6,9 +6,11 @@ import {
   emptyStage,
   followMessage,
   imageAssetIds,
+  recoverableImages,
   packAsset,
   parseStage,
   parseStageMessage,
+  sha256Hex,
   unpackAsset,
   writeCommand,
   type ImageMime,
@@ -113,6 +115,19 @@ export function useStage({ joinCode, role, session, roster }: Options) {
         .sendBytes('asset', packAsset({ assetId, mime: asset.mime }, asset.bytes), [from])
         .catch(() => {});
     });
+    // Byte di immagini che l'host ha perso ricaricando la pagina, mandati da un ospite.
+    // Si accettano solo se l'impronta coincide con quella scritta nel palco.
+    const offRecovered = session.onBytes('asset', (bytes, from) => {
+      if (from === session.localIdentity) return;
+      const asset = unpackAsset(bytes);
+      if (!asset || assetsRef.current.has(asset.header.assetId)) return;
+      const expected = recoverableImages(stageRef.current).get(asset.header.assetId);
+      if (!expected) return;
+      void sha256Hex(asset.bytes).then((actual) => {
+        if (actual === expected.sha256)
+          storeAsset(asset.header.assetId, expected.mime, asset.bytes);
+      });
+    });
     // Battito di versione: un ospite che ha perso l'ultimo comando chiede lo snapshot.
     const heartbeat = setInterval(() => {
       void session
@@ -123,8 +138,27 @@ export function useStage({ joinCode, role, session, roster }: Options) {
       clearInterval(heartbeat);
       offSync();
       offAsset();
+      offRecovered();
     };
-  }, [role, session, ready]);
+  }, [role, session, ready, storeAsset]);
+
+  // Host che ha ricaricato: chiede a tutti gli ospiti le immagini di cui ha solo il
+  // riferimento. Solo quelle con l'impronta, che permette di verificare chi risponde.
+  useEffect(() => {
+    if (role !== 'host' || !session || !ready) return;
+    const requestLost = () => {
+      const now = Date.now();
+      for (const assetId of recoverableImages(stageRef.current).keys()) {
+        if (assetsRef.current.has(assetId)) continue;
+        if (now - (requestedRef.current.get(assetId) ?? 0) < ASSET_RETRY_MS) continue;
+        requestedRef.current.set(assetId, now);
+        void session.sendData('asset-request', { assetId }).catch(() => {});
+      }
+    };
+    requestLost();
+    const retry = setInterval(requestLost, ASSET_RETRY_MS);
+    return () => clearInterval(retry);
+  }, [role, session, ready, stage]);
 
   // Ospite: accetta solo messaggi dell'host, chiede lo snapshot quando perde il filo.
   // Finché non ha ricevuto nulla dall'host ripete la richiesta: la prima può perdersi
@@ -167,6 +201,16 @@ export function useStage({ joinCode, role, session, roster }: Options) {
       const asset = unpackAsset(bytes);
       if (asset) storeAsset(asset.header.assetId, asset.header.mime, asset.bytes);
     });
+    // L'host che ha ricaricato chiede le immagini perse: si mandano solo a lui.
+    const offAssetRequest = session.onData('asset-request', (payload, from) => {
+      if (!fromHost(from)) return;
+      const assetId = (payload as { assetId?: unknown } | null)?.assetId;
+      const asset = typeof assetId === 'string' ? assetsRef.current.get(assetId) : undefined;
+      if (!asset || typeof assetId !== 'string') return;
+      void session
+        .sendBytes('asset', packAsset({ assetId, mime: asset.mime }, asset.bytes), [from])
+        .catch(() => {});
+    });
     requestSync();
     const retry = setInterval(() => {
       if (!synced) requestSync();
@@ -176,6 +220,7 @@ export function useStage({ joinCode, role, session, roster }: Options) {
       offCommand();
       offSnapshot();
       offAsset();
+      offAssetRequest();
     };
   }, [role, session, hostIdentity, commit, storeAsset]);
 
@@ -220,10 +265,17 @@ export function useStage({ joinCode, role, session, roster }: Options) {
       const assetId = crypto.randomUUID();
       storeAsset(assetId, mime, bytes);
       void session?.sendBytes('asset', packAsset({ assetId, mime }, bytes)).catch(() => {});
-      dispatch({
-        type: 'TRAY_ADD',
-        content: { id: crypto.randomUUID(), kind: 'image', data: { title, assetId, mime, alt } },
-      });
+      // L'impronta va nel palco: se l'host ricarica, verifica i byte che gli ridanno gli ospiti.
+      void sha256Hex(bytes).then((sha256) =>
+        dispatch({
+          type: 'TRAY_ADD',
+          content: {
+            id: crypto.randomUUID(),
+            kind: 'image',
+            data: { title, assetId, mime, alt, sha256 },
+          },
+        }),
+      );
     },
     [session, storeAsset, dispatch],
   );

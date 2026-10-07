@@ -41,6 +41,25 @@ export function unpackAsset(packed: Uint8Array): { header: AssetHeader; bytes: U
   }
 }
 
+// Impronta dei byte di un'immagine, in esadecimale. Web Crypto: c'è nel browser e in Node.
+export async function sha256Hex(bytes: Uint8Array): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', bytes.slice());
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Le immagini sul palco recuperabili da un ospite: impronta per verificare i byte, tipo
+// preso dal palco perché l'impronta non copre l'intestazione che l'ospite manda.
+export function recoverableImages(stage: Stage): Map<string, { sha256: string; mime: ImageMime }> {
+  const all = [...stage.tray, ...stage.windows.flatMap((w) => w.contents)];
+  return new Map(
+    all.flatMap((c) =>
+      c.kind === 'image' && c.data.sha256
+        ? [[c.data.assetId, { sha256: c.data.sha256, mime: c.data.mime }] as const]
+        : [],
+    ),
+  );
+}
+
 export function imageAssetIds(stage: Stage): string[] {
   const all = [...stage.tray, ...stage.windows.flatMap((w) => w.contents)];
   return [...new Set(all.flatMap((c) => (c.kind === 'image' ? [c.data.assetId] : [])))];

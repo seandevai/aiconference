@@ -71,6 +71,10 @@ export const contentSchema = z.discriminatedUnion('kind', [
       assetId: id,
       mime: z.enum(['image/png', 'image/jpeg', 'image/webp']),
       alt: z.string().max(LIMITS.alt),
+      sha256: z
+        .string()
+        .regex(/^[0-9a-f]{64}$/)
+        .optional(),
     }),
   }),
 ]);

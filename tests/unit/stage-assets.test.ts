@@ -2,10 +2,13 @@ import { describe, expect, it } from 'vitest';
 import {
   MAX_ASSET_BYTES,
   applyCommand,
+  contentSchema,
   emptyStage,
   imageAssetIds,
+  recoverableImages,
   packAsset,
   sampleContent,
+  sha256Hex,
   unpackAsset,
 } from '@omnicanvas/canvas';
 
@@ -46,5 +49,49 @@ describe('asset packets', () => {
       } as const,
     ].reduce(applyCommand, emptyStage());
     expect(imageAssetIds(stage)).toEqual([assetId]);
+  });
+});
+
+describe('image integrity', () => {
+  it('hashes bytes with SHA-256 in hex', async () => {
+    expect(await sha256Hex(new TextEncoder().encode('abc'))).toBe(
+      'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad',
+    );
+  });
+
+  it('maps every image on the stage to its hash and mime, when it has a hash', () => {
+    const hash = 'a'.repeat(64);
+    const image = (n: number, sha256?: string) => ({
+      id: `00000000-0000-4000-8000-00000000000${n}`,
+      kind: 'image' as const,
+      data: {
+        title: 'x',
+        assetId: `20000000-0000-4000-8000-00000000000${n}`,
+        mime: 'image/png' as const,
+        alt: '',
+        ...(sha256 ? { sha256 } : {}),
+      },
+    });
+    const stage = { ...emptyStage(), tray: [image(1, hash), image(2)] };
+    expect(recoverableImages(stage)).toEqual(
+      new Map([['20000000-0000-4000-8000-000000000001', { sha256: hash, mime: 'image/png' }]]),
+    );
+  });
+
+  it('accepts a well formed hash in the content schema, and only that', () => {
+    const content = {
+      id: '00000000-0000-4000-8000-000000000001',
+      kind: 'image',
+      data: {
+        title: 'x',
+        assetId: '20000000-0000-4000-8000-000000000001',
+        mime: 'image/png',
+        alt: '',
+        sha256: 'b'.repeat(64),
+      },
+    };
+    expect(contentSchema.safeParse(content).success).toBe(true);
+    const bad = { ...content, data: { ...content.data, sha256: 'xyz' } };
+    expect(contentSchema.safeParse(bad).success).toBe(false);
   });
 });
