@@ -245,7 +245,8 @@ branch `slice/redesign-call` (PR #9).
 - [ ] `rooms.created_by` senza `on delete`: blocca la cancellazione account quando
       arriveranno workspace multi-membro (GDPR)
 - [ ] la pagina stanza scrive `room_participants` su GET: rivedere con la presence
-      della slice 2
+      della slice 2. Valutato il 07/10: `joinRoom` riusa la riga aperta, quindi ricarica e
+      prefetch non duplicano; spostarla su POST costa un click «Entra», scelta di prodotto
 - [x] Token route senza rate limit: 30 al minuto per account o per hash dell'IP (KV)
 - [ ] Chi chiude la scheda senza «Esci» lascia la riga aperta: la chiude la purga (slice 8)
 - [ ] Rimuovere `/dev/spike-cpu` e le sue dipendenze dopo la misura
