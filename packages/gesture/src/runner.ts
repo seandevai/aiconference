@@ -1,6 +1,8 @@
 import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
 import { createAdaptiveController } from './adaptive';
-import { createRecognizer } from './recognizer';
+import { createPipeline } from './pipeline';
+import type { RecognizerView } from './recognizer';
+import type { Tuning } from './tuning';
 import type { Dictionary, Frame, GestureEvent } from './types';
 
 // Scaricati una volta: il modello gira nel browser, frame e landmark non escono mai.
@@ -8,7 +10,11 @@ const WASM_BASE = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wa
 const HAND_MODEL =
   'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
 
-export type GestureRunner = { setArmed(armed: boolean): void; stop(): void };
+export type GestureRunner = {
+  setArmed(armed: boolean): void;
+  reconfigure(next: { tuning?: Tuning; dictionary?: Dictionary }): void;
+  stop(): void;
+};
 
 async function createLandmarker(): Promise<HandLandmarker> {
   const fileset = await FilesetResolver.forVisionTasks(WASM_BASE);
@@ -30,14 +36,17 @@ export async function startGestures(
   video: HTMLVideoElement,
   options: {
     onEvent(event: GestureEvent): void;
-    onFrame?(frame: Frame): void;
+    // Fotogramma grezzo (quello da registrare), quello usato dal riconoscitore e la sua vista.
+    onFrame?(raw: Frame, processed: Frame, view: RecognizerView): void;
     armed?: boolean;
     dictionary?: Dictionary;
+    tuning?: Tuning;
   },
 ): Promise<GestureRunner> {
   const landmarker = await createLandmarker();
-  const recognizer = createRecognizer({
+  const pipeline = createPipeline({
     ...(options.dictionary ? { dictionary: options.dictionary } : {}),
+    ...(options.tuning ? { tuning: options.tuning } : {}),
     armed: options.armed ?? false,
   });
   const adaptive = createAdaptiveController();
@@ -54,7 +63,7 @@ export async function startGestures(
       const result = landmarker.detectForVideo(video, now);
       const change = adaptive.record(performance.now() - started);
       if (change) {
-        recognizer.setTwoHands(change.twoHands);
+        pipeline.setTwoHands(change.twoHands);
         void landmarker.setOptions({ numHands: change.twoHands ? 2 : 1 });
       }
       const frame: Frame = {
@@ -63,8 +72,9 @@ export async function startGestures(
           landmarks: points.map(({ x, y, z }) => ({ x, y, z })),
         })),
       };
-      options.onFrame?.(frame);
-      for (const event of recognizer.push(frame)) options.onEvent(event);
+      const out = pipeline.push(frame);
+      options.onFrame?.(frame, out.frame, out.view);
+      for (const event of out.events) options.onEvent(event);
     }
     handle = video.requestVideoFrameCallback(tick);
   };
@@ -72,7 +82,10 @@ export async function startGestures(
 
   return {
     setArmed(armed) {
-      recognizer.setArmed(armed);
+      pipeline.setArmed(armed);
+    },
+    reconfigure(next) {
+      pipeline.reconfigure(next);
     },
     stop() {
       stopped = true;

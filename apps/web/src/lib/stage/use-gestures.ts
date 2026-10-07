@@ -1,14 +1,12 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { nearestSlot, type Stage, type StageCommand } from '@omnicanvas/canvas';
-import type { GestureEvent } from '@omnicanvas/gesture';
+import type { Stage, StageCommand } from '@omnicanvas/canvas';
 import type { GestureRunner } from '@omnicanvas/gesture/runner';
 import type { RealtimeSession } from '@omnicanvas/realtime';
-import { dragItemAt, resolveDrop, slotRectsFromDom, type DragItem } from './drop';
-import { gestureAction, type GestureStatus } from './gesture-actions';
-
-type Cursor = { x: number; y: number; grabbing: boolean };
+import type { GestureEvent } from '@omnicanvas/gesture';
+import type { GestureStatus } from './gesture-actions';
+import { createStageGestureHandler, type StageCursor } from './stage-gesture-handler';
 
 type Options = {
   session: RealtimeSession | null;
@@ -22,13 +20,12 @@ type Options = {
 export function useGestures({ session, cameraOn, stage, dispatch, onAgent, areaRef }: Options) {
   const [status, setStatus] = useState<GestureStatus>('off');
   const [armed, setArmed] = useState(false);
-  const [cursor, setCursor] = useState<Cursor | null>(null);
+  const [cursor, setCursor] = useState<StageCursor | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const runnerRef = useRef<GestureRunner | null>(null);
   const detachRef = useRef<(() => void) | null>(null);
   const stageRef = useRef(stage);
   const handlersRef = useRef({ dispatch, onAgent });
-  const draggingRef = useRef<DragItem | null>(null);
 
   useEffect(() => {
     stageRef.current = stage;
@@ -44,35 +41,19 @@ export function useGestures({ session, cameraOn, stage, dispatch, onAgent, areaR
     [areaRef],
   );
 
-  const onEvent = useCallback(
-    (event: GestureEvent) => {
-      const { dispatch: send, onAgent: agent } = handlersRef.current;
-      if (event.type === 'GESTURES_TOGGLE') {
-        setArmed(event.armed);
-        return;
-      }
-      if ('x' in event) {
-        const point = toScreen(event.x, event.y);
-        if (!point) return;
-        if (event.type === 'GRAB') draggingRef.current = dragItemAt(point.x, point.y);
-        if (event.type === 'DROP') {
-          const item = draggingRef.current;
-          draggingRef.current = null;
-          setCursor(null);
-          const slot = nearestSlot(point, slotRectsFromDom());
-          const command = item && slot ? resolveDrop(stageRef.current, item, slot) : null;
-          if (command) send(command);
-          return;
-        }
-        setCursor({ ...point, grabbing: draggingRef.current !== null });
-        return;
-      }
-      const action = gestureAction(event, stageRef.current, () => crypto.randomUUID());
-      if (action.kind === 'command') send(action.command);
-      if (action.kind === 'agent') agent();
-    },
-    [toScreen],
-  );
+  // Il gestore vive in un ref creato in un effetto: legge i ref solo dentro i callback.
+  const handlerRef = useRef<((event: GestureEvent) => void) | null>(null);
+  useEffect(() => {
+    handlerRef.current = createStageGestureHandler({
+      toScreen,
+      getStage: () => stageRef.current,
+      dispatch: (command) => handlersRef.current.dispatch(command),
+      onAgent: () => handlersRef.current.onAgent(),
+      onArmed: setArmed,
+      onCursor: setCursor,
+    });
+  }, [toScreen]);
+  const onEvent = useCallback((event: GestureEvent) => handlerRef.current?.(event), []);
 
   const toggle = useCallback(async () => {
     if (runnerRef.current) {
