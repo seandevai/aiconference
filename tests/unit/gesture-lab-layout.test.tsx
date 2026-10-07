@@ -113,6 +113,15 @@ describe('gesture lab try screen', () => {
     expect(within(panel).getByText('Preset')).toBeTruthy();
   });
 
+  it('stops the camera when leaving for another screen, whose video is a new element', () => {
+    nav.search = '?vista=prova';
+    const { rerender } = render(<Lab archive={archive} />);
+    hook.stopLive.mockReset();
+    nav.search = '?vista=registra';
+    rerender(<Lab archive={archive} />);
+    expect(hook.stopLive).toHaveBeenCalled();
+  });
+
   it('goes back to the home', () => {
     nav.search = '?vista=prova';
     render(<Lab archive={null} />);

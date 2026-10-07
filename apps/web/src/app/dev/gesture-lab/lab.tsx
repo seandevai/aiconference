@@ -43,9 +43,10 @@ function LabClient({ archive }: { archive: LabArchive | null }) {
   const sceneVisible = view === 'prova' || screenScene;
   const showAdvanced = advanced && sceneVisible;
 
-  // La fotocamera segue la schermata: parte entrando in Prova, si ferma tornando alla pagina
-  // iniziale o aprendo Rigioca; Registra la accende da sé al passo 2. Il rigioco si ferma
-  // sempre cambiando schermata. Il hook si legge da un ref: l'effetto dipende solo dalla vista.
+  // La fotocamera segue la schermata. Ogni schermata ha il suo <video>: cambiando schermata lo
+  // stream resterebbe su un elemento staccato (che il browser mette in pausa), quindi si ferma
+  // sempre e riparte entrando in Prova; Registra la accende da sé al passo 2. Anche il rigioco
+  // si ferma. Il hook si legge da un ref: l'effetto dipende solo dalla vista.
   const labRef = useRef(lab);
   useEffect(() => {
     labRef.current = lab;
@@ -53,11 +54,8 @@ function LabClient({ archive }: { archive: LabArchive | null }) {
   useEffect(() => {
     const current = labRef.current;
     current.pause();
-    if (view === 'prova') {
-      if (current.live === 'off') void current.startLive();
-    } else if (view !== 'registra') {
-      current.stopLive();
-    }
+    current.stopLive();
+    if (view === 'prova') void current.startLive();
   }, [view]);
 
   const removeRecording = useCallback(
