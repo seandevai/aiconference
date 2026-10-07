@@ -83,6 +83,24 @@ describe('useGestureLab replay', () => {
     act(() => result.current.play());
     expect(refs.framesRef.current?.raw.t).toBe(0);
   });
+
+  it('reports how far the replay has gone', () => {
+    const { result } = setup();
+    act(() => result.current.loadRecording(recording));
+    expect(result.current.progress).toBe(0);
+    act(() => result.current.play());
+    expect(result.current.progress).toBe(0);
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+    expect(result.current.progress).toBe(0.5);
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+    expect(result.current.progress).toBe(1);
+    act(() => result.current.loadRecording(recording));
+    expect(result.current.progress).toBe(0);
+  });
 });
 
 describe('useGestureLab live', () => {

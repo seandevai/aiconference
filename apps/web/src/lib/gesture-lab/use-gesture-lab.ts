@@ -51,6 +51,8 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
   const [recording, setRecording] = useState<Recording | null>(null);
   const [playing, setPlaying] = useState(false);
   const [fired, setFired] = useState<string[]>([]);
+  // Quanto del rigioco è passato, da 0 a 1.
+  const [progress, setProgress] = useState(0);
 
   const runnerRef = useRef<GestureRunner | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -236,6 +238,7 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
     setPlaying(false);
     setRecording(next);
     setFired([]);
+    setProgress(0);
   }, []);
 
   const play = useCallback(() => {
@@ -249,6 +252,7 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
         armed: recording.armed,
       });
       pipelineRef.current = pipeline;
+      const last = recording.frames[recording.frames.length - 1]?.t ?? 0;
       setFired([]);
       startRef.current = performance.now();
       replayerRef.current = createReplayer(
@@ -259,6 +263,7 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
           setView(out.view);
           setHand(out.frame.hands[0] ?? null);
           out.events.forEach(onEvent);
+          setProgress(last > 0 ? frame.t / last : 1);
         },
         () => {
           replayerRef.current = null;
@@ -326,5 +331,6 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
     pause,
     capture,
     fired,
+    progress,
   };
 }
