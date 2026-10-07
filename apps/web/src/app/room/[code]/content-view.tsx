@@ -91,5 +91,11 @@ export function ContentView({ content, assetUrl }: { content: Content; assetUrl:
           <figcaption className="text-sm font-medium">{content.data.title}</figcaption>
         </figure>
       );
+    case 'screen':
+      return (
+        <div className="flex h-32 items-center justify-center rounded-tile bg-bg text-sm text-muted">
+          Schermo in arrivo…
+        </div>
+      );
   }
 }
