@@ -25,7 +25,6 @@ export function PresetPanel({ userId, presets, busy, onSave, onApply, onDelete }
 
   return (
     <section className="flex flex-col gap-2 text-sm text-fg">
-      <h2 className="text-sm font-semibold text-muted">Preset</h2>
       <div className="flex gap-2">
         <input
           aria-label="Nome del preset"

@@ -115,7 +115,7 @@ export function RecordWizard({
   async function record(id: number) {
     setStep({ n: 3, count: 0 });
     setCapturing(true);
-    let frames: Frame[] = [];
+    let frames: Frame[];
     try {
       frames = await capture(RECORD_MS);
     } catch {

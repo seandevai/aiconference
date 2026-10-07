@@ -25,7 +25,7 @@ const summary = {
   createdAt: '2026-10-07T10:00:00Z',
 };
 
-function setup(over: { live?: LiveStatus; capture?: ReturnType<typeof vi.fn> } = {}) {
+function setup(over: { live?: LiveStatus; capture?: (ms: number) => Promise<Frame[]> } = {}) {
   const props = {
     live: over.live ?? ('on' as LiveStatus),
     hand: hand('thumb_up'),

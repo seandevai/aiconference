@@ -50,7 +50,7 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
   const [live, setLive] = useState<LiveStatus>('off');
   const [recording, setRecording] = useState<Recording | null>(null);
   const [playing, setPlaying] = useState(false);
-  const [fired, setFired] = useState<string[]>([]);
+  const [fired, setFired] = useState<GestureEvent['type'][]>([]);
   // Quanto del rigioco è passato, da 0 a 1.
   const [progress, setProgress] = useState(0);
 

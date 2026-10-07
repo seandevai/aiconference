@@ -1,6 +1,5 @@
 'use client';
 
-import { Button } from '@omnicanvas/ui';
 import { GESTURE_COMMANDS, GESTURE_NAMES, type GestureCommand } from '@omnicanvas/gesture';
 import { gestureByName } from '@/lib/gesture-lab/gesture-catalog';
 import {
@@ -139,20 +138,6 @@ export function DictionaryControls({ settings, onChange }: Props) {
           </label>
         );
       })}
-    </div>
-  );
-}
-
-// Provvisorio: la vecchia colonna dei comandi lo usa finché la pagina nuova non la sostituisce.
-export function LabControls(props: Props) {
-  return (
-    <div className="flex flex-col gap-4 text-fg">
-      <CorrectionControls {...props} />
-      <TuningControls {...props} />
-      <DictionaryControls {...props} />
-      <Button variant="quiet" onClick={() => props.onChange(DEFAULT_LAB_SETTINGS)}>
-        Ripristina predefiniti
-      </Button>
     </div>
   );
 }

@@ -1,6 +1,11 @@
 import { Button } from '@omnicanvas/ui';
 
-type Props = { title: string; onBack: () => void; backLabel?: string; onAdvanced?: () => void };
+type Props = {
+  title: string;
+  onBack: () => void;
+  backLabel?: string;
+  onAdvanced?: (() => void) | undefined;
+};
 
 // In cima a ogni schermata: si torna indietro, si legge dove si è, si aprono le Avanzate.
 export function ScreenHeader({ title, onBack, backLabel = 'Indietro', onAdvanced }: Props) {
