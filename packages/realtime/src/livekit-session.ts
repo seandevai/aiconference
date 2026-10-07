@@ -10,6 +10,7 @@ import {
 } from 'livekit-client';
 import { cameraCaptureOptions, countVideoInputs, createCameraController } from './camera';
 import { assertChannel, decodeData, encodeData } from './data-codec';
+import { ScreenShareCancelled, isShareCancel, supportsScreenShare } from './screen';
 import { sortRoster, toRosterEntry } from './roster';
 import type {
   ConnectionStatus,
@@ -94,6 +95,7 @@ export async function connectToRoom(url: string, token: string): Promise<Realtim
   const rosterHandlers = new Set<(roster: RosterEntry[]) => void>();
   const audioHandlers = new Set<(blocked: boolean) => void>();
   const disconnectHandlers = new Set<(cause: DisconnectCause) => void>();
+  const screenEndedHandlers = new Set<() => void>();
   const dataHandlers = new Map<string, Set<(payload: unknown, from: string) => void>>();
   const byteHandlers = new Map<string, Set<(bytes: Uint8Array, from: string) => void>>();
 
@@ -101,6 +103,24 @@ export async function connectToRoom(url: string, token: string): Promise<Realtim
     identity === room.localParticipant.identity
       ? room.localParticipant
       : room.remoteParticipants.get(identity);
+
+  const attachSource = (identity: string, source: Track.Source, element: HTMLVideoElement) => {
+    let attached: Track | undefined;
+    // La traccia può arrivare dopo il montaggio della tessera: si riprova a ogni sottoscrizione.
+    const tryAttach = () => {
+      const track = participant(identity)?.getTrackPublication(source)?.track;
+      if (!track || track === attached) return;
+      attached?.detach(element);
+      track.attach(element);
+      attached = track;
+    };
+    tryAttach();
+    room.on(RoomEvent.TrackSubscribed, tryAttach).on(RoomEvent.LocalTrackPublished, tryAttach);
+    return () => {
+      room.off(RoomEvent.TrackSubscribed, tryAttach).off(RoomEvent.LocalTrackPublished, tryAttach);
+      attached?.detach(element);
+    };
+  };
 
   const roster = (): RosterEntry[] =>
     sortRoster([
@@ -125,6 +145,12 @@ export async function connectToRoom(url: string, token: string): Promise<Realtim
     .on(RoomEvent.TrackUnmuted, emitRoster)
     .on(RoomEvent.LocalTrackPublished, emitRoster)
     .on(RoomEvent.LocalTrackUnpublished, emitRoster)
+    // Stop dalla UI o dal pulsante del browser: LiveKit toglie la pubblicazione in entrambi i casi.
+    .on(RoomEvent.LocalTrackUnpublished, (publication) => {
+      if (publication.source === Track.Source.ScreenShare) {
+        screenEndedHandlers.forEach((handler) => handler());
+      }
+    })
     .on(RoomEvent.ActiveSpeakersChanged, emitRoster)
     .on(RoomEvent.TrackSubscribed, (track: RemoteTrack) => {
       if (track.kind === Track.Kind.Audio) audioSink.append(track.attach());
@@ -197,23 +223,34 @@ export async function connectToRoom(url: string, token: string): Promise<Realtim
     },
 
     attachVideo(identity, element) {
-      let attached: Track | undefined;
-      // La traccia può arrivare dopo il montaggio della tessera: si riprova a ogni sottoscrizione.
-      const tryAttach = () => {
-        const track = participant(identity)?.getTrackPublication(Track.Source.Camera)?.track;
-        if (!track || track === attached) return;
-        attached?.detach(element);
-        track.attach(element);
-        attached = track;
-      };
-      tryAttach();
-      room.on(RoomEvent.TrackSubscribed, tryAttach).on(RoomEvent.LocalTrackPublished, tryAttach);
+      return attachSource(identity, Track.Source.Camera, element);
+    },
+
+    canShareScreen() {
+      return supportsScreenShare(globalThis.navigator);
+    },
+
+    async startScreenShare() {
+      try {
+        await room.localParticipant.setScreenShareEnabled(true, { audio: false });
+      } catch (error) {
+        throw isShareCancel(error) ? new ScreenShareCancelled() : error;
+      }
+    },
+
+    async stopScreenShare() {
+      await room.localParticipant.setScreenShareEnabled(false);
+    },
+
+    onScreenShareEnded(handler) {
+      screenEndedHandlers.add(handler);
       return () => {
-        room
-          .off(RoomEvent.TrackSubscribed, tryAttach)
-          .off(RoomEvent.LocalTrackPublished, tryAttach);
-        attached?.detach(element);
+        screenEndedHandlers.delete(handler);
       };
+    },
+
+    attachScreen(identity, element) {
+      return attachSource(identity, Track.Source.ScreenShare, element);
     },
 
     async sendData(channel, payload, to) {

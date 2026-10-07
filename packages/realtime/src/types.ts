@@ -45,6 +45,14 @@ export interface RealtimeSession {
   // Fotocamera in uso: anteriore ('user') anche sui computer, che ne hanno una sola.
   cameraFacing(): FacingMode;
   attachVideo(identity: string, element: HTMLVideoElement): Unsubscribe;
+  // Condivisione dello schermo: solo l'host (lo impone il token), senza audio.
+  canShareScreen(): boolean;
+  // Rifiuta con ScreenShareCancelled se chi condivide chiude il selettore del browser.
+  startScreenShare(): Promise<void>;
+  stopScreenShare(): Promise<void>;
+  // Anche quando si ferma dal pulsante del browser.
+  onScreenShareEnded(handler: () => void): Unsubscribe;
+  attachScreen(identity: string, element: HTMLVideoElement): Unsubscribe;
   // Messaggi piccoli (≤ 15 KB di JSON). Per le immagini c'è sendBytes.
   sendData(channel: string, payload: unknown, to?: string[]): Promise<void>;
   onData(channel: string, handler: (payload: unknown, from: string) => void): Unsubscribe;
