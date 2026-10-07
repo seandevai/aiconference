@@ -8,7 +8,7 @@ import {
   type Participant,
   type RemoteTrack,
 } from 'livekit-client';
-import { countVideoInputs, createCameraController } from './camera';
+import { cameraCaptureOptions, countVideoInputs, createCameraController } from './camera';
 import { assertChannel, decodeData, encodeData } from './data-codec';
 import { sortRoster, toRosterEntry } from './roster';
 import type {
@@ -72,11 +72,16 @@ export async function connectToRoom(url: string, token: string): Promise<Realtim
   const camera = createCameraController({
     isEnabled: () => room.localParticipant.isCameraEnabled,
     async setEnabled(on, facingMode) {
-      await room.localParticipant.setCameraEnabled(on, on ? { facingMode } : undefined);
+      await room.localParticipant.setCameraEnabled(
+        on,
+        on ? cameraCaptureOptions(facingMode) : undefined,
+      );
     },
     async restart(facingMode) {
       const track = room.localParticipant.getTrackPublication(Track.Source.Camera)?.track;
-      if (track instanceof LocalVideoTrack) await track.restartTrack({ facingMode });
+      if (track instanceof LocalVideoTrack) {
+        await track.restartTrack(cameraCaptureOptions(facingMode));
+      }
     },
   });
 
