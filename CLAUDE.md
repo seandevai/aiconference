@@ -93,7 +93,10 @@ Laboratorio gesture `/dev/gesture-lab` su `slice/gesture-lab` (spec
 invariati e quindi call invariata; la traduzione gesto → palco sta in
 `apps/web/src/lib/stage/stage-gesture-handler.ts`, condivisa da call e laboratorio. Su
 `slice/gesture-lab-staging` il laboratorio va su staging per gli admin
-(`docs/GESTURE-LAB.md`), con registrazioni e preset su Supabase (migrazione 0006).
+(`docs/GESTURE-LAB.md`), con registrazioni e preset su Supabase (migrazione 0006). Redesign del laboratorio
+(spec `docs/specs/2026-10-06-gesture-lab-redesign-design.md`, piano
+`docs/plans/2026-10-07-gesture-lab-redesign.md`): pagina iniziale con Prova, Registra a passi
+e Rigioca, tecnico in «Avanzate», usabile da telefono.
 
 Spec v3 del 23/09, dopo un secondo brainstorming con Sean. Rispetto alla v2: palco a
 finestre a slot magnetici invece della lista di schede (ADR-0009), agente a comando
