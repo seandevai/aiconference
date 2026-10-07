@@ -1,0 +1,146 @@
+// @vitest-environment happy-dom
+import { act, renderHook } from '@testing-library/react';
+import { useCallback, useState } from 'react';
+import { describe, expect, it, vi } from 'vitest';
+import {
+  applyCommand,
+  emptyStage,
+  findScreen,
+  screenStartCommands,
+  type Stage,
+  type StageCommand,
+} from '@omnicanvas/canvas';
+import { ScreenShareCancelled, type RealtimeSession } from '@omnicanvas/realtime';
+import { SCREEN_SHARE_ERROR, useScreenShare } from '@/lib/stage/use-screen-share';
+
+let counter = 0;
+const newId = () => `00000000-0000-4000-8000-${String(++counter).padStart(12, '0')}`;
+
+function fakeSession(canShare = true) {
+  const ended = new Set<() => void>();
+  const endNatively = () => ended.forEach((handler) => handler());
+  const session = {
+    localIdentity: 'host-1',
+    canShareScreen: () => canShare,
+    startScreenShare: vi.fn(async () => {}),
+    stopScreenShare: vi.fn(async () => endNatively()),
+    onScreenShareEnded: (handler: () => void) => {
+      ended.add(handler);
+      return () => ended.delete(handler);
+    },
+  };
+  return { session, endNatively };
+}
+
+function setup(options: { role?: 'host' | 'guest'; initial?: Stage; canShare?: boolean } = {}) {
+  const fake = fakeSession(options.canShare);
+  const hook = renderHook(() => {
+    const [stage, setStage] = useState(options.initial ?? emptyStage());
+    const dispatch = useCallback(
+      (command: StageCommand) => setStage((s) => applyCommand(s, command)),
+      [],
+    );
+    const share = useScreenShare({
+      session: fake.session as unknown as RealtimeSession,
+      role: options.role ?? 'host',
+      stage,
+      ready: true,
+      dispatch,
+      newId,
+    });
+    return { stage, dispatch, share };
+  });
+  return { ...fake, hook };
+}
+
+describe('useScreenShare', () => {
+  it('puts the screen on the stage when the host starts sharing', async () => {
+    const { hook } = setup();
+    await act(() => hook.result.current.share.start());
+    expect(hook.result.current.share.sharing).toBe(true);
+    expect(findScreen(hook.result.current.stage)?.data).toEqual({
+      title: 'Schermo',
+      owner: 'host-1',
+    });
+  });
+
+  it('takes the screen away when the browser stops sharing', async () => {
+    const { hook, endNatively } = setup();
+    await act(() => hook.result.current.share.start());
+    act(() => endNatively());
+    expect(hook.result.current.share.sharing).toBe(false);
+    expect(findScreen(hook.result.current.stage)).toBeNull();
+  });
+
+  it('stops from the dock button', async () => {
+    const { hook, session } = setup();
+    await act(() => hook.result.current.share.start());
+    await act(async () => hook.result.current.share.stop());
+    expect(session.stopScreenShare).toHaveBeenCalled();
+    expect(findScreen(hook.result.current.stage)).toBeNull();
+  });
+
+  it('says nothing when the host closes the picker', async () => {
+    const { hook, session } = setup();
+    session.startScreenShare.mockRejectedValueOnce(new ScreenShareCancelled());
+    await act(() => hook.result.current.share.start());
+    expect(hook.result.current.share.error).toBeNull();
+    expect(findScreen(hook.result.current.stage)).toBeNull();
+  });
+
+  it('shows an error for any other failure', async () => {
+    const { hook, session } = setup();
+    session.startScreenShare.mockRejectedValueOnce(new Error('NotReadableError'));
+    await act(() => hook.result.current.share.start());
+    expect(hook.result.current.share.error).toBe(SCREEN_SHARE_ERROR);
+    expect(findScreen(hook.result.current.stage)).toBeNull();
+  });
+
+  it('opens the picker once even if clicked twice', async () => {
+    const { hook, session } = setup();
+    await act(async () => {
+      void hook.result.current.share.start();
+      await hook.result.current.share.start();
+    });
+    expect(session.startScreenShare).toHaveBeenCalledTimes(1);
+  });
+
+  it('clears a screen left on the stage by a reload', () => {
+    const left = screenStartCommands(emptyStage(), {
+      owner: 'host-1',
+      contentId: newId(),
+      windowId: newId(),
+    }).reduce(applyCommand, emptyStage());
+    const { hook } = setup({ initial: left });
+    expect(findScreen(hook.result.current.stage)).toBeNull();
+  });
+
+  it('stops sharing when the host closes the screen window by hand', async () => {
+    const { hook, session } = setup();
+    await act(() => hook.result.current.share.start());
+    const windowId = hook.result.current.stage.focusedId!;
+    act(() => hook.result.current.dispatch({ type: 'WINDOW_ARCHIVE', windowId }));
+    expect(session.stopScreenShare).toHaveBeenCalled();
+  });
+
+  it('stops sharing when the screen could not enter the stage', async () => {
+    const full: Stage = {
+      ...emptyStage(),
+      tray: Array.from({ length: 50 }, () => ({
+        id: newId(),
+        kind: 'text' as const,
+        data: { title: 'x', body: '' },
+      })),
+    };
+    const { hook, session } = setup({ initial: full });
+    await act(() => hook.result.current.share.start());
+    expect(session.stopScreenShare).toHaveBeenCalled();
+    expect(hook.result.current.share.sharing).toBe(false);
+    expect(hook.result.current.stage.windows).toEqual([]);
+  });
+
+  it('is not available to guests or where the browser cannot share', () => {
+    expect(setup({ role: 'guest' }).hook.result.current.share.available).toBe(false);
+    expect(setup({ canShare: false }).hook.result.current.share.available).toBe(false);
+  });
+});
