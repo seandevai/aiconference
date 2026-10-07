@@ -3,6 +3,9 @@
 import { useState } from 'react';
 import { Button } from '@omnicanvas/ui';
 import type { PresetSummary } from '@/lib/gesture-lab/lab-store';
+import type { LabSettings } from '@/lib/gesture-lab/settings';
+import { deletePresetAction, savePresetAction } from './actions';
+import { useLabAction } from './use-lab-action';
 
 type Props = {
   userId: string;
@@ -51,5 +54,52 @@ export function PresetPanel({ userId, presets, busy, onSave, onApply, onDelete }
         ))}
       </ul>
     </section>
+  );
+}
+
+type SectionProps = {
+  userId: string;
+  presets: PresetSummary[];
+  onPresetsChange: (next: PresetSummary[]) => void;
+  settings: LabSettings;
+  onApply: (settings: LabSettings) => void;
+};
+
+// La sezione Preset di Avanzate: l'elenco lo tiene il Lab, così resta chiudendo il pannello.
+export function PresetSection({
+  userId,
+  presets,
+  onPresetsChange,
+  settings,
+  onApply,
+}: SectionProps) {
+  const { busy, message, run } = useLabAction();
+
+  async function save(name: string) {
+    const result = await run(() => savePresetAction({ name, settings }));
+    if (!result?.ok) return false;
+    onPresetsChange([result.value, ...presets]);
+    return true;
+  }
+
+  async function remove(id: string) {
+    if (!window.confirm('Eliminare questo preset?')) return;
+    const result = await run(() => deletePresetAction(id));
+    if (result && (result.ok || result.error === 'not_found'))
+      onPresetsChange(presets.filter((p) => p.id !== id));
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      {message && <p className="text-xs text-danger">{message}</p>}
+      <PresetPanel
+        userId={userId}
+        presets={presets}
+        busy={busy}
+        onSave={save}
+        onApply={(preset) => onApply(preset.settings)}
+        onDelete={(id) => void remove(id)}
+      />
+    </div>
   );
 }
