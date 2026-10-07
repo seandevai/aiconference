@@ -264,3 +264,13 @@ branch `slice/redesign-call` (PR #9).
 - [ ] Upstash di staging creato nella regione predefinita: per la produzione ricrearlo in UE
 - [ ] Vercel: `installCommand` impostato a mano sul progetto (`cd ../.. && npm ci`);
       valutare `apps/web/vercel.json` per tenerlo nel repo
+
+## Condivisione dello schermo — 07/10
+
+Spec `docs/specs/2026-10-07-condivisione-schermo-design.md`, ADR-0015. Rinviato:
+
+- [ ] «Scatta»: fotogramma dello schermo come finestra immagine, che entra nel pacchetto
+      (gesto e click)
+- [ ] Audio dello schermo (scheda o sistema)
+- [ ] Condivisione dagli ospiti
+- [ ] Far vedere lo schermo all'agente
