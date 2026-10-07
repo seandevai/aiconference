@@ -268,9 +268,10 @@ branch `slice/redesign-call` (PR #9).
 - [ ] Soglie delle gesture tarate su mani sintetiche: ritararle con le registrazioni reali
 - [x] Preview Vercel: aggiungere `NEXT_PUBLIC_LIVEKIT_URL`, `LIVEKIT_API_KEY`,
       `LIVEKIT_API_SECRET` del progetto LiveKit Cloud (con il task 0.5)
-- [ ] Advisor Supabase su staging: `search_path` fisso per `ai_reserve_credits`,
-      `ai_record_request`, `grant_credits`; revocare `execute` su `handle_new_user` e
-      `is_workspace_member` da `anon`/`authenticated`; `(select auth.uid())` nelle policy
+- [x] Advisor Supabase su staging: migrazione `0008_security_hardening.sql` (07/10).
+      `is_workspace_member` resta eseguibile da `authenticated`: le policy RLS ne hanno bisogno
+- [ ] Protezione dalle password trapelate (HaveIBeenPwned) in Supabase Auth: si attiva dalla
+      dashboard, non da migrazione
 - [ ] Upstash di staging creato nella regione predefinita: per la produzione ricrearlo in UE
 - [ ] Vercel: `installCommand` impostato a mano sul progetto (`cd ../.. && npm ci`);
       valutare `apps/web/vercel.json` per tenerlo nel repo
