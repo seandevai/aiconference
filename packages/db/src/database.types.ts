@@ -149,6 +149,75 @@ export type Database = {
           },
         ];
       };
+      gesture_lab_admins: {
+        Row: { created_at: string; user_id: string };
+        Insert: { created_at?: string; user_id: string };
+        Update: { created_at?: string; user_id?: string };
+        Relationships: [];
+      };
+      gesture_lab_presets: {
+        Row: {
+          author_id: string;
+          author_name: string;
+          created_at: string;
+          id: string;
+          name: string;
+          settings: Json;
+        };
+        Insert: {
+          author_id: string;
+          author_name: string;
+          created_at?: string;
+          id?: string;
+          name: string;
+          settings: Json;
+        };
+        Update: {
+          author_id?: string;
+          author_name?: string;
+          created_at?: string;
+          id?: string;
+          name?: string;
+          settings?: Json;
+        };
+        Relationships: [];
+      };
+      gesture_recordings: {
+        Row: {
+          armed: boolean;
+          author_id: string;
+          author_name: string;
+          created_at: string;
+          description: string;
+          expect: string | null;
+          frames: Json;
+          id: string;
+          label: string;
+        };
+        Insert: {
+          armed: boolean;
+          author_id: string;
+          author_name: string;
+          created_at?: string;
+          description?: string;
+          expect?: string | null;
+          frames: Json;
+          id?: string;
+          label: string;
+        };
+        Update: {
+          armed?: boolean;
+          author_id?: string;
+          author_name?: string;
+          created_at?: string;
+          description?: string;
+          expect?: string | null;
+          frames?: Json;
+          id?: string;
+          label?: string;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           avatar_url: string | null;
@@ -399,6 +468,7 @@ export type Database = {
         Args: { p_credits: number; p_reason?: string; p_workspace: string };
         Returns: number;
       };
+      is_gesture_lab_admin: { Args: never; Returns: boolean };
       is_workspace_member: { Args: { ws: string }; Returns: boolean };
     };
     Enums: {

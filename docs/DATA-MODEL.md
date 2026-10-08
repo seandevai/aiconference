@@ -120,6 +120,47 @@ Funzioni `ai_reserve_credits`, `ai_record_request`, `grant_credits`: eseguibili 
 service role (migrazione 0004). Nell'MVP i crediti si caricano a mano (`manual_grant`). I motivi legati ai piani
 arrivano con Stripe.
 
+### gesture_lab_admins
+Elenco degli admin del laboratorio gesture (migrazione 0006). Dati di prova del
+laboratorio gesture: solo landmark e testo dell'admin, mai contenuti di riunione.
+
+| colonna | tipo | note |
+|---|---|---|
+| user_id | uuid PK | FK a `auth.users`, cascade |
+| created_at | timestamptz | |
+
+Si popola dal SQL editor o dal service role. Funzione `is_gesture_lab_admin()`:
+eseguibile solo da `authenticated`.
+
+### gesture_recordings
+Dati di prova del laboratorio gesture: solo landmark e testo dell'admin, mai contenuti
+di riunione.
+
+| colonna | tipo | note |
+|---|---|---|
+| id | uuid PK | |
+| author_id | uuid FK | `auth.users`, cascade |
+| author_name | text | 1-80 caratteri |
+| label | text | 1-60 caratteri |
+| expect | text | nullable, un evento noto del riconoscitore |
+| description | text | massimo 500 caratteri |
+| armed | boolean | |
+| frames | jsonb | array, massimo 1 MiB di testo |
+| created_at | timestamptz | |
+
+### gesture_lab_presets
+Dati di prova del laboratorio gesture: solo landmark e testo dell'admin, mai contenuti
+di riunione.
+
+| colonna | tipo | note |
+|---|---|---|
+| id | uuid PK | |
+| author_id | uuid FK | `auth.users`, cascade |
+| author_name | text | 1-80 caratteri |
+| name | text | 1-60 caratteri |
+| settings | jsonb | oggetto |
+| created_at | timestamptz | |
+
 ### bundles
 Il record del pacchetto. Metadati soli: il contenuto è un blob cifrato su R2 e la
 chiave non esiste lato server.
@@ -187,6 +228,11 @@ using (
 - `bundles`: scrittura solo dal service role. La pagina di download legge via route
   server per id, senza sessione: il possesso del link è l'autorizzazione, la chiave
   è la protezione.
+- `gesture_lab_admins`: chiusa a ogni client, nessuna policy (RLS attiva); la toccano
+  solo il SQL editor e il service role.
+- `gesture_recordings`: gli admin del laboratorio leggono tutto, scrivono solo a proprio
+  nome e cancellano solo le proprie righe. Nessun update.
+- `gesture_lab_presets`: come `gesture_recordings`.
 - Gli ospiti senza account non hanno sessione Supabase: non leggono mai Postgres
   direttamente.
 

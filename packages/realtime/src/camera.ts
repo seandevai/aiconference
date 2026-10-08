@@ -5,6 +5,16 @@ export function nextFacingMode(current: FacingMode): FacingMode {
   return current === 'user' ? 'environment' : 'user';
 }
 
+// Stessa cattura all'accensione e a ogni giro: il riavvio della traccia sostituisce tutti i
+// vincoli, e senza risoluzione il browser prende il formato nativo della camera (su PC 4:3
+// o verticale). 720p orizzontale come il predefinito del vendor.
+export function cameraCaptureOptions(facing: FacingMode) {
+  return {
+    facingMode: facing,
+    resolution: { width: 1280, height: 720, aspectRatio: 16 / 9, frameRate: 30 },
+  };
+}
+
 export function countVideoInputs(devices: readonly { kind: string }[]): number {
   return devices.filter((device) => device.kind === 'videoinput').length;
 }

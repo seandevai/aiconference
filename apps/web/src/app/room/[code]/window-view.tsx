@@ -92,7 +92,8 @@ export function WindowView({ window, assetUrls, dispatch }: Props) {
                   content.kind === 'image' ? (assetUrls[content.data.assetId] ?? null) : null
                 }
               />
-              {dispatch && (
+              {/* Lo schermo si ferma dal dock: nel vassoio non ci va mai. */}
+              {dispatch && content.kind !== 'screen' && (
                 <div className="w-fit">
                   <WindowAction
                     icon="to-tray"
