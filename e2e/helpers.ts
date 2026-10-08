@@ -52,13 +52,29 @@ export async function waitUntilInCall(page: Page): Promise<void> {
   ).toHaveCount(1, { timeout: 30_000 });
 }
 
+// Indirizzi di documentazione (RFC 5737), uno per ospite; il pid separa i worker.
+let guestCount = 0;
+function nextGuestIp(): string {
+  guestCount += 1;
+  return `198.51.${process.pid % 256}.${guestCount % 256}`;
+}
+
 export async function joinAsAnonymousGuest(
   browser: Browser,
   roomUrl: string,
   name = 'Cliente',
   contextOptions: BrowserContextOptions = {},
 ): Promise<Page> {
-  const context = await browser.newContext(contextOptions);
+  // Il form dell'ospite è limitato per IP (GUEST_JOIN_RATE_LIMIT): in CI tutti gli ospiti
+  // arriverebbero da 127.0.0.1 e la suite supererebbe il limite. Ogni ospite ha il suo
+  // indirizzo, come nella realtà; Next tiene un x-forwarded-for già presente.
+  const context = await browser.newContext({
+    ...contextOptions,
+    extraHTTPHeaders: {
+      ...contextOptions.extraHTTPHeaders,
+      'x-forwarded-for': nextGuestIp(),
+    },
+  });
   opened.push(context);
   const guest = await context.newPage();
   await guest.goto(roomUrl);
