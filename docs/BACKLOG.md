@@ -294,3 +294,15 @@ Spec `docs/specs/2026-10-07-condivisione-schermo-design.md`, ADR-0015. Rinviato:
 - [ ] Audio dello schermo (scheda o sistema)
 - [ ] Condivisione dagli ospiti
 - [ ] Far vedere lo schermo all'agente
+
+## Gesture a due mani — 08/10
+
+Oggi il riconoscitore usa solo `frame.hands[0]` per pose, hold, pinch, swipe e flick; la
+seconda mano serve solo a `two_hands_spread`.
+
+- [ ] Mano principale scelta con `handedness` di MediaPipe (es. sempre la destra) invece
+      dell'ordine restituito: con due mani in vista l'ordine può scambiarsi e interrompere
+      un hold o un pinch in corso
+- [ ] Gesti diversi in contemporanea con le due mani (es. pinch con una, hold con l'altra):
+      serve uno stato per mano nel riconoscitore e una regola sui conflitti; da spec
+- [ ] Avvisare nel laboratorio quando il controller adattivo spegne la seconda mano
