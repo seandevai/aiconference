@@ -71,6 +71,9 @@ function toFile(
         bytes: asset.bytes,
       };
     }
+    // Mai raggiunto: collectFiles scarta lo schermo prima; serve all'esaustività.
+    case 'screen':
+      return null;
   }
 }
 
@@ -83,7 +86,8 @@ export function collectFiles(
   const seen = new Set<string>();
   const contents: Content[] = [];
   for (const content of [...stage.windows.flatMap((w) => w.contents), ...stage.tray]) {
-    if (seen.has(content.id)) continue;
+    // Lo schermo condiviso non entra mai nel pacchetto (ADR-0015).
+    if (content.kind === 'screen' || seen.has(content.id)) continue;
     seen.add(content.id);
     contents.push(content);
   }

@@ -17,6 +17,9 @@ export type TableData = { title: string; columns: string[]; rows: string[][] };
 // Solo il riferimento: i byte viaggiano peer to peer e restano in memoria.
 export type ImageRef = { title: string; assetId: string; mime: ImageMime; alt: string };
 
+// Riferimento a una traccia dal vivo: chi condivide. Nessun fotogramma passa dal palco.
+export type ScreenRef = { title: string; owner: string };
+
 // forkOf: la proposta dell'ospite affiancata all'originale punta all'originale (spec §2.6).
 type ContentBase = { id: string; archived?: boolean; forkOf?: string };
 
@@ -24,7 +27,8 @@ export type Content =
   | (ContentBase & { kind: 'chart'; data: ChartData })
   | (ContentBase & { kind: 'text'; data: TextData })
   | (ContentBase & { kind: 'table'; data: TableData })
-  | (ContentBase & { kind: 'image'; data: ImageRef });
+  | (ContentBase & { kind: 'image'; data: ImageRef })
+  | (ContentBase & { kind: 'screen'; data: ScreenRef });
 
 // Una modifica sostituisce i dati del contenuto, mai il tipo.
 export type ContentEdit = {

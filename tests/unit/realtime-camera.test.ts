@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  cameraCaptureOptions,
   countVideoInputs,
   createCameraController,
   nextFacingMode,
@@ -17,6 +18,17 @@ describe('camera helpers', () => {
       countVideoInputs([{ kind: 'audioinput' }, { kind: 'videoinput' }, { kind: 'videoinput' }]),
     ).toBe(2);
     expect(countVideoInputs([{ kind: 'audiooutput' }])).toBe(0);
+  });
+
+  // Il riavvio della traccia sostituisce tutti i vincoli: senza risoluzione il browser
+  // ripiega sul formato nativo della camera, su PC 4:3 o verticale.
+  it('keeps the landscape 720p capture on both sides', () => {
+    for (const facing of ['user', 'environment'] as const) {
+      expect(cameraCaptureOptions(facing)).toEqual({
+        facingMode: facing,
+        resolution: { width: 1280, height: 720, aspectRatio: 16 / 9, frameRate: 30 },
+      });
+    }
   });
 });
 

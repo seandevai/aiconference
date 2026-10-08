@@ -1,9 +1,16 @@
 import 'server-only';
-import { AccessToken, RoomServiceClient } from 'livekit-server-sdk';
+import { AccessToken, RoomServiceClient, TrackSource } from 'livekit-server-sdk';
 import type { ParticipantRole } from './types';
 
 // Basta per entrare: una volta connesso, LiveKit rinnova il token da solo.
 export const ROOM_TOKEN_TTL_SECONDS = 10 * 60;
+
+// Sorgenti per ruolo: lo schermo lo pubblica solo l'host (ADR-0015). Lo verifica LiveKit,
+// non la UI.
+const PUBLISH_SOURCES: Record<ParticipantRole, TrackSource[]> = {
+  guest: [TrackSource.CAMERA, TrackSource.MICROPHONE],
+  host: [TrackSource.CAMERA, TrackSource.MICROPHONE, TrackSource.SCREEN_SHARE],
+};
 
 export type RoomTokenInput = {
   roomId: string;
@@ -35,6 +42,7 @@ export async function createRoomToken(
     canSubscribe: true,
     canPublishData: true,
     canUpdateOwnMetadata: false,
+    canPublishSources: PUBLISH_SOURCES[input.role],
   });
   return token.toJwt();
 }

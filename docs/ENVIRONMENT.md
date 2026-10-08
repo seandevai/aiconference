@@ -37,6 +37,7 @@ attive**. Se una tabella non ha RLS, quella chiave la espone a Internet.
 | `STRIPE_SECRET_KEY` | billing, post-MVP |
 | `STRIPE_WEBHOOK_SECRET` | verifica firma webhook, post-MVP |
 | `CRON_SECRET` | autentica il job di purga |
+| `GESTURE_LAB_ENABLED` | `true` solo su Preview: apre `/dev/gesture-lab` agli admin del laboratorio su staging. Assente in produzione. Letta da `gestureLabEnabled()`, non da `serverEnv()` |
 
 In locale (Codespace e CI) LiveKit gira con `livekit-server --dev`: URL
 `ws://localhost:7880`, chiave `devkey`, segreto `secret`. Valgono solo per quel server;

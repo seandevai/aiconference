@@ -18,6 +18,7 @@ export const LIMITS = {
   rows: 30,
   cell: 200,
   alt: 200,
+  owner: 128,
 } as const;
 
 // Il vassoio può superare MAX_TRAY con gli archiviati: il tetto qui è più largo.
@@ -72,6 +73,13 @@ export const contentSchema = z.discriminatedUnion('kind', [
       mime: z.enum(['image/png', 'image/jpeg', 'image/webp']),
       alt: z.string().max(LIMITS.alt),
     }),
+  }),
+  z.object({
+    id,
+    kind: z.literal('screen'),
+    archived,
+    forkOf,
+    data: z.object({ title, owner: z.string().min(1).max(LIMITS.owner) }),
   }),
 ]);
 

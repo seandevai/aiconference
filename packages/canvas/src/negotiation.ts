@@ -40,6 +40,8 @@ export function openNegotiation(
   // Si negozia ciò che è sul palco, non ciò che sta nel vassoio.
   const content = findContent(stage, options.contentId);
   if (!content) return stage;
+  // Lo schermo è una traccia dal vivo dell'host: non c'è nulla da proporre.
+  if (content.kind === 'screen') return stage;
   return {
     ...stage,
     negotiation: {

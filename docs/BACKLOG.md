@@ -181,6 +181,21 @@ Verifica su telefono: `docs/spikes/2026-09-27-spike-mobile-call.md`.
 - [x] Dopo una riconnessione completa tessere, spotlight e PiP restano legati alle tracce
       della sessione vecchia (da slice 2)
 
+## Richieste di Sean del 06/10 (ADVICES)
+
+In programma il 07/10, in quest'ordine: prima la fotocamera su PC (difetto piccolo, si
+corregge con un test), poi la condivisione dello schermo (brainstorming e spec), il PiP
+automatico resta fermo finché non c'è l'app nativa.
+
+- [ ] **(3, fermo)** Swipe verso l'alto su iPhone: la call non passa ancora nel riquadro PiP. È il caso
+      già deciso il 29/09 (vedi sopra): dal web Safari non lo permette per un video dentro
+      la pagina. Da riaprire solo con l'app nativa o un'idea nuova
+- [x] **(1)** «Gira fotocamera» su PC (corretto, PR #23): l'immagine viene ridimensionata come se fosse la fotocamera
+      verticale di un telefono. Da correggere: su desktop il formato resta orizzontale
+- [x] **(2)** Condivisione dello schermo per l'host (implementata su `slice/condivisione-schermo`,
+      spec `docs/specs/2026-10-07-condivisione-schermo-design.md`): nuova funzione, serviva una spec (LiveKit in
+      `packages/realtime`; dove compare sul palco o accanto ai video)
+
 ## Redesign (Nod) — 29/09
 
 Spec `docs/specs/2026-09-29-redesign-call-design.md`, piano `docs/plans/2026-09-29-redesign-call.md`,
@@ -264,6 +279,11 @@ branch `slice/redesign-call` (PR #9).
 - [ ] Prezzi in `packages/ai/src/pricing.ts` scritti a mano: aggiornarli se cambia il listino
 - [x] Preview Vercel: `AI_PROVIDER=anthropic` e `ANTHROPIC_API_KEY` (con il task 0.5)
 - [ ] Registrare gesture reali con `/dev/gesture-recorder` e aggiungerle ai test
+- [x] Laboratorio gesture `/dev/gesture-lab`: dizionario, soglie, filtro One Euro, cursore a
+      60fps, riscontro, pose stabili, rigioco (spec `docs/specs/2026-10-05-gesture-lab-design.md`)
+- [ ] Decidere quali correzioni accendere nella call dopo le prove nel laboratorio, e portarle
+      nei predefiniti con un test
+- [ ] Gesti continui (zoom con le dita, rotazione): serve un ADR nuovo, ADR-0010 non li prevede
 - [ ] CONFIRM/REJECT a gesto non fanno ancora nulla: servono le immagini con conferma (4B)
 - [ ] MediaPipe si scarica da jsdelivr e googleapis: valutare l'hosting dei file
 - [ ] Soglie delle gesture tarate su mani sintetiche: ritararle con le registrazioni reali
@@ -276,3 +296,25 @@ branch `slice/redesign-call` (PR #9).
 - [ ] Upstash di staging creato nella regione predefinita: per la produzione ricrearlo in UE
 - [ ] Vercel: `installCommand` impostato a mano sul progetto (`cd ../.. && npm ci`);
       valutare `apps/web/vercel.json` per tenerlo nel repo
+
+## Condivisione dello schermo — 07/10
+
+Spec `docs/specs/2026-10-07-condivisione-schermo-design.md`, ADR-0015. Rinviato:
+
+- [ ] «Scatta»: fotogramma dello schermo come finestra immagine, che entra nel pacchetto
+      (gesto e click)
+- [ ] Audio dello schermo (scheda o sistema)
+- [ ] Condivisione dagli ospiti
+- [ ] Far vedere lo schermo all'agente
+
+## Gesture a due mani — 08/10
+
+Oggi il riconoscitore usa solo `frame.hands[0]` per pose, hold, pinch, swipe e flick; la
+seconda mano serve solo a `two_hands_spread`.
+
+- [ ] Mano principale scelta con `handedness` di MediaPipe (es. sempre la destra) invece
+      dell'ordine restituito: con due mani in vista l'ordine può scambiarsi e interrompere
+      un hold o un pinch in corso
+- [ ] Gesti diversi in contemporanea con le due mani (es. pinch con una, hold con l'altra):
+      serve uno stato per mano nel riconoscitore e una regola sui conflitti; da spec
+- [ ] Avvisare nel laboratorio quando il controller adattivo spegne la seconda mano

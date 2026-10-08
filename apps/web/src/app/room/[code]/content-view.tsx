@@ -1,4 +1,5 @@
 import type { ChartData, Content } from '@omnicanvas/canvas';
+import { ScreenView } from './screen-view';
 
 function ChartView({ data }: { data: ChartData }) {
   const max = Math.max(1, ...data.values);
@@ -91,5 +92,7 @@ export function ContentView({ content, assetUrl }: { content: Content; assetUrl:
           <figcaption className="text-sm font-medium">{content.data.title}</figcaption>
         </figure>
       );
+    case 'screen':
+      return <ScreenView owner={content.data.owner} title={content.data.title} />;
   }
 }
