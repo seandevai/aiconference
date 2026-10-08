@@ -44,4 +44,17 @@ describe('createRoomToken', () => {
     const token = await createRoomToken(input, credentials);
     await expect(new TokenVerifier('devkey', 'other-secret').verify(token)).rejects.toThrow();
   });
+
+  it('lets only the host publish a screen', async () => {
+    const verify = async (role: 'host' | 'guest') =>
+      new TokenVerifier('devkey', 'secret').verify(
+        await createRoomToken({ ...input, role }, credentials),
+      );
+    expect((await verify('guest')).video?.canPublishSources).toEqual(['camera', 'microphone']);
+    expect((await verify('host')).video?.canPublishSources).toEqual([
+      'camera',
+      'microphone',
+      'screen_share',
+    ]);
+  });
 });

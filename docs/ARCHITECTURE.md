@@ -182,6 +182,8 @@ PDF chiedono conferma esplicita prima della chiamata.
 - `onRosterChange`, `onStatusChange`, `onDisconnected(cause)`, `onAudioBlockedChange`, `startAudio()`
 - `sendData(channel, payload, to?)` e `onData(channel, handler)` — JSON fino a 15 KB
 - `sendBytes(topic, bytes, to?)` e `onBytes(topic, handler)` — immagini
+- `canShareScreen()`, `startScreenShare()`, `stopScreenShare()`, `onScreenShareEnded(handler)`,
+  `attachScreen(identity, <video>)` — schermo dell'host; la riconnessione non conta come fine
 - lato server, da `@omnicanvas/realtime/server`: `createRoomToken()`
 
 L'identità LiveKit è l'id di `room_participants`; ruolo e lingua sono attributi
@@ -190,6 +192,8 @@ firmati dal server e non modificabili dal client. Il token si emette da
 arrivano dagli eventi LiveKit e non toccano Postgres. LiveKit si ricollega da solo ai
 cali brevi; se rinuncia, `createReconnector` chiede un token nuovo con backoff
 1-16 s e dopo cinque tentativi mostra «Riprova».
+
+Lo schermo condiviso è un contenuto `screen` del palco che porta solo l'identità di chi condivide. La traccia la pubblica solo l'host (grant per ruolo) e non entra mai nel pacchetto (ADR-0015).
 
 Il codice dell'applicazione parla solo a questa interfaccia. Il giorno in cui
 LiveKit diventa caro o inadatto, si riscrive un file invece di trenta. Si parte dal

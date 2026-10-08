@@ -9,6 +9,7 @@ import { phaseMessage, type CallPhase } from '@/lib/call/phase';
 import { isMirrored } from '@/lib/call/mirror';
 import { openPip, watchPipSupport } from '@/lib/call/pip';
 import { nextLastSpeaker, pipTarget, resolveSpotlight } from '@/lib/call/spotlight';
+import { useScreenShare } from '@/lib/stage/use-screen-share';
 import { useStage } from '@/lib/stage/use-stage';
 import { leaveRoomAction } from './actions';
 import { PipVideo } from './pip-video';
@@ -34,6 +35,13 @@ export function RoomCall({ joinCode, role, showSamples }: Props) {
     attachVideo,
   } = useCall(joinCode);
   const stageApi = useStage({ joinCode, role, session, roster: state.roster });
+  const screenShare = useScreenShare({
+    session,
+    role,
+    stage: stageApi.stage,
+    ready: stageApi.ready,
+    dispatch: stageApi.dispatch,
+  });
   const local = state.roster.find((entry) => entry.isLocal);
   const message = phaseMessage(state.phase);
   const live = LIVE_PHASES.includes(state.phase);
@@ -114,6 +122,11 @@ export function RoomCall({ joinCode, role, showSamples }: Props) {
               {state.mediaError}
             </StatusBanner>
           )}
+          {screenShare.error && live && (
+            <StatusBanner tone="error" live="alert">
+              {screenShare.error}
+            </StatusBanner>
+          )}
           {state.audioBlocked && live && (
             <StatusBanner
               tone="warning"
@@ -176,6 +189,15 @@ export function RoomCall({ joinCode, role, showSamples }: Props) {
             {cameraButtonLabel(local?.camOn ?? false)}
           </Button>
           {state.canSwitchCamera && <Button onClick={switchCamera}>Gira fotocamera</Button>}
+          {screenShare.available && (
+            <Button
+              onClick={() => (screenShare.sharing ? screenShare.stop() : void screenShare.start())}
+              aria-pressed={screenShare.sharing}
+              disabled={!stageApi.ready}
+            >
+              {screenShare.sharing ? 'Interrompi condivisione' : 'Condividi schermo'}
+            </Button>
+          )}
           {pipSupported && pipIdentity && (
             <Button
               onClick={() => {

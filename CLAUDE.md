@@ -100,6 +100,9 @@ invariati e quindi call invariata; la traduzione gesto → palco sta in
 (spec `docs/specs/2026-10-06-gesture-lab-redesign-design.md`, piano
 `docs/plans/2026-10-07-gesture-lab-redesign.md`): pagina iniziale con Prova, Registra a passi
 e Rigioca, tecnico in «Avanzate», usabile da telefono.
+Condivisione dello schermo dell'host su `slice/condivisione-schermo`: finestra «Schermo» dentro il palco,
+solo l'host pubblica, fuori dal pacchetto (spec `docs/specs/2026-10-07-condivisione-schermo-design.md`,
+ADR-0015).
 
 Spec v3 del 23/09, dopo un secondo brainstorming con Sean. Rispetto alla v2: palco a
 finestre a slot magnetici invece della lista di schede (ADR-0009), agente a comando

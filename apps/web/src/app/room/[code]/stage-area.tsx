@@ -10,6 +10,7 @@ import { AgentPanel } from './agent-panel';
 import { GestureControl } from './gesture-control';
 import { MobileStage } from './mobile-stage';
 import { StageBoard } from './stage-board';
+import { ScreenAttachContext } from './screen-view';
 import { Tray } from './tray';
 
 type Props = {
@@ -26,25 +27,35 @@ type Props = {
 };
 
 export function StageArea(props: Props) {
-  const { role, stage, ready, assetUrls } = props;
+  const { role, stage, ready, assetUrls, session } = props;
   if (!ready) return <StageSkeleton />;
+  // Il metodo dell'oggetto sessione è stabile: niente funzioni nuove a ogni render, che
+  // riaggancerebbero il video di continuo.
+  const attachScreen = session?.attachScreen ?? null;
+  return (
+    <ScreenAttachContext.Provider value={attachScreen}>
+      {role === 'guest' ? (
+        <GuestStage stage={stage} assetUrls={assetUrls} />
+      ) : (
+        <HostStage {...props} />
+      )}
+    </ScreenAttachContext.Provider>
+  );
+}
 
-  if (role === 'guest') {
-    const counter = stageCounter(stage);
-    return (
-      <>
-        <Panel tone="stage" className="hidden h-full flex-col gap-2 p-2 lg:flex">
-          {counter && <span className="tabular text-xs text-muted">{counter}</span>}
-          <StageBoard stage={stage} assetUrls={assetUrls} />
-        </Panel>
-        <div className="h-full lg:hidden">
-          <MobileStage stage={stage} assetUrls={assetUrls} />
-        </div>
-      </>
-    );
-  }
-
-  return <HostStage {...props} />;
+function GuestStage({ stage, assetUrls }: { stage: Stage; assetUrls: Record<string, string> }) {
+  const counter = stageCounter(stage);
+  return (
+    <>
+      <Panel tone="stage" className="hidden h-full flex-col gap-2 p-2 lg:flex">
+        {counter && <span className="tabular text-xs text-muted">{counter}</span>}
+        <StageBoard stage={stage} assetUrls={assetUrls} />
+      </Panel>
+      <div className="h-full lg:hidden">
+        <MobileStage stage={stage} assetUrls={assetUrls} />
+      </div>
+    </>
+  );
 }
 
 // La forma del palco (primo piano e tre laterali) mentre arriva lo stato: la pagina

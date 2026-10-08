@@ -33,6 +33,17 @@ const stageWith = (windows: Content[][], tray: Content[]): Stage => ({
 const decode = (bytes: Uint8Array) => new TextDecoder().decode(bytes);
 
 describe('collectFiles', () => {
+  it('never puts the shared screen in the bundle, not even among the missing', () => {
+    const live = {
+      id: '00000000-0000-4000-8000-0000000000a1',
+      kind: 'screen',
+      data: { title: 'Schermo', owner: 'host-1' },
+    } as Content;
+    const { files, missing } = collectFiles(stageWith([[live, text(1)]], []), new Map());
+    expect(files.map((f) => f.name)).toEqual(['01-nota-1.md']);
+    expect(missing).toEqual([]);
+  });
+
   it('turns every content into a file: windows, tray and archived ones', () => {
     const stage = stageWith([[text(1)]], [text(2), text(3, { archived: true })]);
     const { files, missing } = collectFiles(stage, new Map());

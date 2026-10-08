@@ -32,6 +32,12 @@ function unarchive(content: Content): Content {
   return copy;
 }
 
+const isScreen = (content: Content) => content.kind === 'screen';
+
+function hasScreen(stage: Stage): boolean {
+  return [...stage.tray, ...stage.windows.flatMap((w) => w.contents)].some(isScreen);
+}
+
 function containsContent(stage: Stage, contentId: string): boolean {
   return (
     stage.tray.some((c) => c.id === contentId) ||
@@ -86,6 +92,8 @@ export function applyCommand(stage: Stage, command: StageCommand): Stage {
   switch (command.type) {
     case 'TRAY_ADD': {
       if (stage.tray.length >= MAX_TRAY || containsContent(stage, command.content.id)) return stage;
+      // Una sola condivisione alla volta sul palco.
+      if (isScreen(command.content) && hasScreen(stage)) return stage;
       return { ...stage, tray: [...stage.tray, command.content] };
     }
 
@@ -108,7 +116,9 @@ export function applyCommand(stage: Stage, command: StageCommand): Stage {
         const promoted = [...windows].sort((a, b) => slotIndex(a.slot) - slotIndex(b.slot))[0]!;
         windows = windows.map((w) => (w === promoted ? { ...w, slot: 'main' as const } : w));
       }
-      const archived = target.contents.map((c) => ({ ...c, archived: true }));
+      const archived = target.contents
+        .filter((c) => !isScreen(c))
+        .map((c) => ({ ...c, archived: true }));
       return withWindows({ ...stage, tray: [...stage.tray, ...archived] }, windows);
     }
 
@@ -146,12 +156,20 @@ export function applyCommand(stage: Stage, command: StageCommand): Stage {
     }
 
     case 'CONTENT_REMOVE': {
+      // Lo schermo condiviso non va mai nel vassoio: finita la traccia non resta nulla.
+      const inTray = stage.tray.find((c) => c.id === command.contentId);
+      if (inTray) {
+        return isScreen(inTray)
+          ? { ...stage, tray: stage.tray.filter((c) => c !== inTray) }
+          : stage;
+      }
       const content = stage.windows
         .flatMap((w) => w.contents)
         .find((c) => c.id === command.contentId);
       if (!content) return stage;
+      const tray = isScreen(content) ? stage.tray : [...stage.tray, { ...content, archived: true }];
       return withWindows(
-        { ...stage, tray: [...stage.tray, { ...content, archived: true }] },
+        { ...stage, tray },
         stage.windows.map((w) => ({
           ...w,
           contents: w.contents.filter((c) => c.id !== command.contentId),

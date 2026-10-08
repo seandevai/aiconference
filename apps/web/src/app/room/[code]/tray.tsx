@@ -17,6 +17,7 @@ const KIND_LABELS = {
   text: 'testo',
   table: 'tabella',
   image: 'immagine',
+  screen: 'schermo',
 } as const;
 
 export function Tray({ stage, dispatch, addImage, showSamples }: Props) {
