@@ -3,7 +3,9 @@ import { admin, anonClient, createTestUser, signedInClient, type TestUser } from
 
 // Migrazione 0008: la funzione del trigger sui nuovi utenti non si chiama da /rest/v1/rpc.
 // Prima della migrazione la chiamata arrivava alla funzione e falliva solo perché non è
-// dentro un trigger (0A000); dopo, si ferma ai privilegi (42501).
+// dentro un trigger (0A000); dopo, si ferma ai privilegi (42501) oppure PostgREST, che
+// non espone le funzioni senza execute, non la trova nemmeno (PGRST202).
+const BLOCKED = ['42501', 'PGRST202'];
 describe('security hardening', () => {
   let user: TestUser;
 
@@ -17,13 +19,13 @@ describe('security hardening', () => {
 
   it('keeps handle_new_user out of reach for anonymous callers', async () => {
     const { error } = await anonClient().rpc('handle_new_user' as never);
-    expect(error?.code).toBe('42501');
+    expect(BLOCKED).toContain(error?.code);
   });
 
   it('keeps handle_new_user out of reach for signed-in users', async () => {
     const client = await signedInClient(user);
     const { error } = await client.rpc('handle_new_user' as never);
-    expect(error?.code).toBe('42501');
+    expect(BLOCKED).toContain(error?.code);
   });
 
   it('still creates the profile when a user signs up', async () => {
