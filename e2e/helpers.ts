@@ -38,6 +38,7 @@ export async function signUpHostWithRoom(
   const { host, email } = await signUpHost(browser);
   await host.getByRole('button', { name: 'Nuova riunione' }).click();
   await host.getByLabel('Titolo della riunione').fill(title);
+  await host.getByLabel('Durata').selectOption('30');
   await host.getByRole('button', { name: 'Crea', exact: true }).click();
   await expect(host).toHaveURL(/\/room\/[A-Z2-9]{8}$/, { timeout: 15_000 });
   return { host, roomUrl: host.url(), email };

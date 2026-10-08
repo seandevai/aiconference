@@ -114,8 +114,18 @@ Riferimento: `docs/specs/2026-09-23-omnicanvas-mvp-design.md` (v3).
 - [ ] Pagina `/p/<id>` che decifra nel browser, senza script di terze parti
 - [ ] PDF riassuntivo a quota
 - [ ] Avviso prima della chiusura: senza «termina» il pacchetto non esiste
-- [ ] Job di purga delle stanze abbandonate
-- [ ] Test: dopo la purga i dati di sessione non esistono
+- [x] Durata della stanza al posto della purga (ADR-0014, `slice/timer-stanza`)
+- [ ] Pacchetto composto dal browser dell'host prima di `close`, anche allo zero del timer
+
+## Dopo il timer
+
+- [ ] Cron di riserva: `closeRoom` sulle stanze `active` con `ends_at` passato (piano Vercel Pro
+      o servizio esterno)
+- [ ] Pulizia delle stanze CREATE mai aperte
+- [ ] `close` chiude anche le righe aperte di `room_participants` (oggi restano con `left_at` nullo)
+- [ ] Rimuovere `room:{id}:presence` dai documenti: nessun codice la usa e non serve più
+- [ ] Il cookie dell'ospite resta di 12 ore: innocuo (la stanza scaduta rifiuta il token),
+      ma si può legare a `ends_at` quando la scadenza è nota all'ingresso
 
 ## Da verificare su Supabase reale
 
@@ -250,7 +260,8 @@ branch `slice/redesign-call` (PR #9).
 - [ ] `rooms.created_by` senza `on delete`: blocca la cancellazione account quando
       arriveranno workspace multi-membro (GDPR)
 - [ ] la pagina stanza scrive `room_participants` su GET: rivedere con la presence
-      della slice 2
+      della slice 2. Valutato il 07/10: `joinRoom` riusa la riga aperta, quindi ricarica e
+      prefetch non duplicano; spostarla su POST costa un click «Entra», scelta di prodotto
 - [x] Token route senza rate limit: 30 al minuto per account o per hash dell'IP (KV)
 - [ ] Chi chiude la scheda senza «Esci» lascia la riga aperta: la chiude la purga (slice 8)
 - [ ] Rimuovere `/dev/spike-cpu` e le sue dipendenze dopo la misura
@@ -278,9 +289,10 @@ branch `slice/redesign-call` (PR #9).
 - [ ] Soglie delle gesture tarate su mani sintetiche: ritararle con le registrazioni reali
 - [x] Preview Vercel: aggiungere `NEXT_PUBLIC_LIVEKIT_URL`, `LIVEKIT_API_KEY`,
       `LIVEKIT_API_SECRET` del progetto LiveKit Cloud (con il task 0.5)
-- [ ] Advisor Supabase su staging: `search_path` fisso per `ai_reserve_credits`,
-      `ai_record_request`, `grant_credits`; revocare `execute` su `handle_new_user` e
-      `is_workspace_member` da `anon`/`authenticated`; `(select auth.uid())` nelle policy
+- [x] Advisor Supabase su staging: migrazione `0008_security_hardening.sql` (07/10).
+      `is_workspace_member` resta eseguibile da `authenticated`: le policy RLS ne hanno bisogno
+- [ ] Protezione dalle password trapelate (HaveIBeenPwned) in Supabase Auth: si attiva dalla
+      dashboard, non da migrazione
 - [ ] Upstash di staging creato nella regione predefinita: per la produzione ricrearlo in UE
 - [ ] Vercel: `installCommand` impostato a mano sul progetto (`cd ../.. && npm ci`);
       valutare `apps/web/vercel.json` per tenerlo nel repo

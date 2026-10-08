@@ -4,11 +4,13 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { parseDisplayName } from '@/lib/auth/display-name';
 import { createRoomForUser } from '@/lib/rooms/create-room';
+import { DEFAULT_PLANNED_MINUTES } from '@/lib/rooms/timer';
 import { createServerSupabase } from '@/lib/supabase/server';
 
 export type CreateRoomState = { error: string | null };
 
 const MESSAGES = {
+  INVALID_DURATION: 'Scegli una durata valida (30, 45, 60 o 90 minuti).',
   INVALID_TITLE: 'Dai un titolo alla stanza (massimo 120 caratteri).',
   NO_WORKSPACE: 'Il tuo account non ha un workspace. Contatta il supporto.',
   JOIN_CODE_COLLISION: 'Non siamo riusciti a generare un codice libero. Riprova.',
@@ -24,6 +26,7 @@ export async function createRoomAction(
 
   const result = await createRoomForUser(supabase, data.user.id, {
     title: String(formData.get('title') ?? ''),
+    plannedMinutes: Number(formData.get('planned_minutes') ?? DEFAULT_PLANNED_MINUTES),
   });
   if (!result.ok) return { error: MESSAGES[result.error] };
   redirect(`/room/${result.joinCode}`);

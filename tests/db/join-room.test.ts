@@ -161,4 +161,26 @@ describe('joinRoom', () => {
       ),
     ).toBeNull();
   });
+
+  it('reports an expired room as ended', async () => {
+    const created = await createRoomForUser(await signedInClient(host), host.id, {
+      title: 'Scaduta',
+    });
+    if (!created.ok) throw new Error('setup failed');
+    await admin
+      .from('rooms')
+      .update({
+        status: 'active',
+        started_at: new Date(Date.now() - 70 * 60_000).toISOString(),
+        ends_at: new Date(Date.now() - 3 * 60_000).toISOString(),
+      })
+      .eq('id', created.id);
+    const result = await joinRoom(admin, {
+      joinCode: created.joinCode,
+      userId: null,
+      displayName: 'Cliente',
+      language: 'en',
+    });
+    expect(result).toEqual({ kind: 'ended' });
+  });
 });

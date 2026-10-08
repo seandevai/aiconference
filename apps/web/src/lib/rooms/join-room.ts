@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@omnicanvas/db';
 import { isValidJoinCode } from './join-code';
 import { isLanguage } from './languages';
+import { isRoomOver } from './timer';
 
 export type RoomSummary = { id: string; title: string; joinCode: string };
 
@@ -21,7 +22,6 @@ export type JoinRoomResult =
   | { kind: 'ended' }
   | { kind: 'invalid'; field: 'displayName' | 'language' };
 
-const ENDED_STATUSES = new Set(['closing', 'closed', 'purged']);
 const MAX_NAME_LENGTH = 40;
 
 type Admin = SupabaseClient<Database>;
@@ -32,12 +32,14 @@ export async function joinRoom(admin: Admin, input: JoinRoomInput): Promise<Join
 
   const { data: room, error } = await admin
     .from('rooms')
-    .select('id, title, join_code, status, created_by')
+    .select('id, title, join_code, status, created_by, ends_at')
     .eq('join_code', input.joinCode)
     .maybeSingle();
   if (error) throw error;
   if (!room) return { kind: 'not_found' };
-  if (ENDED_STATUSES.has(room.status)) return { kind: 'ended' };
+  if (isRoomOver({ status: room.status, endsAt: room.ends_at }, new Date())) {
+    return { kind: 'ended' };
+  }
 
   const summary: RoomSummary = { id: room.id, title: room.title, joinCode: room.join_code };
   const role = input.userId !== null && input.userId === room.created_by ? 'host' : 'guest';

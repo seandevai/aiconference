@@ -104,6 +104,9 @@ Condivisione dello schermo dell'host su `slice/condivisione-schermo`: finestra Â
 solo l'host pubblica, fuori dal pacchetto (spec `docs/specs/2026-10-07-condivisione-schermo-design.md`,
 ADR-0015).
 
+Timer della stanza (durata scelta dall'host, proroghe, chiusura allo zero, niente purga per presence)
+su `slice/timer-stanza`, spec `docs/specs/2026-10-04-timer-stanza-design.md`, ADR-0014.
+
 Spec v3 del 23/09, dopo un secondo brainstorming con Sean. Rispetto alla v2: palco a
 finestre a slot magnetici invece della lista di schede (ADR-0009), agente a comando
 con parola chiave locale e modalitÃ  companion opzionale, sottotitoli tradotti

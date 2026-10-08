@@ -244,18 +244,21 @@ script di terze parti, per non esporre il frammento (ADR-0008).
 ## 10. Ciclo di vita della stanza
 
 ```
-CREATA        riga in rooms, nessuno stato in KV
-ATTIVA        primo join: stato in KV con TTL, token emessi
-IN CHIUSURA   host termina: il suo browser compone, cifra e carica il pacchetto
-CHIUSA        rooms.ended_at valorizzato, KV cancellato, token revocati
-PURGATA       entro 10 minuti: nessuno stato di sessione sui server
-SCADUTA       dopo 7 giorni: blob rimosso dal lifecycle di R2, resta la riga in bundles
+CREATA        riga in rooms, planned_minutes scelto, ends_at nullo
+ATTIVA        primo token: started_at = now, ends_at = now + planned_minutes
+              stato in KV con TTL fino a ends_at + margine
+IN CHIUSURA   host termina (o zero con host presente): dalla slice 8 il browser
+              compone, cifra e carica il pacchetto
+CHIUSA        route close: status = closed, ended_at, KV cancellato, stanza LiveKit chiusa
+SCADUTA       now > ends_at + margine senza close: trattata come chiusa da ogni route;
+              KV già scaduto per TTL; LiveKit chiude la stanza vuota (emptyTimeout)
+
+PACCHETTO     dopo 7 giorni: blob rimosso dal lifecycle di R2, resta la riga in bundles
+SCADUTO       (riguarda il pacchetto, non la stanza: «SCADUTA» sopra è solo la stanza)
 ```
 
-Il passaggio a PURGATA avviene **anche se l'host chiude il browser senza premere
-nulla**: un job purga le stanze senza presence da più di N minuti. In quel caso il
-pacchetto non esiste, perché i contenuti vivevano solo nei browser. L'interfaccia lo
-dice prima, non dopo.
+Vedi ADR-0014: la durata della stanza sostituisce la purga per presence. Lo stato `active`
+con `ends_at` passato è uno stato legittimo: «scaduta».
 
 ## 11. Autorizzazione
 

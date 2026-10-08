@@ -51,11 +51,13 @@ alla registrazione.
 | title | text | inserito dall'host, è metadato non contenuto |
 | join_code | text unique | codice corto per il link di invito |
 | status | text | `created`, `active`, `closing`, `closed`, `purged` |
+| planned_minutes | integer | 30, 45, 60, 90; predefinito 60 |
+| ends_at | timestamptz | fissato al primo ingresso, spostato solo dalle proroghe |
 | guest_credit_cap | integer | nullable. Valorizzato = «offro io» attivo, tetto per ospite |
 | started_at, ended_at, purged_at | timestamptz | nullable |
 | created_at, updated_at | timestamptz | |
 
-Indice su `join_code`. Indice su `(status, started_at)` per il job di purga.
+Indice su `join_code`. Indice su `(status, started_at)`: indice storico, nessun job lo usa più.
 
 ### room_participants
 Chi è entrato, con che ruolo e per quanto. Serve per i permessi, per il pagante e

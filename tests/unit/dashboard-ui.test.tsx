@@ -28,6 +28,7 @@ const room = (over: Partial<DashboardRoom>): DashboardRoom => ({
   status: 'created',
   startedAt: null,
   endedAt: null,
+  endsAt: null,
   createdAt: '2026-09-29T08:00:00Z',
   ...over,
 });
@@ -135,6 +136,21 @@ describe('NewMeeting', () => {
   it('starts open for a new user', () => {
     render(<NewMeeting defaultOpen />);
     expect(screen.getByLabelText('Titolo della riunione')).toBeTruthy();
+  });
+
+  describe('NewMeeting duration', () => {
+    it('offers the four durations with one hour preselected', () => {
+      render(<NewMeeting defaultOpen />);
+      const select = screen.getByLabelText('Durata') as HTMLSelectElement;
+      expect(select.name).toBe('planned_minutes');
+      expect(select.value).toBe('60');
+      expect([...select.options].map((o) => o.textContent)).toEqual([
+        '30 minuti',
+        '45 minuti',
+        '1 ora',
+        '1 ora e 30',
+      ]);
+    });
   });
 });
 

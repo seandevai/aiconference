@@ -298,9 +298,11 @@ export type Database = {
           created_at: string;
           created_by: string;
           ended_at: string | null;
+          ends_at: string | null;
           guest_credit_cap: number | null;
           id: string;
           join_code: string;
+          planned_minutes: number;
           purged_at: string | null;
           started_at: string | null;
           status: string;
@@ -312,9 +314,11 @@ export type Database = {
           created_at?: string;
           created_by: string;
           ended_at?: string | null;
+          ends_at?: string | null;
           guest_credit_cap?: number | null;
           id?: string;
           join_code: string;
+          planned_minutes?: number;
           purged_at?: string | null;
           started_at?: string | null;
           status?: string;
@@ -326,9 +330,11 @@ export type Database = {
           created_at?: string;
           created_by?: string;
           ended_at?: string | null;
+          ends_at?: string | null;
           guest_credit_cap?: number | null;
           id?: string;
           join_code?: string;
+          planned_minutes?: number;
           purged_at?: string | null;
           started_at?: string | null;
           status?: string;

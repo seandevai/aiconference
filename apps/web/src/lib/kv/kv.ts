@@ -14,7 +14,13 @@ export type CounterKv = {
   expire(key: string, seconds: number): Promise<unknown>;
 };
 
-export function createKv(): KvLike & CounterKv {
+// Chiavi della stanza: la proroga ne sposta la scadenza, la chiusura le toglie.
+export type RoomKeysKv = {
+  expire(key: string, seconds: number): Promise<unknown>;
+  del(...keys: string[]): Promise<unknown>;
+};
+
+export function createKv(): KvLike & CounterKv & RoomKeysKv {
   const env = serverEnv();
   return new Redis({ url: env.KV_REST_API_URL, token: env.KV_REST_API_TOKEN });
 }

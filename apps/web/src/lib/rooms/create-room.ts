@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import type { Database } from '@omnicanvas/db';
+import { DEFAULT_PLANNED_MINUTES, isPlannedMinutes } from './timer';
 import { generateJoinCode } from './join-code';
 
 const titleSchema = z.string().trim().min(1).max(120);
@@ -9,16 +10,18 @@ const UNIQUE_VIOLATION = '23505';
 
 export type CreateRoomResult =
   | { ok: true; id: string; joinCode: string }
-  | { ok: false; error: 'INVALID_TITLE' | 'NO_WORKSPACE' | 'JOIN_CODE_COLLISION' };
+  | { ok: false; error: 'INVALID_TITLE' | 'INVALID_DURATION' | 'NO_WORKSPACE' | 'JOIN_CODE_COLLISION' };
 
 export async function createRoomForUser(
   supabase: SupabaseClient<Database>,
   userId: string,
-  input: { title: string },
+  input: { title: string; plannedMinutes?: unknown },
   nextCode: () => string = generateJoinCode,
 ): Promise<CreateRoomResult> {
   const title = titleSchema.safeParse(input.title);
   if (!title.success) return { ok: false, error: 'INVALID_TITLE' };
+  const plannedMinutes = input.plannedMinutes ?? DEFAULT_PLANNED_MINUTES;
+  if (!isPlannedMinutes(plannedMinutes)) return { ok: false, error: 'INVALID_DURATION' };
 
   const { data: membership } = await supabase
     .from('workspace_members')
@@ -38,6 +41,7 @@ export async function createRoomForUser(
         created_by: userId,
         title: title.data,
         join_code: nextCode(),
+        planned_minutes: plannedMinutes,
       })
       .select('id, join_code')
       .single();

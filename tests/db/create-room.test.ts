@@ -62,4 +62,25 @@ describe('createRoomForUser', () => {
     );
     expect(result).toEqual({ ok: false, error: 'JOIN_CODE_COLLISION' });
   });
+
+  it('stores the chosen duration, 60 minutes when none is given', async () => {
+    const client = await signedInClient(host);
+    const chosen = await createRoomForUser(client, host.id, { title: 'Breve', plannedMinutes: 30 });
+    const fallback = await createRoomForUser(client, host.id, { title: 'Standard' });
+    if (!chosen.ok || !fallback.ok) throw new Error('create failed');
+    const { data } = await admin
+      .from('rooms')
+      .select('id, planned_minutes, ends_at')
+      .in('id', [chosen.id, fallback.id]);
+    const byId = new Map((data ?? []).map((row) => [row.id, row]));
+    expect(byId.get(chosen.id)).toMatchObject({ planned_minutes: 30, ends_at: null });
+    expect(byId.get(fallback.id)).toMatchObject({ planned_minutes: 60, ends_at: null });
+  });
+
+  it('refuses a duration outside the list', async () => {
+    const client = await signedInClient(host);
+    expect(
+      await createRoomForUser(client, host.id, { title: 'Lunga', plannedMinutes: 240 }),
+    ).toEqual({ ok: false, error: 'INVALID_DURATION' });
+  });
 });

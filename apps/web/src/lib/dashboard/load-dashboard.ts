@@ -20,7 +20,7 @@ export async function loadDashboard(
     supabase.from('profiles').select('display_name').eq('id', userId).maybeSingle(),
     supabase
       .from('rooms')
-      .select('id, title, join_code, status, started_at, ended_at, created_at')
+      .select('id, title, join_code, status, started_at, ended_at, ends_at, created_at')
       .order('created_at', { ascending: false })
       .limit(50),
     supabase
@@ -41,6 +41,7 @@ export async function loadDashboard(
         status: row.status,
         startedAt: row.started_at,
         endedAt: row.ended_at,
+        endsAt: row.ends_at,
         createdAt: row.created_at,
       }));
 

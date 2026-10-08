@@ -118,4 +118,42 @@ describe('RLS on rooms and room_participants', () => {
     });
     expect(error?.code).toBe('23505');
   });
+
+  it('refuses a deadline written by the client', async () => {
+    const client = await signedInClient(host);
+    const { error } = await client.from('rooms').insert({
+      workspace_id: await workspaceOf(host),
+      created_by: host.id,
+      title: 'Furbo',
+      join_code: generateJoinCode(),
+      ends_at: '2099-01-01T00:00:00Z',
+    });
+    expect(error).not.toBeNull();
+  });
+
+  it('accepts only the planned durations', async () => {
+    const client = await signedInClient(host);
+    const workspaceId = await workspaceOf(host);
+    const bad = await client.from('rooms').insert({
+      workspace_id: workspaceId,
+      created_by: host.id,
+      title: 'Venti',
+      join_code: generateJoinCode(),
+      planned_minutes: 20,
+    });
+    expect(bad.error).not.toBeNull();
+    const good = await client
+      .from('rooms')
+      .insert({
+        workspace_id: workspaceId,
+        created_by: host.id,
+        title: 'Quarantacinque',
+        join_code: generateJoinCode(),
+        planned_minutes: 45,
+      })
+      .select('planned_minutes, ends_at')
+      .single();
+    expect(good.error).toBeNull();
+    expect(good.data).toEqual({ planned_minutes: 45, ends_at: null });
+  });
 });

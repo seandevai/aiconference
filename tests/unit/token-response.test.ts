@@ -2,10 +2,25 @@ import { describe, expect, it } from 'vitest';
 import { toTokenResponse } from '@/lib/rooms/token-response';
 
 describe('toTokenResponse', () => {
-  it('returns url and token on success', () => {
-    expect(toTokenResponse({ kind: 'ok', url: 'ws://lk', token: 'jwt' })).toEqual({
+  it('returns url, token and the room timing on success', () => {
+    expect(
+      toTokenResponse({
+        kind: 'ok',
+        url: 'ws://lk',
+        token: 'jwt',
+        endsAt: '2026-10-04T11:00:00.000Z',
+        capAt: '2026-10-04T13:00:00.000Z',
+        serverNow: '2026-10-04T10:00:00.000Z',
+      }),
+    ).toEqual({
       status: 200,
-      body: { url: 'ws://lk', token: 'jwt' },
+      body: {
+        url: 'ws://lk',
+        token: 'jwt',
+        endsAt: '2026-10-04T11:00:00.000Z',
+        capAt: '2026-10-04T13:00:00.000Z',
+        serverNow: '2026-10-04T10:00:00.000Z',
+      },
     });
   });
 
