@@ -74,6 +74,10 @@ function LabClient({ archive }: { archive: LabArchive | null }) {
   const scene = (
     <LabScene
       areaRef={areaRef}
+      variant="stage"
+      panel={null}
+      stageShown={false}
+      onToggleStage={() => {}}
       hand={
         <HandView
           videoRef={videoRef}
