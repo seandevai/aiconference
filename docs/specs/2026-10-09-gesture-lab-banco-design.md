@@ -55,7 +55,7 @@ l'anello dell'hold. Sotto, tre riquadri affiancati della stessa altezza:
    tacche alle soglie `tuning.pose.folded` e `tuning.pose.extended`; una barra per il pinch con
    la tacca a `tuning.pose.pinchOn`; pollice esteso o chiuso. Le barre vanno da 0 a 1; un
    valore fuori scala si ferma al bordo e il numero resta scritto.
-3. **Eventi:** gli ultimi eventi del registro (`log`), il più recente in alto, con l'ora.
+3. **Eventi:** gli ultimi eventi del registro (`log`), il più recente in alto, coi secondi dall'avvio come oggi.
 
 Senza mano in vista i riquadri dicono «Nessuna mano in vista» e le barre restano vuote; a
 fotocamera spenta vale il messaggio di oggi sullo scheletro.
