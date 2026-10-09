@@ -83,7 +83,12 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
 export function BenchPanel({ view, hand, tuning, log, stacked = false }: Props) {
   const metrics = hand ? poseMetrics(hand) : null;
   return (
-    <div className={cx('grid min-h-0 gap-3 text-xs text-fg', !stacked && 'lg:grid-cols-3')}>
+    <div
+      className={cx(
+        'grid min-h-0 gap-3 text-xs text-fg',
+        !stacked && 'h-full lg:grid-cols-3 lg:grid-rows-[minmax(0,1fr)]',
+      )}
+    >
       <Tile title="Posa">
         <h3 className="text-sm font-semibold text-muted">Posa</h3>
         {view ? (

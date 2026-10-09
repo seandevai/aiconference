@@ -61,6 +61,12 @@ describe('LabScene', () => {
     expect(box('palco').className).toContain('lg:hidden');
   });
 
+  // I riquadri non devono uscire dalla loro altezza e coprire i comandi sotto la scena.
+  it('clips the numbers to their share of the height', () => {
+    const { box } = renderScene('bench');
+    expect(box('numeri').className).toContain('overflow-hidden');
+  });
+
   it('has no numbers in the stage variant', () => {
     renderScene('stage');
     expect(screen.queryByText('numeri')).toBeNull();

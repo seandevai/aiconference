@@ -93,6 +93,8 @@ describe('BenchPanel', () => {
       <BenchPanel view={null} hand={null} tuning={DEFAULT_TUNING} log={[]} />,
     );
     expect((container.firstElementChild as HTMLElement).className).toContain('lg:grid-cols-3');
+    // Una riga alta quanto lo spazio: ogni riquadro scorre dentro di sé.
+    expect((container.firstElementChild as HTMLElement).className).toContain('h-full');
     rerender(<BenchPanel view={null} hand={null} tuning={DEFAULT_TUNING} log={[]} stacked />);
     expect((container.firstElementChild as HTMLElement).className).not.toContain('lg:grid-cols-3');
   });

@@ -65,7 +65,9 @@ function LabClient({ archive }: { archive: LabArchive | null }) {
     const current = labRef.current;
     current.pause();
     current.stopLive();
-    if (view === 'prova' || view === 'banco') void current.startLive();
+    // Il banco aperto da telefono torna all'inizio: lì la fotocamera non deve nemmeno partire.
+    const benchFits = view === 'banco' && window.matchMedia(WIDE_SCREEN_QUERY).matches;
+    if (view === 'prova' || benchFits) void current.startLive();
   }, [view]);
 
   // Il banco serve spazio: aperto dal telefono (link o tasto indietro) si torna all'inizio.
@@ -73,7 +75,7 @@ function LabClient({ archive }: { archive: LabArchive | null }) {
     if (view !== 'banco') return;
     const wide = window.matchMedia(WIDE_SCREEN_QUERY);
     const check = () => {
-      if (!wide.matches) go('home');
+      if (!wide.matches) go('home', null, { replace: true });
     };
     check();
     wide.addEventListener('change', check);

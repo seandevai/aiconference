@@ -187,6 +187,27 @@ describe('gesture lab bench', () => {
     expect(window.location.search).toBe('');
   });
 
+  // Il ritorno sostituisce la voce: il tasto indietro non deve riportare al banco.
+  it('replaces the history entry when sending a phone back home', () => {
+    media.wide = false;
+    nav.search = '?vista=banco';
+    window.history.replaceState(null, '', '/dev/gesture-lab?vista=banco');
+    const push = vi.spyOn(window.history, 'pushState');
+    const replace = vi.spyOn(window.history, 'replaceState');
+    render(<Lab archive={null} />);
+    expect(push).not.toHaveBeenCalled();
+    expect(replace).toHaveBeenCalledWith(null, '', '/dev/gesture-lab');
+    push.mockRestore();
+    replace.mockRestore();
+  });
+
+  it('does not start the camera when the bench is opened on a phone', () => {
+    media.wide = false;
+    nav.search = '?vista=banco';
+    render(<Lab archive={null} />);
+    expect(hook.startLive).not.toHaveBeenCalled();
+  });
+
   it('hides the cursor where the stage is not visible', () => {
     state.cursor = { x: 10, y: 10, grabbing: false };
     nav.search = '?vista=banco';

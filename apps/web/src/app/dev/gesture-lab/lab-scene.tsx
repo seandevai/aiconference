@@ -59,7 +59,9 @@ export function LabScene({
         {stage}
       </div>
       {variant === 'bench' && (
-        <div className="min-h-0 shrink-0 max-lg:hidden lg:order-3 lg:max-h-[40%]">{panel}</div>
+        <div className="min-h-0 shrink-0 overflow-hidden max-lg:hidden lg:order-3 lg:h-[40%]">
+          {panel}
+        </div>
       )}
     </div>
   );
