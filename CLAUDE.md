@@ -100,6 +100,9 @@ invariati e quindi call invariata; la traduzione gesto → palco sta in
 (spec `docs/specs/2026-10-06-gesture-lab-redesign-design.md`, piano
 `docs/plans/2026-10-07-gesture-lab-redesign.md`): pagina iniziale con Prova, Registra a passi
 e Rigioca, tecnico in «Avanzate», usabile da telefono.
+Banco di prova del laboratorio su `slice/gesture-lab-banco` (spec
+`docs/specs/2026-10-09-gesture-lab-banco-design.md`): su PC scheletro e numeri dal vivo (anche in
+Registra), sul telefono la mano a tutto spazio col palco a richiesta, scheletro sempre acceso.
 Condivisione dello schermo dell'host su `slice/condivisione-schermo`: finestra «Schermo» dentro il palco,
 solo l'host pubblica, fuori dal pacchetto (spec `docs/specs/2026-10-07-condivisione-schermo-design.md`,
 ADR-0015).

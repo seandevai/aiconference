@@ -13,6 +13,10 @@ describe('resolveView', () => {
     expect(resolveView(params('?vista=registra'), true)).toEqual({ view: 'registra', id: null });
   });
 
+  it('opens the bench without the archive', () => {
+    expect(resolveView(params('?vista=banco'), false)).toEqual({ view: 'banco', id: null });
+  });
+
   it('falls back to the home for an unknown view', () => {
     expect(resolveView(params('?vista=taratura'), true)).toEqual({ view: 'home', id: null });
   });
@@ -33,6 +37,10 @@ describe('resolveView', () => {
 });
 
 describe('viewSearch', () => {
+  it('writes the bench view', () => {
+    expect(viewSearch('banco')).toBe('?vista=banco');
+  });
+
   it('writes the view, and the id only for the replay', () => {
     expect(viewSearch('home')).toBe('');
     expect(viewSearch('prova')).toBe('?vista=prova');

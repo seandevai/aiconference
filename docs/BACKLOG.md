@@ -281,6 +281,10 @@ branch `slice/redesign-call` (PR #9).
 - [ ] Registrare gesture reali con `/dev/gesture-recorder` e aggiungerle ai test
 - [x] Laboratorio gesture `/dev/gesture-lab`: dizionario, soglie, filtro One Euro, cursore a
       60fps, riscontro, pose stabili, rigioco (spec `docs/specs/2026-10-05-gesture-lab-design.md`)
+- [x] Banco di prova su PC (scheletro e numeri dal vivo) e mano al centro sul telefono (spec
+      `docs/specs/2026-10-09-gesture-lab-banco-design.md`, branch `slice/gesture-lab-banco`)
+- [ ] Controllo a mano del banco: 1920x1080 e iPhone verticale e orizzontale (piano
+      `docs/plans/2026-10-09-gesture-lab-banco.md`, «Controllo a mano»)
 - [ ] Decidere quali correzioni accendere nella call dopo le prove nel laboratorio, e portarle
       nei predefiniti con un test
 - [ ] Gesti continui (zoom con le dita, rotazione): serve un ADR nuovo, ADR-0010 non li prevede

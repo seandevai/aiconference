@@ -6,9 +6,12 @@ import { useSearchParams } from 'next/navigation';
 // La schermata del laboratorio sta nell'URL (?vista=…): il tasto indietro del telefono e del
 // browser torna alla schermata prima. Registra e Rigioca parlano col server: senza archivio
 // non esistono.
-export type LabView = 'home' | 'prova' | 'registra' | 'rigioca';
+export type LabView = 'home' | 'prova' | 'banco' | 'registra' | 'rigioca';
 
-const VIEWS: readonly LabView[] = ['prova', 'registra', 'rigioca'];
+const VIEWS: readonly LabView[] = ['prova', 'banco', 'registra', 'rigioca'];
+// Da qui in su c'è spazio per il banco (Tailwind `lg`).
+export const WIDE_SCREEN_QUERY = '(min-width: 64rem)';
+
 const ARCHIVE_VIEWS: readonly LabView[] = ['registra', 'rigioca'];
 
 export function resolveView(
