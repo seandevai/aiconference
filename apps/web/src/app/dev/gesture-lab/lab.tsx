@@ -5,14 +5,15 @@ import { cx } from '@omnicanvas/ui';
 import type { Frame } from '@omnicanvas/gesture';
 import { StageBoard } from '@/app/room/[code]/stage-board';
 import type { LabArchive, RecordingSummary } from '@/lib/gesture-lab/lab-store';
-import { useLabView } from '@/lib/gesture-lab/lab-view';
+import { WIDE_SCREEN_QUERY, useLabView } from '@/lib/gesture-lab/lab-view';
 import { effectiveTuning } from '@/lib/gesture-lab/settings';
 import { useGestureLab } from '@/lib/gesture-lab/use-gesture-lab';
 import { AdvancedPanel } from './advanced-panel';
-import { Diagnostics } from './diagnostics';
+import { BenchPanel } from './bench-panel';
+import { BenchScreen } from './bench-screen';
 import { HandView } from './hand-view';
 import { HomeScreen } from './home-screen';
-import { LabScene } from './lab-scene';
+import { LabScene, stageHiddenClass, type SceneVariant } from './lab-scene';
 import { PresetSection } from './preset-panel';
 import { RecordWizard } from './record-wizard';
 import { ReplayScreen } from './replay-screen';
@@ -40,12 +41,21 @@ function LabClient({ archive }: { archive: LabArchive | null }) {
   const [presets, setPresets] = useState(archive?.presets ?? []);
   const [advanced, setAdvanced] = useState(false);
   const [screenScene, setScreenScene] = useState(false);
-  const sceneVisible = view === 'prova' || screenScene;
+  const sceneVisible = view === 'prova' || view === 'banco' || screenScene;
+  // Sul telefono il palco si apre a richiesta; ogni schermata riparte con la mano.
+  const [stageShown, setStageShown] = useState(false);
+  const [stageView, setStageView] = useState(view);
+  if (stageView !== view) {
+    setStageView(view);
+    setStageShown(false);
+  }
+  const toggleStage = useCallback(() => setStageShown((shown) => !shown), []);
+  const variant: SceneVariant = view === 'banco' || view === 'registra' ? 'bench' : 'stage';
   const showAdvanced = advanced && sceneVisible;
 
   // La fotocamera segue la schermata. Ogni schermata ha il suo <video>: cambiando schermata lo
   // stream resterebbe su un elemento staccato (che il browser mette in pausa), quindi si ferma
-  // sempre e riparte entrando in Prova; Registra la accende da sé al passo 2. Anche il rigioco
+  // sempre e riparte entrando in Prova o nel banco; Registra la accende da sé al passo 2. Anche il rigioco
   // si ferma. Il hook si legge da un ref: l'effetto dipende solo dalla vista.
   const labRef = useRef(lab);
   useEffect(() => {
@@ -55,8 +65,22 @@ function LabClient({ archive }: { archive: LabArchive | null }) {
     const current = labRef.current;
     current.pause();
     current.stopLive();
-    if (view === 'prova') void current.startLive();
+    // Il banco aperto da telefono torna all'inizio: lì la fotocamera non deve nemmeno partire.
+    const benchFits = view === 'banco' && window.matchMedia(WIDE_SCREEN_QUERY).matches;
+    if (view === 'prova' || benchFits) void current.startLive();
   }, [view]);
+
+  // Il banco serve spazio: aperto dal telefono (link o tasto indietro) si torna all'inizio.
+  useEffect(() => {
+    if (view !== 'banco') return;
+    const wide = window.matchMedia(WIDE_SCREEN_QUERY);
+    const check = () => {
+      if (!wide.matches) go('home', null, { replace: true });
+    };
+    check();
+    wide.addEventListener('change', check);
+    return () => wide.removeEventListener('change', check);
+  }, [view, go]);
 
   const removeRecording = useCallback(
     (recordingId: string) => setRecordings((list) => list.filter((r) => r.id !== recordingId)),
@@ -74,18 +98,28 @@ function LabClient({ archive }: { archive: LabArchive | null }) {
   const scene = (
     <LabScene
       areaRef={areaRef}
+      variant={variant}
+      stageShown={stageShown}
+      onToggleStage={toggleStage}
       hand={
         <HandView
           videoRef={videoRef}
           framesRef={framesRef}
           view={lab.view}
           lastEvent={lab.fired[lab.fired.length - 1] ?? null}
-          feedback={lab.settings.toggles.feedback}
           idle={lab.live !== 'on' && !lab.playing}
           replaying={lab.playing}
         />
       }
       stage={<StageBoard stage={lab.stage} assetUrls={{}} dispatch={lab.dispatch} />}
+      panel={
+        <BenchPanel
+          view={lab.view}
+          hand={lab.hand}
+          tuning={effectiveTuning(lab.settings)}
+          log={lab.log}
+        />
+      }
     />
   );
 
@@ -103,6 +137,16 @@ function LabClient({ archive }: { archive: LabArchive | null }) {
             scene={scene}
             live={lab.live}
             armed={lab.armed}
+            onStart={() => void lab.startLive()}
+            onStop={lab.stopLive}
+            onBack={toHome}
+            onAdvanced={openAdvanced}
+          />
+        )}
+        {view === 'banco' && (
+          <BenchScreen
+            scene={scene}
+            live={lab.live}
             onStart={() => void lab.startLive()}
             onStop={lab.stopLive}
             onBack={toHome}
@@ -153,11 +197,12 @@ function LabClient({ archive }: { archive: LabArchive | null }) {
         settings={lab.settings}
         onChange={lab.setSettings}
         diagnostics={
-          <Diagnostics
+          <BenchPanel
             view={lab.view}
             hand={lab.hand}
             tuning={effectiveTuning(lab.settings)}
             log={lab.log}
+            stacked
           />
         }
         presets={
@@ -175,10 +220,13 @@ function LabClient({ archive }: { archive: LabArchive | null }) {
       {lab.cursor && (
         <div
           aria-hidden
+          data-lab-cursor
           style={{ left: lab.cursor.x, top: lab.cursor.y }}
-          className={`pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 ${
-            lab.cursor.grabbing ? 'h-8 w-8 border-accent bg-accent/30' : 'h-5 w-5 border-fg'
-          }`}
+          className={cx(
+            'pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-1/2 rounded-full border-2',
+            lab.cursor.grabbing ? 'h-8 w-8 border-accent bg-accent/30' : 'h-5 w-5 border-fg',
+            stageHiddenClass(variant, stageShown),
+          )}
         />
       )}
     </main>

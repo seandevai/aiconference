@@ -1,17 +1,45 @@
+import { cx } from '@omnicanvas/ui';
 import type { LabView } from '@/lib/gesture-lab/lab-view';
 
 const CHOICES = [
-  { view: 'prova', title: 'Prova le gesture', hint: 'Fotocamera e palco.', archive: false },
+  {
+    view: 'prova',
+    title: 'Prova le gesture',
+    hint: 'Fotocamera e palco.',
+    archive: false,
+    wideOnly: false,
+  },
+  {
+    view: 'banco',
+    title: 'Banco di prova',
+    hint: 'Scheletro e numeri dal vivo.',
+    archive: false,
+    wideOnly: true,
+  },
   {
     view: 'registra',
     title: 'Registra un gesto',
     hint: 'Guidato, un passo alla volta.',
     archive: true,
+    wideOnly: false,
   },
-  { view: 'rigioca', title: "Rigioca dall'archivio", hint: 'Anche senza webcam.', archive: true },
-] as const satisfies readonly { view: LabView; title: string; hint: string; archive: boolean }[];
+  {
+    view: 'rigioca',
+    title: "Rigioca dall'archivio",
+    hint: 'Anche senza webcam.',
+    archive: true,
+    wideOnly: false,
+  },
+] as const satisfies readonly {
+  view: LabView;
+  title: string;
+  hint: string;
+  archive: boolean;
+  wideOnly: boolean;
+}[];
 
-// La pagina iniziale: tre scelte grandi, impilate su telefono e affiancate su schermo largo.
+// La pagina iniziale: scelte grandi, impilate su telefono e affiancate su schermo largo. Il banco
+// c'è solo su schermo largo: quattro scelte lì, tre sul telefono.
 export function HomeScreen({
   canArchive,
   onGo,
@@ -23,13 +51,16 @@ export function HomeScreen({
     <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col justify-center gap-4">
       <h1 className="text-2xl font-extrabold">Laboratorio gesture</h1>
       <p className="text-muted">Cosa vuoi fare?</p>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {CHOICES.filter((c) => canArchive || !c.archive).map((c) => (
           <button
             key={c.view}
             type="button"
             onClick={() => onGo(c.view)}
-            className="flex min-h-24 flex-col items-start gap-1 rounded-panel border border-line bg-surface p-4 text-left hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            className={cx(
+              'flex min-h-24 flex-col items-start gap-1 rounded-panel border border-line bg-surface p-4 text-left hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+              c.wideOnly && 'max-lg:hidden',
+            )}
           >
             <span className="text-lg font-extrabold">{c.title}</span>
             <span className="text-sm text-muted">{c.hint}</span>

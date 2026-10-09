@@ -15,7 +15,7 @@ const preset = (over: Partial<PresetSummary>): PresetSummary => ({
   name: 'morbido',
   settings: {
     ...DEFAULT_LAB_SETTINGS,
-    toggles: { ...DEFAULT_LAB_SETTINGS.toggles, feedback: true },
+    toggles: { ...DEFAULT_LAB_SETTINGS.toggles, smoothCursor: true },
   },
   authorId: 'luca',
   authorName: 'Luca',

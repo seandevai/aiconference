@@ -52,11 +52,6 @@ export function CorrectionControls({ settings, onChange }: Props) {
         onChange={(v) => setToggle('smoothCursor', v)}
       />
       <Toggle
-        label="Riscontro durante il gesto"
-        checked={toggles.feedback}
-        onChange={(v) => setToggle('feedback', v)}
-      />
-      <Toggle
         label="Pose stabili"
         checked={toggles.stablePoses}
         onChange={(v) => setToggle('stablePoses', v)}

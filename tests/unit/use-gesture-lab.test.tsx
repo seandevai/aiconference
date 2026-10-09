@@ -216,9 +216,6 @@ describe('useGestureLab live', () => {
     await finish();
     runner.reconfigure.mockClear();
     act(() =>
-      result.current.setSettings((s) => ({ ...s, toggles: { ...s.toggles, feedback: true } })),
-    );
-    act(() =>
       result.current.setSettings((s) => ({ ...s, toggles: { ...s.toggles, smoothCursor: true } })),
     );
     expect(runner.reconfigure).not.toHaveBeenCalled();

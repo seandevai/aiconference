@@ -10,6 +10,12 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(nav.search),
 }));
 
+// Schermo largo o telefono: il banco esiste solo da `lg` in su.
+const media = vi.hoisted(() => ({ wide: true }));
+const state = vi.hoisted(() => ({
+  cursor: null as null | { x: number; y: number; grabbing: boolean },
+}));
+
 const hook = vi.hoisted(() => ({ startLive: vi.fn(), stopLive: vi.fn(), pause: vi.fn() }));
 // Il layout non dipende dalla webcam: il hook resta fermo in 'off'.
 vi.mock('@/lib/gesture-lab/use-gesture-lab', () => ({
@@ -22,7 +28,7 @@ vi.mock('@/lib/gesture-lab/use-gesture-lab', () => ({
     view: null,
     hand: null,
     armed: false,
-    cursor: null,
+    cursor: state.cursor,
     live: 'off',
     startLive: hook.startLive,
     stopLive: hook.stopLive,
@@ -53,8 +59,19 @@ beforeEach(() => {
   nav.search = '';
   window.history.replaceState(null, '', '/dev/gesture-lab');
   Object.values(hook).forEach((fn) => fn.mockReset());
+  media.wide = true;
+  state.cursor = null;
+  vi.stubGlobal('matchMedia', (query: string) => ({
+    matches: query === '(min-width: 64rem)' ? media.wide : false,
+    media: query,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  }));
 });
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 
 describe('gesture lab home', () => {
   it('offers only «Prova» without the archive', () => {
@@ -69,6 +86,7 @@ describe('gesture lab home', () => {
     render(<Lab archive={archive} />);
     expect(screen.getByRole('button', { name: /Registra un gesto/ })).toBeTruthy();
     expect(screen.getByRole('button', { name: /Rigioca dall'archivio/ })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Banco di prova/ })).toBeTruthy();
   });
 
   it('puts the chosen screen in the URL', () => {
@@ -142,5 +160,79 @@ describe('gesture lab other screens', () => {
     render(<Lab archive={archive} />);
     expect(screen.getByRole('heading', { name: 'Rigioca' })).toBeTruthy();
     expect(hook.stopLive).toHaveBeenCalled();
+  });
+});
+
+describe('gesture lab bench', () => {
+  it('offers the bench only on a wide screen, also without the archive', () => {
+    render(<Lab archive={null} />);
+    const bench = screen.getByRole('button', { name: /Banco di prova/ });
+    expect(bench.className).toContain('max-lg:hidden');
+  });
+
+  it('starts the camera and shows hand and numbers, without the stage', () => {
+    nav.search = '?vista=banco';
+    render(<Lab archive={null} />);
+    expect(hook.startLive).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('heading', { name: 'Banco di prova' })).toBeTruthy();
+    expect(screen.getByRole('region', { name: 'Dita' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Avanzate' })).toBeTruthy();
+  });
+
+  it('goes back to the home when opened on a phone', () => {
+    media.wide = false;
+    nav.search = '?vista=banco';
+    window.history.replaceState(null, '', '/dev/gesture-lab?vista=banco');
+    render(<Lab archive={null} />);
+    expect(window.location.search).toBe('');
+  });
+
+  // Il ritorno sostituisce la voce: il tasto indietro non deve riportare al banco.
+  it('replaces the history entry when sending a phone back home', () => {
+    media.wide = false;
+    nav.search = '?vista=banco';
+    window.history.replaceState(null, '', '/dev/gesture-lab?vista=banco');
+    const push = vi.spyOn(window.history, 'pushState');
+    const replace = vi.spyOn(window.history, 'replaceState');
+    render(<Lab archive={null} />);
+    expect(push).not.toHaveBeenCalled();
+    expect(replace).toHaveBeenCalledWith(null, '', '/dev/gesture-lab');
+    push.mockRestore();
+    replace.mockRestore();
+  });
+
+  it('does not start the camera when the bench is opened on a phone', () => {
+    media.wide = false;
+    nav.search = '?vista=banco';
+    render(<Lab archive={null} />);
+    expect(hook.startLive).not.toHaveBeenCalled();
+  });
+
+  it('hides the cursor where the stage is not visible', () => {
+    state.cursor = { x: 10, y: 10, grabbing: false };
+    nav.search = '?vista=banco';
+    const { container } = render(<Lab archive={null} />);
+    const cursor = container.querySelector('[data-lab-cursor]') as HTMLElement;
+    expect(cursor.className).toContain('lg:hidden');
+  });
+});
+
+describe('gesture lab phone stage', () => {
+  it('starts every screen with the hand, even after showing the stage elsewhere', () => {
+    nav.search = '?vista=prova';
+    const { rerender } = render(<Lab archive={archive} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Mostra il palco' }));
+    expect(screen.getByRole('button', { name: 'Nascondi il palco' })).toBeTruthy();
+    nav.search = '?vista=rigioca';
+    rerender(<Lab archive={archive} />);
+    nav.search = '?vista=prova';
+    rerender(<Lab archive={archive} />);
+    expect(screen.getByRole('button', { name: 'Mostra il palco' })).toBeTruthy();
+  });
+
+  it('has no numbers in the try screen', () => {
+    nav.search = '?vista=prova';
+    render(<Lab archive={archive} />);
+    expect(screen.queryByRole('region', { name: 'Dita' })).toBeNull();
   });
 });

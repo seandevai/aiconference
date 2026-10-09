@@ -16,11 +16,18 @@ rigiocano. Spec: `docs/specs/2026-10-05-gesture-lab-design.md` e
 
 ## Come si usa
 
-La pagina iniziale offre tre scelte; ognuna ha il suo indirizzo, quindi il tasto indietro
-del telefono torna alla scelta prima.
+La pagina iniziale offre quattro scelte su computer e tre su telefono; ognuna ha il suo
+indirizzo, quindi il tasto indietro del telefono torna alla scelta prima. Lo scheletro della
+mano è sempre disegnato: grigio il grezzo, lime il filtrato.
 
 - **Prova le gesture** (`?vista=prova`): fotocamera, mano col nome del gesto riconosciuto,
   palco con due finestre.
+- **Banco di prova** (`?vista=banco`, solo computer): scheletro sopra e tre riquadri sotto.
+  **Posa**: grezza e stabile, armato o in pausa, pausa residua, avanzamento dell'hold.
+  **Dita**: una barra per dito e una per il pinch; le tacche sono le soglie di `tuning.pose`
+  (piegato ed esteso, pinch). **Eventi**: gli ultimi, il più recente in alto. Serve a capire
+  perché un gesto scatta o no. Al passo «Mettiti in posizione» di Registra, su computer, c'è
+  lo stesso banco al posto del palco. Aperto da telefono torna alla pagina iniziale.
 - **Registra un gesto** (`?vista=registra`, solo admin): si sceglie il gesto, ci si mette in
   posizione, 3-2-1 e 4 secondi di registrazione, poi l'esito. Il nome si compone da solo; la
   nota è facoltativa.
@@ -32,6 +39,10 @@ del telefono torna alla scelta prima.
 Il tecnico (taratura, correzioni, dizionario, preset, diagnostica, «Copia come codice») sta
 in **Avanzate**, col ⚙ in Prova, al passo «Mettiti in posizione» e nel rigioco. Su telefono
 verticale sale dal basso: toccare la maniglia lo porta a schermo intero e indietro.
+
+Su telefono Prova, Registra e Rigioca mostrano la mano a tutto spazio; «Mostra il palco» apre
+il palco al suo posto. Il palco resta attivo anche nascosto: una gesture fatta col palco chiuso
+si vede aprendolo. Ogni schermata riparte con la mano.
 
 ## Aggiungere un admin
 
