@@ -11,7 +11,7 @@ import {
 
 // Impostazioni del laboratorio gesture (solo sviluppo): restano nel browser di Sean.
 
-export type LabToggles = { smoothCursor: boolean; feedback: boolean; stablePoses: boolean };
+export type LabToggles = { smoothCursor: boolean; stablePoses: boolean };
 export type LabSettings = { tuning: Tuning; dictionary: Dictionary; toggles: LabToggles };
 
 export const LAB_STORAGE_KEY = 'gesture-lab:v1';
@@ -20,7 +20,7 @@ export const LAB_STORAGE_KEY = 'gesture-lab:v1';
 export const DEFAULT_LAB_SETTINGS: LabSettings = {
   tuning: { ...DEFAULT_TUNING, stability: { frames: 3 } },
   dictionary: DEFAULT_DICTIONARY,
-  toggles: { smoothCursor: false, feedback: false, stablePoses: false },
+  toggles: { smoothCursor: false, stablePoses: false },
 };
 
 export function effectiveTuning(settings: LabSettings): Tuning {
@@ -56,7 +56,6 @@ export function parseLabSettings(value: unknown): LabSettings {
     dictionary: parseDictionary(parsed.dictionary),
     toggles: {
       smoothCursor: bool(toggles.smoothCursor, d.smoothCursor),
-      feedback: bool(toggles.feedback, d.feedback),
       stablePoses: bool(toggles.stablePoses, d.stablePoses),
     },
   };

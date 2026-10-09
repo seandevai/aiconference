@@ -80,7 +80,6 @@ function LabClient({ archive }: { archive: LabArchive | null }) {
           framesRef={framesRef}
           view={lab.view}
           lastEvent={lab.fired[lab.fired.length - 1] ?? null}
-          feedback={lab.settings.toggles.feedback}
           idle={lab.live !== 'on' && !lab.playing}
           replaying={lab.playing}
         />

@@ -78,7 +78,7 @@ export function useGestureLab({ videoRef, areaRef, framesRef }: LabRefs) {
   }, [settings]);
 
   // Si riconfigura solo se cambia la taratura effettiva o il dizionario: gli interruttori della sola
-  // interfaccia (cursore fluido, feedback) non devono ricostruire il riconoscitore e perdere un trascinamento.
+  // interfaccia (cursore fluido) non devono ricostruire il riconoscitore e perdere un trascinamento.
   const configKey = JSON.stringify({
     tuning: effectiveTuning(settings),
     dictionary: settings.dictionary,

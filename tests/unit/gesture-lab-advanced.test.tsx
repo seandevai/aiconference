@@ -6,7 +6,7 @@ import { DEFAULT_LAB_SETTINGS, labCode, type LabSettings } from '@/lib/gesture-l
 
 const changed: LabSettings = {
   ...DEFAULT_LAB_SETTINGS,
-  toggles: { ...DEFAULT_LAB_SETTINGS.toggles, feedback: true },
+  toggles: { ...DEFAULT_LAB_SETTINGS.toggles, smoothCursor: true },
 };
 
 function renderPanel(props: Partial<Parameters<typeof AdvancedPanel>[0]> = {}) {

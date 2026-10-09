@@ -11,36 +11,22 @@ type Props = {
   view: RecognizerView | null;
   // L'ultimo evento scattato: il suo gesto resta scritto finché non ne scatta un altro.
   lastEvent: GestureEvent['type'] | null;
-  feedback: boolean;
   // Né fotocamera né rigioco: al posto del riquadro nero si dice cosa succede.
   idle: boolean;
-  // Nel rigioco non c'è video (si salvano solo i punti): lo scheletro si disegna sempre.
+  // Nel rigioco non c'è video (si salvano solo i punti): lo dice l'etichetta.
   replaying: boolean;
 };
 
 const RING = 2 * Math.PI * 11;
 
 // La mano grande col nome del gesto riconosciuto. I numeri stanno in Avanzate → Diagnostica.
-export function HandView({
-  videoRef,
-  framesRef,
-  view,
-  lastEvent,
-  feedback,
-  idle,
-  replaying,
-}: Props) {
+export function HandView({ videoRef, framesRef, view, lastEvent, idle, replaying }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   // Scheletro e video condividono la proporzione dello stream (640x480 finché è ignota).
   const [size, setSize] = useState({ w: 640, h: 480 });
-  const drawing = feedback || replaying;
 
+  // Lo scheletro si disegna sempre: dal vivo e nel rigioco.
   useEffect(() => {
-    if (!drawing) {
-      const canvas = canvasRef.current;
-      canvas?.getContext('2d')?.clearRect(0, 0, canvas.width, canvas.height);
-      return;
-    }
     let frame = 0;
     const styles = getComputedStyle(document.documentElement);
     const colors = {
@@ -53,10 +39,10 @@ export function HandView({
     };
     frame = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frame);
-  }, [drawing, framesRef]);
+  }, [framesRef]);
 
   const shown = view?.dragging ? gestureByName('pinch_drag') : gestureForEvent(lastEvent);
-  const holding = feedback && view?.hold ? gestureForHold(view.hold.pose) : null;
+  const holding = view?.hold ? gestureForHold(view.hold.pose) : null;
   const progress = view?.hold?.progress ?? 0;
 
   return (

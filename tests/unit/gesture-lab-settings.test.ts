@@ -29,11 +29,7 @@ class MemoryStorage {
 describe('lab settings', () => {
   it('starts from today defaults, with every correction off', () => {
     expect(DEFAULT_LAB_SETTINGS.dictionary).toEqual(DEFAULT_DICTIONARY);
-    expect(DEFAULT_LAB_SETTINGS.toggles).toEqual({
-      smoothCursor: false,
-      feedback: false,
-      stablePoses: false,
-    });
+    expect(DEFAULT_LAB_SETTINGS.toggles).toEqual({ smoothCursor: false, stablePoses: false });
     expect(effectiveTuning(DEFAULT_LAB_SETTINGS)).toEqual(DEFAULT_TUNING);
   });
 
@@ -52,7 +48,7 @@ describe('lab settings', () => {
       ...DEFAULT_LAB_SETTINGS,
       tuning: setTuningValue(DEFAULT_LAB_SETTINGS.tuning, 'timings.holdMs', 600),
       dictionary: { ...DEFAULT_DICTIONARY, flick_up: null },
-      toggles: { smoothCursor: true, feedback: true, stablePoses: false },
+      toggles: { smoothCursor: true, stablePoses: false },
     };
     saveLabSettings(storage, settings);
     expect(storage.data.has(LAB_STORAGE_KEY)).toBe(true);
@@ -146,11 +142,19 @@ describe('labCode', () => {
 describe('parseLabSettings', () => {
   it('falls back to the defaults for anything it does not understand', () => {
     expect(parseLabSettings(null)).toEqual(DEFAULT_LAB_SETTINGS);
-    expect(parseLabSettings({ toggles: { feedback: 'yes' } })).toEqual(DEFAULT_LAB_SETTINGS);
+    expect(parseLabSettings({ toggles: { smoothCursor: 'yes' } })).toEqual(DEFAULT_LAB_SETTINGS);
   });
 
   it('keeps valid toggles', () => {
-    const settings = parseLabSettings({ toggles: { feedback: true } });
-    expect(settings.toggles.feedback).toBe(true);
+    const settings = parseLabSettings({ toggles: { smoothCursor: true } });
+    expect(settings.toggles.smoothCursor).toBe(true);
+  });
+
+  // Impostazioni salvate prima del 09/10: lo scheletro ora è sempre acceso.
+  it('ignores the old feedback toggle and keeps the others', () => {
+    const settings = parseLabSettings({
+      toggles: { feedback: true, smoothCursor: true, stablePoses: true },
+    });
+    expect(settings.toggles).toEqual({ smoothCursor: true, stablePoses: true });
   });
 });

@@ -27,7 +27,6 @@ function renderHand(props: Partial<Parameters<typeof HandView>[0]> = {}) {
       framesRef={{ current: null }}
       view={null}
       lastEvent={null}
-      feedback={false}
       idle={false}
       replaying={false}
       {...props}
@@ -63,10 +62,9 @@ describe('HandView', () => {
     expect(screen.getByText(/Pinch e trascina/)).toBeTruthy();
   });
 
-  it('shows the hold ring with the gesture name when feedback is on', () => {
+  it('shows the hold ring with the gesture name', () => {
     renderHand({
       view: view({ hold: { pose: 'thumb_up', progress: 0.5 } }),
-      feedback: true,
     });
     expect(screen.getByLabelText('Attesa del gesto')).toBeTruthy();
     expect(screen.getByText('Pollice su')).toBeTruthy();
@@ -77,15 +75,15 @@ describe('HandView', () => {
     expect(screen.getByText(/Fotocamera spenta/)).toBeTruthy();
   });
 
-  it('draws the hand during a replay even with feedback off, and says there is no video', () => {
+  it('draws the hand during a replay and says there is no video', () => {
     renderHand({ replaying: true });
     expect(drawing.drawHands).toHaveBeenCalled();
     expect(screen.getByText(/nessun video/)).toBeTruthy();
   });
 
-  it('draws nothing live when feedback is off', () => {
+  it('draws the live hand without any toggle', () => {
     renderHand();
-    expect(drawing.drawHands).not.toHaveBeenCalled();
+    expect(drawing.drawHands).toHaveBeenCalled();
   });
 });
 
