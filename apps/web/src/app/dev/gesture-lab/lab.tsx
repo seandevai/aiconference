@@ -9,7 +9,7 @@ import { useLabView } from '@/lib/gesture-lab/lab-view';
 import { effectiveTuning } from '@/lib/gesture-lab/settings';
 import { useGestureLab } from '@/lib/gesture-lab/use-gesture-lab';
 import { AdvancedPanel } from './advanced-panel';
-import { Diagnostics } from './diagnostics';
+import { BenchPanel } from './bench-panel';
 import { HandView } from './hand-view';
 import { HomeScreen } from './home-screen';
 import { LabScene } from './lab-scene';
@@ -152,11 +152,12 @@ function LabClient({ archive }: { archive: LabArchive | null }) {
         settings={lab.settings}
         onChange={lab.setSettings}
         diagnostics={
-          <Diagnostics
+          <BenchPanel
             view={lab.view}
             hand={lab.hand}
             tuning={effectiveTuning(lab.settings)}
             log={lab.log}
+            stacked
           />
         }
         presets={

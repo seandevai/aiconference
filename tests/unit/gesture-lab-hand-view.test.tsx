@@ -1,14 +1,12 @@
 // @vitest-environment happy-dom
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { DEFAULT_TUNING, type RecognizerView } from '@omnicanvas/gesture';
-import { hand } from '../fixtures/hands';
+import type { RecognizerView } from '@omnicanvas/gesture';
 
 const drawing = vi.hoisted(() => ({ drawHands: vi.fn() }));
 vi.mock('@/lib/gesture-lab/hand-drawing', () => drawing);
 
 const { HandView } = await import('@/app/dev/gesture-lab/hand-view');
-const { Diagnostics } = await import('@/app/dev/gesture-lab/diagnostics');
 
 const view = (over: Partial<RecognizerView> = {}): RecognizerView => ({
   rawPose: 'thumb_up',
@@ -84,27 +82,5 @@ describe('HandView', () => {
   it('draws the live hand without any toggle', () => {
     renderHand();
     expect(drawing.drawHands).toHaveBeenCalled();
-  });
-});
-
-describe('Diagnostics', () => {
-  it('shows raw and stable pose, finger numbers and the events', () => {
-    render(
-      <Diagnostics
-        view={view({ rawPose: 'fist' })}
-        hand={hand('thumb_up')}
-        tuning={DEFAULT_TUNING}
-        log={[{ t: 1_200, label: 'CONFIRM' }]}
-      />,
-    );
-    expect(screen.getByText(/Posa grezza: fist · stabile: thumb_up/)).toBeTruthy();
-    expect(screen.getByText('Indice')).toBeTruthy();
-    expect(screen.getByRole('heading', { name: 'Eventi' })).toBeTruthy();
-    expect(screen.getByText('CONFIRM')).toBeTruthy();
-  });
-
-  it('says when no hand is in view', () => {
-    render(<Diagnostics view={null} hand={null} tuning={DEFAULT_TUNING} log={[]} />);
-    expect(screen.getByText('Nessuna mano in vista.')).toBeTruthy();
   });
 });
